@@ -8,11 +8,71 @@ public class BuilderRequestPojo {
 
 	private String tableName;
 
+	private String whereCondition;
+
+	private String dataType;
+
+	private String filterCondition;
+
 	private List<String> columnNames;
-	
+
 	private List<String> listTableName;
+
+	private List<String> joinColumn;
+
+	private List<FilterPojo> filterPojos;
 	
+	private List<JoinData> joinData;
 	
+
+	public List<JoinData> getJoinData() {
+		return joinData;
+	}
+
+	public void setJoinData(List<JoinData> joinData) {
+		this.joinData = joinData;
+	}
+
+	
+	public List<FilterPojo> getFilterPojos() {
+		return filterPojos;
+	}
+
+	public void setFilterPojos(List<FilterPojo> filterPojos) {
+		this.filterPojos = filterPojos;
+	}
+
+	public String getWhereCondition() {
+		return whereCondition;
+	}
+
+	public void setWhereCondition(String whereCondition) {
+		this.whereCondition = whereCondition;
+	}
+
+	public List<String> getJoinColumn() {
+		return joinColumn;
+	}
+
+	public void setJoinColumn(List<String> joinColumn) {
+		this.joinColumn = joinColumn;
+	}
+
+	public String getFilterCondition() {
+		return filterCondition;
+	}
+
+	public void setFilterCondition(String filterCondition) {
+		this.filterCondition = filterCondition;
+	}
+
+	public String getDataType() {
+		return dataType;
+	}
+
+	public void setDataType(String dataType) {
+		this.dataType = dataType;
+	}
 
 	public List<String> getListTableName() {
 		return listTableName;

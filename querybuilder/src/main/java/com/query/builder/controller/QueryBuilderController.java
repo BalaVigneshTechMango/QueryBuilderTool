@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.query.builder.common.MyObject;
 import com.query.builder.request.BuilderRequestPojo;
 import com.query.builder.response.QueryResponsePojo;
 import com.query.builder.service.QueryBuilderService;
@@ -23,9 +22,9 @@ public class QueryBuilderController {
 	 * @return It will return the entire table list in the database.
 	 */
 	@PostMapping("/getTableUsingSchema")
-	public QueryResponsePojo findSchema() {
+	public QueryResponsePojo findSchema(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		List<String> response = queryBuilderService.getTableNames();
+		List<String> response = queryBuilderService.getTableNames(builderRequestPojo);
 		queryResponsePojo.setObject(response);
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setMessage("Mall project table List");
@@ -37,9 +36,9 @@ public class QueryBuilderController {
 	 * 
 	 */
 	@PostMapping("/getColumnName")
-	public QueryResponsePojo getColumnName() {
+	public QueryResponsePojo getColumnName(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		List<String> response = queryBuilderService.getColumnName();
+		List<String> response = queryBuilderService.getColumnName(builderRequestPojo);
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setObject(response);
 		queryResponsePojo.setMessage("Entire column of table");
@@ -52,7 +51,7 @@ public class QueryBuilderController {
 	@PostMapping("/groupBy")
 	public QueryResponsePojo groupBy(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		List<MyObject> response = queryBuilderService.groupBy(builderRequestPojo);
+		List<Map<String, Object>> response = queryBuilderService.groupBy(builderRequestPojo);
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setObject(response);
 		queryResponsePojo.setMessage("Entire column of table");
@@ -63,9 +62,9 @@ public class QueryBuilderController {
 	 * @return get the entire ColumnAndTableName using database Name
 	 */
 	@PostMapping("/getColumnAndTableName")
-	public QueryResponsePojo getColumnAndTableName() {
+	public QueryResponsePojo getColumnAndTableName(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		Object response = queryBuilderService.getColumnAndTableName();
+		Object response = queryBuilderService.getColumnAndTableName(builderRequestPojo);
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setObject(response);
 		queryResponsePojo.setMessage("Entire column And TableName of the database");
@@ -89,9 +88,9 @@ public class QueryBuilderController {
 	 * Get Column and datatype of specific table (column of the table with datatype)
 	 */
 	@PostMapping("/getColumnAndDatatype")
-	public QueryResponsePojo getTableValues() {
+	public QueryResponsePojo getTableValues(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		Map<String, String> response = queryBuilderService.getColumnAndDatatypes();
+		Map<String, String> response = queryBuilderService.getColumnAndDatatypes(builderRequestPojo);
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setObject(response);
 		queryResponsePojo.setMessage(" ColumnName and its DataType of particular table");
@@ -102,9 +101,9 @@ public class QueryBuilderController {
 	 * Get the column and data(values) using table name and schemaName(db Name)
 	 */
 	@PostMapping("/getColumnValues")
-	public QueryResponsePojo getColumnAndValues() {
+	public QueryResponsePojo getColumnAndValues(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		List<Map<String, Object>> response = queryBuilderService.getColumnValues();
+		List<Map<String, Object>> response = queryBuilderService.getColumnValues(builderRequestPojo);
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setObject(response);
 		queryResponsePojo.setMessage(" ColumnName And values of the table");
@@ -120,9 +119,62 @@ public class QueryBuilderController {
 		List<Map<String, Object>> response = queryBuilderService.getColumnValueListOfTable(builderRequestPojo);
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setObject(response);
-		queryResponsePojo.setMessage(" ColumnName And values of the table");
+		queryResponsePojo.setMessage(" Get List ColumnName And values of the table");
 		return queryResponsePojo;
 	}
-	
+
+	/**
+	 * get the table column by datatype (using the datatype and tableName)
+	 */
+	@PostMapping("/getTableDataByType")
+	public QueryResponsePojo getTableDataByType(@RequestBody BuilderRequestPojo builderRequestPojo) {
+		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		List<Map<String, Object>> response = queryBuilderService.getTableDataByType(builderRequestPojo);
+		queryResponsePojo.setIstrue(true);
+		queryResponsePojo.setObject(response);
+		queryResponsePojo.setMessage(" ColumnName And values of the table");
+		return queryResponsePojo;
+
+	}	
+
+	// get the Current database Name from project
+	@PostMapping("/getDatabaseName")
+	public QueryResponsePojo getDataBaseName() {
+		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		List<String> response = queryBuilderService.getDataBaseName();
+		queryResponsePojo.setIstrue(true);
+		queryResponsePojo.setObject(response);
+		queryResponsePojo.setMessage("Current database Name");
+		return queryResponsePojo;
+
+	}
+
+	/**
+	 * This Api is filter condition of the selected columns for the tables
+	 */
+	@PostMapping("/intFilterCondition")
+	public QueryResponsePojo intFilterCondition(@RequestBody BuilderRequestPojo builderRequestPojo) {
+		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		Object response = queryBuilderService.intFilterCondition(builderRequestPojo);
+		queryResponsePojo.setIstrue(true);
+		queryResponsePojo.setObject(response);
+		queryResponsePojo.setMessage("int Filter Condition");
+		return queryResponsePojo;
+
+	}
+    
+	/**
+	 *  This Api for dynamic join query for multiple tables
+	 */
+	@PostMapping("/getJoinData")
+	public QueryResponsePojo getJoinData(@RequestBody BuilderRequestPojo builderRequestPojo) {
+		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		List<Map<String, Object>> response = queryBuilderService.getJoinData(builderRequestPojo);
+		queryResponsePojo.setIstrue(true);
+		queryResponsePojo.setObject(response);
+		queryResponsePojo.setMessage("get Join Data");
+		return queryResponsePojo;
+		
+	}
 
 }
