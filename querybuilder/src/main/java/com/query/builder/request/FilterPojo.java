@@ -14,26 +14,7 @@ public class FilterPojo {
 	
 	private List<String> columnNames;
 	
-	private String lsTableName;
-	private String rsTableName;
 	
-
-	public String getLsTableName() {
-		return lsTableName;
-	}
-
-	public String getRsTableName() {
-		return rsTableName;
-	}
-
-	public void setLsTableName(String lsTableName) {
-		this.lsTableName = lsTableName;
-	}
-
-	public void setRsTableName(String rsTableName) {
-		this.rsTableName = rsTableName;
-	}
-
 	public String getJoinColumn() {
 		return joinColumn;
 	}

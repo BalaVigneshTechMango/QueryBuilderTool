@@ -8,7 +8,7 @@ import com.query.builder.request.BuilderRequestPojo;
 public interface QueryBuilderDao {
 
 	// get All table Name in Database
-	public List<String> getTableNames(String schemaName);
+	public List<Map<String, Object>> getTableNames(String schemaName);
 
 	// get All column name in particular table
 	public List<String> getColumnName(String schemaName, String tableName);
@@ -16,7 +16,7 @@ public interface QueryBuilderDao {
 	List<Map<String, Object>> groupBy(List<String> columnNames, String schemaName, String tableName);
 
 	// This method will return the column And TableName of the database
-	public Object getColumnAndTableName(String schemaName);
+	public List<Map<String, Object>> getColumnAndTableName(String schemaName);
 
 	// Get All Schemas using schemata (get db names)
 	public List<String> getAllSchemas();
@@ -41,5 +41,9 @@ public interface QueryBuilderDao {
 
 	// This Api for dynamic join query for multiple tables
 	public List<Map<String, Object>> intFilterCondition(BuilderRequestPojo builderRequestPojo);
+
+	public List<Map<String, Object>> getColumnValueDatatype(String tableName,String schemaName);
+
+	public List<Map<String, Object>> executeDynamicQuery(List<String> tables,List<String> joins, String filterCondition);
 
 }

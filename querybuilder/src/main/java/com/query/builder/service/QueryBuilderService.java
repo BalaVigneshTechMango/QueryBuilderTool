@@ -8,7 +8,7 @@ import com.query.builder.request.BuilderRequestPojo;
 public interface QueryBuilderService {
 
 	// get All table Name in Database
-	List<String> getTableNames(BuilderRequestPojo builderRequestPojo);
+	List<Map<String, Object>> getTableNames(BuilderRequestPojo builderRequestPojo);
 
 	// get All column name in particular table
 	public List<String> getColumnName(BuilderRequestPojo builderRequestPojo);
@@ -16,7 +16,7 @@ public interface QueryBuilderService {
 	public List<Map<String, Object>> groupBy(BuilderRequestPojo builderRequestPojo);
 
 	// This method will return the column And TableName of the database
-	public Object getColumnAndTableName(BuilderRequestPojo builderRequestPojo);
+	public List<Map<String, Object>> getColumnAndTableName(BuilderRequestPojo builderRequestPojo);
 
 	// Get All Schemas using schemata (get db names)
 	public List<String> getAllSchema();
@@ -41,5 +41,9 @@ public interface QueryBuilderService {
 
 	// This Api for dynamic join query for multiple tables
 	List<Map<String, Object>> getJoinData(BuilderRequestPojo builderRequestPojo);
+
+	List<Map<String, Object>> getColumnValueDatatype(BuilderRequestPojo builderRequestPojo);
+
+	List<Map<String, Object>> executeDynamicQuery(BuilderRequestPojo builderRequestPojo);
 
 }

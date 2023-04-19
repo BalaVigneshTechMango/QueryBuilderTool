@@ -1,8 +1,16 @@
 package com.query.builder.controller;
 
 import java.util.List;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
+
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,7 +32,7 @@ public class QueryBuilderController {
 	@PostMapping("/getTableUsingSchema")
 	public QueryResponsePojo findSchema(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		List<String> response = queryBuilderService.getTableNames(builderRequestPojo);
+		List<Map<String, Object>> response = queryBuilderService.getTableNames(builderRequestPojo);
 		queryResponsePojo.setObject(response);
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setMessage("Mall project table List");
@@ -64,7 +72,7 @@ public class QueryBuilderController {
 	@PostMapping("/getColumnAndTableName")
 	public QueryResponsePojo getColumnAndTableName(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		Object response = queryBuilderService.getColumnAndTableName(builderRequestPojo);
+		List<Map<String, Object>> response = queryBuilderService.getColumnAndTableName(builderRequestPojo);
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setObject(response);
 		queryResponsePojo.setMessage("Entire column And TableName of the database");
@@ -135,7 +143,7 @@ public class QueryBuilderController {
 		queryResponsePojo.setMessage(" ColumnName And values of the table");
 		return queryResponsePojo;
 
-	}	
+	}
 
 	// get the Current database Name from project
 	@PostMapping("/getDatabaseName")
@@ -162,19 +170,46 @@ public class QueryBuilderController {
 		return queryResponsePojo;
 
 	}
-    
+
 	/**
-	 *  This Api for dynamic join query for multiple tables
+	 * This Api for dynamic join query for multiple tables
+	 * 
+	 * @throws JsonProcessingException
 	 */
 	@PostMapping("/getJoinData")
-	public QueryResponsePojo getJoinData(@RequestBody BuilderRequestPojo builderRequestPojo) {
+	public QueryResponsePojo getJoinData(@RequestBody BuilderRequestPojo builderRequestPojo)
+			throws JsonProcessingException {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		List<Map<String, Object>> response = queryBuilderService.getJoinData(builderRequestPojo);
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		ObjectMapper mapper = Jackson2ObjectMapperBuilder.json().build();
+		String json = gson.toJson(response);	
 		queryResponsePojo.setIstrue(true);
 		queryResponsePojo.setObject(response);
-		queryResponsePojo.setMessage("get Join Data");
+		queryResponsePojo.setMessage(mapper.writeValueAsString(json));
 		return queryResponsePojo;
-		
+
 	}
+
+	@PostMapping("/getColumnValueDatatype")
+	public QueryResponsePojo getColumnValueDatatype(@RequestBody BuilderRequestPojo builderRequestPojo) {
+		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		List<Map<String, Object>>response= queryBuilderService.getColumnValueDatatype(builderRequestPojo);
+		queryResponsePojo.setIstrue(true);
+		queryResponsePojo.setMessage(null);
+		queryResponsePojo.setObject(response);
+		return queryResponsePojo;
+	}
+	
+	@PostMapping("/getExecuteDynamicQuery")//not in use
+	public QueryResponsePojo executeDynamicQuery(@RequestBody BuilderRequestPojo builderRequestPojo) {
+		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		List<Map<String, Object>>response= queryBuilderService.executeDynamicQuery(builderRequestPojo);
+		queryResponsePojo.setIstrue(true);
+		queryResponsePojo.setMessage("get Joins");
+		queryResponsePojo.setObject(response);
+		return queryResponsePojo;
+	}
+	
 
 }

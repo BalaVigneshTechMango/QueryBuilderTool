@@ -21,9 +21,18 @@ public class BuilderRequestPojo {
 	private List<String> joinColumn;
 
 	private List<FilterPojo> filterPojos;
-	
+
 	private List<JoinData> joinData;
-	
+
+	private List<String> joins; // executeDynamicQuery
+
+	public List<String> getJoins() {
+		return joins;
+	}
+
+	public void setJoins(List<String> joins) {
+		this.joins = joins;
+	}
 
 	public List<JoinData> getJoinData() {
 		return joinData;
@@ -33,7 +42,6 @@ public class BuilderRequestPojo {
 		this.joinData = joinData;
 	}
 
-	
 	public List<FilterPojo> getFilterPojos() {
 		return filterPojos;
 	}

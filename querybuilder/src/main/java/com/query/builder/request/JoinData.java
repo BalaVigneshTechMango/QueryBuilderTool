@@ -15,6 +15,8 @@ public class JoinData {
 	private String joinType;
 
 	private String whereCondition;
+	
+	private String operators;
 
 	public String getWhereCondition() {
 		return whereCondition;
@@ -62,6 +64,14 @@ public class JoinData {
 
 	public void setJoinType(String joinType) {
 		this.joinType = joinType;
+	}
+
+	public String getOperators() {
+		return operators;
+	}
+
+	public void setOperators(String operators) {
+		this.operators = operators;
 	}
 
 }
