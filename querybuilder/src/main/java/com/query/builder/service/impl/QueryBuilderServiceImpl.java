@@ -17,20 +17,34 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Autowired
 	private QueryBuilderDao queryBuilderDao;
 
-	// get All table Name in Database
+	// 1.get All table Name in Database
 	@Override
 	public List<Map<String, Object>> getTableNames(BuilderRequestPojo builderRequestPojo) {
 		String schemaName = builderRequestPojo.getSchemaName();
 		return queryBuilderDao.getTableNames(schemaName);
 	}
 
-	// get All column name in particular table
+	// 2. Get the list list of table name and response it back as table wise select
+	// Query
 	@Override
-	public List<String> getColumnName(BuilderRequestPojo builderRequestPojo) {
-		String schemaName = builderRequestPojo.getSchemaName();
-		String tableName = builderRequestPojo.getTableName();
-		return queryBuilderDao.getColumnName(schemaName, tableName);
+	public List<Map<String, Object>> listOfSelectQuery(BuilderRequestPojo builderRequestPojo) {
+		List<String> tableName = builderRequestPojo.getListTableName();
+	    String schemaName=builderRequestPojo.getSchemaName();
+		return queryBuilderDao.listOfSelectQuery(tableName,schemaName);
+	}
 
+	// 3 This method will return the column And TableName of the database
+	@Override
+	public List<Map<String, Object>> getColumnAndTableName(BuilderRequestPojo builderRequestPojo) {
+		String schemaName = builderRequestPojo.getSchemaName();
+		return queryBuilderDao.getColumnAndTableName(schemaName);
+	}
+
+	@Override
+	public List<Map<String, Object>> getColumnListOfTableName(BuilderRequestPojo builderRequestPojo) {
+		String schemaName = builderRequestPojo.getSchemaName();
+		List<String> listTableName = builderRequestPojo.getListTableName();
+		return queryBuilderDao.getColumnListOfTableName(schemaName, listTableName);
 	}
 
 	@Override
@@ -39,19 +53,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		String schemaName = builderRequestPojo.getSchemaName();
 		String tableName = builderRequestPojo.getTableName();
 		return queryBuilderDao.groupBy(columnNames, schemaName, tableName);
-	}
-
-	// This method will return the column And TableName of the database
-	@Override
-	public List<Map<String, Object>> getColumnAndTableName(BuilderRequestPojo builderRequestPojo) {
-		String schemaName = builderRequestPojo.getSchemaName();
-		return queryBuilderDao.getColumnAndTableName(schemaName);
-	}
-
-	// Get All Schemas using schemata (get db names)
-	@Override
-	public List<String> getAllSchema() {
-		return queryBuilderDao.getAllSchemas();
 	}
 
 	// Get the specific table column of the table with datatype
@@ -69,13 +70,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return queryBuilderDao.getColumnValues(schemaName, tableName);
 	}
 
-	// get Column and values of by using list of table Name
-	@Override
-	public List<Map<String, Object>> getColumnValueListOfTable(BuilderRequestPojo builderRequestPojo) {
-		List<String> listOftableName = builderRequestPojo.getListTableName();
-		String schemaName = builderRequestPojo.getSchemaName();
-		return queryBuilderDao.getColumnValueListOfTable(listOftableName, schemaName);
-	}
+
+	
 
 	// get the table column by datatype (using the datatype and tableName)
 	@Override
@@ -100,24 +96,48 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 
 	// This Api for dynamic join query for multiple tables
 	@Override
-	public List<Map<String, Object>> getJoinData(BuilderRequestPojo builderRequestPojo) {
+	public Object getJoinData(BuilderRequestPojo builderRequestPojo) {
 
 		return queryBuilderDao.getJoinedData(builderRequestPojo);
 	}
 
 	@Override
 	public List<Map<String, Object>> getColumnValueDatatype(BuilderRequestPojo builderRequestPojo) {
-		  String tableName=builderRequestPojo.getTableName();
-		  String schemaName=builderRequestPojo.getSchemaName();
-		return queryBuilderDao.getColumnValueDatatype(tableName,schemaName);
+		List<String> listTableName = builderRequestPojo.getListTableName();
+		String schemaName = builderRequestPojo.getSchemaName();
+		return queryBuilderDao.getColumnValueDatatype(listTableName, schemaName);
+	}
+
+	//6.This API is used to join the table with using inner join without on condition and where conditon
+	@Override
+	public List<Map<String, Object>> innerJoin(BuilderRequestPojo builderRequestPojo) {
+		List<String> tableName = builderRequestPojo.getListTableName();
+		return queryBuilderDao.innerJoin(tableName);
+	}
+
+	// not in use
+
+	// get All column name in particular table
+	@Override
+	public List<String> getColumnName(BuilderRequestPojo builderRequestPojo) {
+		String schemaName = builderRequestPojo.getSchemaName();
+		String tableName = builderRequestPojo.getTableName();
+		return queryBuilderDao.getColumnName(schemaName, tableName);
+
 	}
 
 	@Override
 	public List<Map<String, Object>> executeDynamicQuery(BuilderRequestPojo builderRequestPojo) {
-		List<String>tables=builderRequestPojo.getListTableName();
-		List<String>joins=builderRequestPojo.getJoins();
-		String whereCondition=builderRequestPojo.getWhereCondition();
-		return queryBuilderDao.executeDynamicQuery(tables,joins,whereCondition);
+		List<String> tables = builderRequestPojo.getListTableName();
+		List<String> joins = builderRequestPojo.getJoins();
+		String whereCondition = builderRequestPojo.getWhereCondition();
+		return queryBuilderDao.executeDynamicQuery(tables, joins, whereCondition);
+	}
+
+	// Get All Schemas using schemata (get db names)
+	@Override
+	public List<String> getAllSchema() {
+		return queryBuilderDao.getAllSchemas();
 	}
 
 }

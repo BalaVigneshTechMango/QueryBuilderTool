@@ -17,9 +17,19 @@ public class JoinData {
 	private String whereCondition;
 	
 	private String operators;
+	
+	private boolean isActive;
 
 	public String getWhereCondition() {
 		return whereCondition;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 
 	public List<JoinConditionDto> getJoinCondition() {

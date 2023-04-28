@@ -24,7 +24,27 @@ public class BuilderRequestPojo {
 
 	private List<JoinData> joinData;
 
+	private boolean isActive;
+
 	private List<String> joins; // executeDynamicQuery
+
+	private List<FilterData> filterData; // used for filter
+
+	public List<FilterData> getFilterData() {
+		return filterData;
+	}
+
+	public void setFilterData(List<FilterData> filterData) {
+		this.filterData = filterData;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean isActive) {
+		this.isActive = isActive;
+	}
 
 	public List<String> getJoins() {
 		return joins;
