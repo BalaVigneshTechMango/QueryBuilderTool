@@ -4,31 +4,31 @@ package com.query.builder.response;
 public class QueryResponsePojo {
 
 	private String message;
-	private Object object;
-	private Boolean istrue;
+	private Object responseData;
+	private Boolean isSuccess;
 
 	public String getMessage() {
 		return message;
 	}
 
-	public Object getObject() {
-		return object;
+	public Object getResponseData() {
+		return responseData;
 	}
 
-	public Boolean getIstrue() {
-		return istrue;
+	public Boolean getIsSuccess() {
+		return isSuccess;
 	}
 
 	public void setMessage(String message) {
 		this.message = message;
 	}
 
-	public void setObject(Object object) {
-		this.object = object;
+	public void setResponseData(Object object) {
+		this.responseData = object;
 	}
 
-	public void setIstrue(Boolean istrue) {
-		this.istrue = istrue;
+	public void setIsSuccess(Boolean istrue) {
+		this.isSuccess = istrue;
 	}
 
 }

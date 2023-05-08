@@ -4,26 +4,27 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
-
 import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.query.builder.dao.QueryBuilderDao;
+import com.query.builder.dto.WhereConditionDTO;
 import com.query.builder.request.BuilderRequestPojo;
-import com.query.builder.request.FilterData;
-import com.query.builder.request.FilterPojo;
+import com.query.builder.request.FilterDataPojo;
 import com.query.builder.request.JoinData;
-import com.query.builder.request.WhereCondition;
 
 @Service
 public class QueryBuilderDaoImpl implements QueryBuilderDao {
@@ -46,54 +47,69 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	// 2.Get the list list of table name and response it back as table wise select
 	// Query
 	@Override
-	public List<Map<String, Object>> listOfSelectQuery(List<String> tableNames, String schemaName) {
-		List<Map<String, Object>> results = new ArrayList<>(tableNames.size());
-		for (String tableName : tableNames) {
-			String sqlQuery = "SELECT * FROM " + schemaName + "." + tableName;
-			List<Map<String, Object>> queryResult = jdbcTemplate.queryForList(sqlQuery);
-			Map<String, Object> tableResult = new HashMap<>(2);
-			tableResult.put("table", tableName);
+	public List<Map<String, Object>> listOfSelectQuery(List<String> tableName, String schemaName) {
+		List<Map<String, Object>> results = new ArrayList<>();
+		for (String tableNames : tableName) {
+			StringBuilder sqlQuery = new StringBuilder();
+			sqlQuery.append("SELECT * FROM " + schemaName + "." + tableNames);
+			List<Map<String, Object>> queryResult = jdbcTemplate.queryForList(sqlQuery.toString());
+			Map<String, Object> tableResult = new HashMap<>();
+			tableResult.put("table", tableNames);
 			tableResult.put("rows", queryResult);
 			results.add(tableResult);
 		}
+
 		return results;
 	}
 
-//	public List<Map<String, Object>> listOfSelectQuery(List<String> tableName, String schemaName) {
-//		List<Map<String, Object>> results = new ArrayList<>();
-//		for (String tableNames : tableName) {
-//			StringBuilder sqlQuery = new StringBuilder();
-//			sqlQuery.append("SELECT * FROM " + schemaName + "." + tableNames);
-//			List<Map<String, Object>> queryResult = jdbcTemplate.queryForList(sqlQuery.toString());
-//			Map<String, Object> tableResult = new HashMap<>();
-//			tableResult.put("table", tableNames);
-//			tableResult.put("rows", queryResult);
-//			results.add(tableResult);
-//		}
-//
-//		return results;
-//	}
-
-	// 3 This method will return the column And TableName of the database CH
+	// 3 This method will return the column And TableName of the database
 	@Override
-	public List<Map<String, Object>> getColumnAndTableName(String schemaName) {
-		List<Map<String, Object>> tables = jdbcTemplate
-				.query("SELECT table_name, column_name FROM information_schema.columns WHERE table_schema =" + "'"
-						+ schemaName + "'", new ColumnMapRowMapper());
+	public Map<String, Map<String, String>> getColumnAndTableName(String dataBase) {
+		Map<String, Map<String, String>> schemaMap = new LinkedHashMap<>();
+		List<String> tableNames = new ArrayList<>();
 
-		return tables.stream().collect(Collectors.groupingBy(m -> m.get("table_name"))).entrySet().stream()
-				.map(e -> Map.of("tableName", e.getKey(), "columns", e.getValue().stream()
-						.map(m -> Map.of("column_name", m.get("column_name"))).collect(Collectors.toList())))
-				.collect(Collectors.toList());
+		// Query to get all table names in the database
+		String sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = ?";
+		SqlRowSet rowSet = jdbcTemplate.queryForRowSet(sql, dataBase);
+
+		// Iterate over the result set to get table names
+		while (rowSet.next()) {
+			tableNames.add(rowSet.getString("table_name"));
+		}
+		// Query to get column names and data types for each table
+		sql = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = ? AND table_name = ?";
+
+		// Iterate over the table names and execute the query to get column names and
+		// data types
+		for (String tableName : tableNames) {
+			Map<String, String> columnMap = new LinkedHashMap<>();
+			rowSet = jdbcTemplate.queryForRowSet(sql, dataBase, tableName);
+
+			// Iterate over the result set to get column names and data types
+			while (rowSet.next()) {
+				columnMap.put(rowSet.getString("column_name"), rowSet.getString("data_type"));
+			}
+
+			// Add the table name and column names and data types to the schema map
+			schemaMap.put(tableName, columnMap);
+		}
+		// Add the table names to the schema map as a separate entry for easy access
+		String tableNamesString = String.join(",", tableNames);
+		Map<String, String> tableNameMap = new LinkedHashMap<>();
+        
+		tableNameMap.put("tableNames", tableNamesString);
+		schemaMap.put("tableName", tableNameMap);
+
+		return schemaMap;
 	}
 
 	// 4. select * from L1 inner join R1 on ((LT1 == RT1) and (Lt2 != RT2))
 	// This Api for dynamic join query for multiple tables
-	public Object getJoinedData(BuilderRequestPojo builderRequestPojo) {
+	public Object getJoinedData(BuilderRequestPojo builderRequestPojo)
+			throws JsonMappingException, JsonProcessingException {
 		StringBuilder queryBuilder = new StringBuilder();
 		List<JoinData> joinDatas = builderRequestPojo.getJoinData();
 		List<String> columnNames = joinDatas.get(0).getColumnNames();
-		String whereCondition = joinDatas.get(0).getWhereCondition();
 		boolean value = false;
 		queryBuilder.append("SELECT ");
 		for (String column : columnNames) {
@@ -128,19 +144,41 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 				}
 			}
 		}
-		queryBuilder.append(" WHERE ").append(whereCondition);
-		if (value) {
-			System.out.println(queryBuilder.toString());
-			return jdbcTemplate.queryForList(queryBuilder.toString());
 
+		queryBuilder.append(" WHERE ");
+
+		int jsonDataSize = builderRequestPojo.getJoinData().size();
+		int whereClauses=builderRequestPojo.getJoinData().get(0).getWhereClause().size();
+		int whereConditions=builderRequestPojo.getJoinData().get(jsonDataSize).getWhereClause().get(whereClauses).getWhereConditon().size();
+		for (int where = 0; where < whereClauses; where++) {
+			List<WhereConditionDTO > whereCondition = builderRequestPojo.getJoinData().get(where).getWhereClause()
+					.get(where).getWhereConditon();
+			for (int condition = 0; condition < whereCondition.size(); condition++) {
+//where ((product_id= 1 and store_details.store_id=1)or(product_name='productBV'));
+				String values=whereCondition.get(condition).getValue();
+				String operator=whereCondition.get(condition).getOperator();
+				String columnName=whereCondition.get(condition).getColumnName();
+				
+//				if (condition > 0) {
+//					queryBuilder.append(" " + builderRequestPojo.getJoinData().get(where).getWhereClause()
+//							.get(where).getWhereConditon().get(where).getOperator() + " ");
+//				}
+				//if (condition==0) {
+					queryBuilder.append(" "+columnName +" "+ operator +values);
+				//}
+				
+			}
 		}
-		return queryBuilder.toString();
+		
+		return jdbcTemplate.queryForList(queryBuilder.toString());
+
+		
 	}
 
 	// 5. This Api is filter condition of the selected columns for the tables
 	@Override
 	public List<Map<String, Object>> intFilterCondition(BuilderRequestPojo builderRequestPojo) {
-		List<FilterPojo> filterPojos = builderRequestPojo.getFilterPojos();
+		List<FilterDataPojo> filterPojos = builderRequestPojo.getFilterPojos();
 		List<Map<String, Object>> response = new ArrayList<>();// add the execuited query one by one
 		List<String> responseQuery = new ArrayList<>();// returnQuery
 		for (int index = 0; index < filterPojos.size(); index++) {
@@ -151,7 +189,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			responseQuery.add(sql);
 			List<Map<String, Object>> queryResponse = jdbcTemplate.queryForList(sql);
 			Map<String, Object> tableResult = new HashMap<>();
-			tableResult.put("table_name", table);
+			tableResult.put("tableName", table);
 			tableResult.put("whereCondtion", whereCondition);
 			tableResult.put("filterResponse", queryResponse);
 			response.add(tableResult);
@@ -173,7 +211,6 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		System.out.println(sqlQuery.toString());
 
 		return jdbcTemplate.queryForList(sqlQuery.toString());
-
 	}
 
 	// 7.Get Column, value and datatype by using List table name and Column name
@@ -288,7 +325,6 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			tableResult.put("tables", result);
 			response.add(tableResult);
 		}
-
 		return response;
 	}
 

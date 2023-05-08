@@ -2,8 +2,13 @@ package com.query.builder.request;
 
 import java.util.List;
 
+import com.query.builder.dto.WhereClause;
+
 public class JoinData {
 
+	
+	private List<WhereClause> whereClause; // this is dynmaic where clause used for joins and filter where clause
+	
 	private List<String> columnNames;
 
 	private List<JoinConditionDto> joinCondition;
@@ -19,6 +24,17 @@ public class JoinData {
 	private String operators;
 	
 	private boolean isActive;
+
+	
+	
+	
+	public List<WhereClause> getWhereClause() {
+		return whereClause;
+	}
+
+	public void setWhereClause(List<WhereClause> whereClause) {
+		this.whereClause = whereClause;
+	}
 
 	public String getWhereCondition() {
 		return whereCondition;

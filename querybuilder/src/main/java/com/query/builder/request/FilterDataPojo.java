@@ -2,7 +2,7 @@ package com.query.builder.request;
 
 import java.util.List;
 
-public class FilterPojo {
+public class FilterDataPojo {
 
 	private String tableNames;
 

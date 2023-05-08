@@ -1,26 +1,39 @@
 package com.query.builder.request;
+
+import java.util.List;
+
 public class WhereCondition {
-    private String[] filterColumn;
-    private String columnName;
-    private String operator;
-    private Object value;
-    private String logicalOperator;
+	private String[] filterColumn;
+	private String columnName;
+	private String operator;
+	private Object value;
+	private String logicalOperator;
+	private List<String> condition;
+	
 
-    public String[] getFilterColumn() {
-        return filterColumn;
-    }
+	public List<String> getCondition() {
+		return condition;
+	}
 
-    public void setFilterColumn(String[] filterColumn) {
-        this.filterColumn = filterColumn;
-    }
+	public void setCondition(List<String> condition) {
+		this.condition = condition;
+	}
 
-    public String getColumnName() {
-        return columnName;
-    }
+	public String[] getFilterColumn() {
+		return filterColumn;
+	}
 
-    public void setColumnName(String columnName) {
-        this.columnName = columnName;
-    }
+	public void setFilterColumn(String[] filterColumn) {
+		this.filterColumn = filterColumn;
+	}
+
+	public String getColumnName() {
+		return columnName;
+	}
+
+	public void setColumnName(String columnName) {
+		this.columnName = columnName;
+	}
 
 	public String getOperator() {
 		return operator;

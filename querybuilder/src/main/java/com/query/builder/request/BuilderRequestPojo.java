@@ -2,9 +2,11 @@ package com.query.builder.request;
 
 import java.util.List;
 
+import com.query.builder.dto.WhereClause;
+
 public class BuilderRequestPojo {
 
-	private String schemaName;
+	private String dataBase;
 
 	private String tableName;
 
@@ -20,7 +22,7 @@ public class BuilderRequestPojo {
 
 	private List<String> joinColumn;
 
-	private List<FilterPojo> filterPojos;
+	private List<FilterDataPojo> filterPojos;
 
 	private List<JoinData> joinData;
 
@@ -28,16 +30,8 @@ public class BuilderRequestPojo {
 
 	private List<String> joins; // executeDynamicQuery
 
-	private List<FilterData> filterData; // used for filter
 
-	public List<FilterData> getFilterData() {
-		return filterData;
-	}
-
-	public void setFilterData(List<FilterData> filterData) {
-		this.filterData = filterData;
-	}
-
+	
 	public boolean isActive() {
 		return isActive;
 	}
@@ -62,11 +56,11 @@ public class BuilderRequestPojo {
 		this.joinData = joinData;
 	}
 
-	public List<FilterPojo> getFilterPojos() {
+	public List<FilterDataPojo> getFilterPojos() {
 		return filterPojos;
 	}
 
-	public void setFilterPojos(List<FilterPojo> filterPojos) {
+	public void setFilterPojos(List<FilterDataPojo> filterPojos) {
 		this.filterPojos = filterPojos;
 	}
 
@@ -118,12 +112,14 @@ public class BuilderRequestPojo {
 		this.columnNames = columnNames;
 	}
 
-	public String getSchemaName() {
-		return schemaName;
+
+
+	public String getDataBase() {
+		return dataBase;
 	}
 
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
+	public void setDataBase(String database) {
+		this.dataBase = database;
 	}
 
 	public String getTableName() {

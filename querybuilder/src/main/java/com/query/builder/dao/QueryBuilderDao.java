@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.query.builder.request.BuilderRequestPojo;
 
 public interface QueryBuilderDao {
@@ -16,7 +18,7 @@ public interface QueryBuilderDao {
 	public List<Map<String, Object>> listOfSelectQuery(List<String> tableName,String schemaName);
 
 	// 3.This method will return the column And TableName of the database
-	public List<Map<String, Object>> getColumnAndTableName(String schemaName);
+	public Map<String, Map<String, String>> getColumnAndTableName(String schemaName);
 
 	List<Map<String, Object>> getColumnListOfTableName(String projectName, List<String> tableNames);
 
@@ -28,8 +30,6 @@ public interface QueryBuilderDao {
 	// Get the column and data(values) using table name and schemaName(db Name)
 	public List<Map<String, Object>> getColumnValues(String schemaName, String tableName);
 
-
-
 	// get the table column by datatype (using the datatype and tableName)
 	List<Map<String, Object>> getTableDataByType(String tableName, String dataType);
 
@@ -37,7 +37,7 @@ public interface QueryBuilderDao {
 	public List<String> getDatabaseName();
 
 	// This Api is filter condition of the selected columns for the tables
-	Object getJoinedData(BuilderRequestPojo builderRequestPojo);
+	Object getJoinedData(BuilderRequestPojo builderRequestPojo) throws JsonMappingException, JsonProcessingException;
 
 	// This Api for dynamic join query for multiple tables
 	public List<Map<String, Object>> intFilterCondition(BuilderRequestPojo builderRequestPojo);
