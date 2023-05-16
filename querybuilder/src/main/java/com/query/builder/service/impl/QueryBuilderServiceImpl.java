@@ -31,8 +31,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public List<Map<String, Object>> listOfSelectQuery(BuilderRequestPojo builderRequestPojo) {
 		List<String> tableName = builderRequestPojo.getListTableName();
-	    String schemaName=builderRequestPojo.getDataBase();
-		return queryBuilderDao.listOfSelectQuery(tableName,schemaName);
+		String schemaName = builderRequestPojo.getDataBase();
+		return queryBuilderDao.listOfSelectQuery(tableName, schemaName);
 	}
 
 	// 3 This method will return the column And TableName of the database
@@ -72,9 +72,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return queryBuilderDao.getColumnValues(schemaName, tableName);
 	}
 
-
-	
-
 	// get the table column by datatype (using the datatype and tableName)
 	@Override
 	public List<Map<String, Object>> getTableDataByType(BuilderRequestPojo builderRequestPojo) {
@@ -92,13 +89,13 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public List<Map<String, Object>> intFilterCondition(BuilderRequestPojo builderRequestPojo) {
 
-		return queryBuilderDao.intFilterCondition(builderRequestPojo);
+		return queryBuilderDao.filterCondition(builderRequestPojo);
 
 	}
 
 	// This Api for dynamic join query for multiple tables
 	@Override
-	public Object getJoinData(BuilderRequestPojo builderRequestPojo) throws JsonMappingException, JsonProcessingException {
+	public List<Map<String, Object>> getJoinData(BuilderRequestPojo builderRequestPojo) {
 
 		return queryBuilderDao.getJoinedData(builderRequestPojo);
 	}
@@ -110,7 +107,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return queryBuilderDao.getColumnValueDatatype(listTableName, schemaName);
 	}
 
-	//6.This API is used to join the table with using inner join without on condition and where conditon
+	// 6.This API is used to join the table with using inner join without on
+	// condition and where conditon
 	@Override
 	public List<Map<String, Object>> innerJoin(BuilderRequestPojo builderRequestPojo) {
 		List<String> tableName = builderRequestPojo.getListTableName();
@@ -140,6 +138,23 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public List<String> getAllSchema() {
 		return queryBuilderDao.getAllSchemas();
+	}
+
+	@Override
+	public List<String> getPrimaryKeyAndIndexColumns(BuilderRequestPojo builderRequestPojo) {
+		String database = builderRequestPojo.getDataBase();
+		String tableName = builderRequestPojo.getTableName();
+		return queryBuilderDao.getPrimaryKeyAndIndexColumns(database, tableName);
+	}
+
+	@Override
+	public List<Map<String, Object>> getJoinQuery(BuilderRequestPojo builderRequestPojo) {
+		return queryBuilderDao.getJoinQuery(builderRequestPojo);
+	}
+
+	@Override
+	public List<Map<String, Object>> getFilterQuery(BuilderRequestPojo builderRequestPojo) {
+		return queryBuilderDao.getFilterQuery(builderRequestPojo);
 	}
 
 }

@@ -41,7 +41,7 @@ public interface QueryBuilderService {
 	public List<Map<String, Object>> intFilterCondition(BuilderRequestPojo builderRequestPojo);
 
 	// This Api for dynamic join query for multiple tables
-	Object getJoinData(BuilderRequestPojo builderRequestPojo) throws JsonMappingException, JsonProcessingException;
+	List<Map<String, Object>> getJoinData(BuilderRequestPojo builderRequestPojo);
 
 	List<Map<String, Object>> getColumnValueDatatype(BuilderRequestPojo builderRequestPojo);
 
@@ -57,5 +57,11 @@ public interface QueryBuilderService {
 
 	// Get All Schemas using schemata (get db names)
 	public List<String> getAllSchema();
+
+	List<String> getPrimaryKeyAndIndexColumns(BuilderRequestPojo builderRequestPojo);
+
+	List<Map<String, Object>> getJoinQuery(BuilderRequestPojo builderRequestPojo);
+
+	List<Map<String, Object>> getFilterQuery(BuilderRequestPojo builderRequestPojo);
 
 }

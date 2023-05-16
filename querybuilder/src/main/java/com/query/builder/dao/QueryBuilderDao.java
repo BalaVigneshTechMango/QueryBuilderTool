@@ -12,10 +12,10 @@ public interface QueryBuilderDao {
 
 	// 1.get All table Name in Database
 	public List<Map<String, Object>> getTableNames(String schemaName);
-
+      
 	// 2.Get the list list of table name and response it back as table wise select
 	// Query
-	public List<Map<String, Object>> listOfSelectQuery(List<String> tableName,String schemaName);
+	public List<Map<String, Object>> listOfSelectQuery(List<String> tableName, String schemaName);
 
 	// 3.This method will return the column And TableName of the database
 	public Map<String, Map<String, String>> getColumnAndTableName(String schemaName);
@@ -37,14 +37,15 @@ public interface QueryBuilderDao {
 	public List<String> getDatabaseName();
 
 	// This Api is filter condition of the selected columns for the tables
-	Object getJoinedData(BuilderRequestPojo builderRequestPojo) throws JsonMappingException, JsonProcessingException;
+	List<Map<String, Object>> getJoinedData(BuilderRequestPojo builderRequestPojo);
 
 	// This Api for dynamic join query for multiple tables
-	public List<Map<String, Object>> intFilterCondition(BuilderRequestPojo builderRequestPojo);
+	public List<Map<String, Object>> filterCondition(BuilderRequestPojo builderRequestPojo);
 
 	List<Map<String, Object>> getColumnValueDatatype(List<String> listTableName, String schemaName);
 
-	//6.This API is used to join the table with using inner join without on condition and where conditon
+	// 6.This API is used to join the table with using inner join without on
+	// condition and where conditon
 	public List<Map<String, Object>> innerJoin(List<String> tableName);
 
 	// not in use
@@ -57,5 +58,11 @@ public interface QueryBuilderDao {
 
 	// Get All Schemas using schemata (get db names)
 	public List<String> getAllSchemas();
+
+	public List<String> getPrimaryKeyAndIndexColumns(String database, String tableName);
+
+	public List<Map<String, Object>> getJoinQuery(BuilderRequestPojo builderRequestPojo);
+
+	public List<Map<String, Object>> getFilterQuery(BuilderRequestPojo builderRequestPojo);
 
 }

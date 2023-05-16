@@ -12,6 +12,8 @@ import com.google.gson.JsonObject;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,7 @@ import com.query.builder.request.BuilderRequestPojo;
 import com.query.builder.response.QueryResponsePojo;
 import com.query.builder.service.QueryBuilderService;
 
+@CrossOrigin
 @RestController
 @RequestMapping(value = "/query")
 public class QueryBuilderController {
@@ -53,7 +56,7 @@ public class QueryBuilderController {
 		queryResponsePojo.setMessage("Get All Table Data");
 		queryResponsePojo.setResponseData(response);
 		return queryResponsePojo;
-	}	
+	}
 
 	/**
 	 * 3.get the entire ColumnAndTableName using database Name
@@ -70,13 +73,23 @@ public class QueryBuilderController {
 
 	/**
 	 * 4. This Api for dynamic join query for multiple tables
-	 * @throws JsonProcessingException 
-	 * @throws JsonMappingException 
+	 * 
 	 */
 	@PostMapping("/getJoinData")
-	public QueryResponsePojo getJoinData(@RequestBody BuilderRequestPojo builderRequestPojo) throws JsonMappingException, JsonProcessingException {
+	public QueryResponsePojo getJoinData(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		Object response = queryBuilderService.getJoinData(builderRequestPojo);
+		List<Map<String, Object>> response = queryBuilderService.getJoinData(builderRequestPojo);
+		queryResponsePojo.setIsSuccess(true);
+		queryResponsePojo.setResponseData(response);
+		queryResponsePojo.setMessage("Joined Data");
+		return queryResponsePojo;
+
+	}
+
+	@PostMapping("/getJoinQuery")
+	public QueryResponsePojo getJoinQuery(@RequestBody BuilderRequestPojo builderRequestPojo) {
+		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		List<Map<String, Object>> response = queryBuilderService.getJoinQuery(builderRequestPojo);
 		queryResponsePojo.setIsSuccess(true);
 		queryResponsePojo.setResponseData(response);
 		queryResponsePojo.setMessage("Joined Data");
@@ -91,6 +104,17 @@ public class QueryBuilderController {
 	public QueryResponsePojo getFilterData(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		Object response = queryBuilderService.intFilterCondition(builderRequestPojo);
+		queryResponsePojo.setIsSuccess(true);
+		queryResponsePojo.setResponseData(response);
+		queryResponsePojo.setMessage("Filter Condition");
+		return queryResponsePojo;
+
+	}
+	
+	@PostMapping("/getFilterQuery")
+	public QueryResponsePojo getFilterQuery(@RequestBody BuilderRequestPojo builderRequestPojo) {
+		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		List<Map<String, Object>> response = queryBuilderService.getFilterQuery(builderRequestPojo);
 		queryResponsePojo.setIsSuccess(true);
 		queryResponsePojo.setResponseData(response);
 		queryResponsePojo.setMessage("Filter Condition");
@@ -219,8 +243,8 @@ public class QueryBuilderController {
 	}
 
 	/**
-	 * get Column and values of by using list of table Name  //Cartesian Product
-	 */        
+	 * get Column and values of by using list of table Name //Cartesian Product
+	 */
 //	@PostMapping("getColumnDataListOfTable")
 //	public QueryResponsePojo getColumValuesListOfTables(@RequestBody BuilderRequestPojo builderRequestPojo) {
 //		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
@@ -231,7 +255,7 @@ public class QueryBuilderController {
 //		return queryResponsePojo;
 //	}
 
-	//get the Current database Name from project
+	// get the Current database Name from project
 	@PostMapping("/getDatabaseName")
 	public QueryResponsePojo getDataBaseName() {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
@@ -239,6 +263,17 @@ public class QueryBuilderController {
 		queryResponsePojo.setIsSuccess(true);
 		queryResponsePojo.setResponseData(response);
 		queryResponsePojo.setMessage("Current database Name");
+		return queryResponsePojo;
+
+	}
+
+	@PostMapping("/getPrimaryIndex")
+	public QueryResponsePojo getPrimaryKeyAndIndexColumns(@RequestBody BuilderRequestPojo builderRequestPojo) {
+		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		List<String> response = queryBuilderService.getPrimaryKeyAndIndexColumns(builderRequestPojo);
+		queryResponsePojo.setIsSuccess(true);
+		queryResponsePojo.setResponseData(response);
+		queryResponsePojo.setMessage("Get PrimaryKey and Index columns");
 		return queryResponsePojo;
 
 	}

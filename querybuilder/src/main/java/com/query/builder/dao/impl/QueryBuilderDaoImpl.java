@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -11,7 +12,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
+
+import javax.persistence.criteria.JoinType;
 import javax.sql.DataSource;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -20,11 +26,14 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.query.builder.common.WhereClause;
 import com.query.builder.dao.QueryBuilderDao;
-import com.query.builder.dto.WhereConditionDTO;
+import com.query.builder.dto.FilterDataPojo;
+import com.query.builder.dto.WhereGroupListDto;
+import com.query.builder.dto.WhereListDto;
+import com.query.builder.enums.Condition;
+import com.query.builder.enums.LogicalCondition;
 import com.query.builder.request.BuilderRequestPojo;
-import com.query.builder.request.FilterDataPojo;
-import com.query.builder.request.JoinData;
 
 @Service
 public class QueryBuilderDaoImpl implements QueryBuilderDao {
@@ -51,7 +60,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		List<Map<String, Object>> results = new ArrayList<>();
 		for (String tableNames : tableName) {
 			StringBuilder sqlQuery = new StringBuilder();
-			sqlQuery.append("SELECT * FROM " + schemaName + "." + tableNames);
+			sqlQuery.append("Select * From " + schemaName + "." + tableNames);
 			List<Map<String, Object>> queryResult = jdbcTemplate.queryForList(sqlQuery.toString());
 			Map<String, Object> tableResult = new HashMap<>();
 			tableResult.put("table", tableNames);
@@ -89,14 +98,14 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			while (rowSet.next()) {
 				columnMap.put(rowSet.getString("column_name"), rowSet.getString("data_type"));
 			}
-
 			// Add the table name and column names and data types to the schema map
 			schemaMap.put(tableName, columnMap);
 		}
 		// Add the table names to the schema map as a separate entry for easy access
+
 		String tableNamesString = String.join(",", tableNames);
 		Map<String, String> tableNameMap = new LinkedHashMap<>();
-        
+
 		tableNameMap.put("tableNames", tableNamesString);
 		schemaMap.put("tableName", tableNameMap);
 
@@ -105,12 +114,122 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	// 4. select * from L1 inner join R1 on ((LT1 == RT1) and (Lt2 != RT2))
 	// This Api for dynamic join query for multiple tables
-	public Object getJoinedData(BuilderRequestPojo builderRequestPojo)
-			throws JsonMappingException, JsonProcessingException {
+	public List<Map<String, Object>> getJoinedData(BuilderRequestPojo builderRequestPojo) {
+		LogicalCondition previousValue = null; // Variable to store the previous value of Group
 		StringBuilder queryBuilder = new StringBuilder();
-		List<JoinData> joinDatas = builderRequestPojo.getJoinData();
+		List<FilterDataPojo> joinDatas = builderRequestPojo.getFilterData();
 		List<String> columnNames = joinDatas.get(0).getColumnNames();
-		boolean value = false;
+		queryBuilder.append("Select ");
+		for (String column : columnNames) {
+			queryBuilder.append(column).append(", ");
+		}
+		queryBuilder.setLength(queryBuilder.length() - 2);
+		for (int index = 0; index < joinDatas.size(); index++) {
+			String leftTableName = joinDatas.get(index).getLsTableName();
+			String rightTableName = joinDatas.get(index).getRsTableName();
+			String joinType = joinDatas.get(index).getJoinsTypes().getOperator();
+			int joinConditionSize = joinDatas.get(index).getJoinCondition().size();
+			for (int condition = 0; condition < joinConditionSize; condition++) {
+				LogicalCondition logicalCondition = joinDatas.get(index).getJoinCondition().get(condition)
+						.getLogicalCondition();
+				String leftJoinColumn = joinDatas.get(index).getJoinCondition().get(condition).getLsColumn();
+				String rightJoinColumn = joinDatas.get(index).getJoinCondition().get(condition).getRsColumn();
+				String conditionType = joinDatas.get(index).getJoinCondition().get(condition).getCondition()
+						.getOperator();
+				if (index == 0 && condition == 0) {
+					queryBuilder.append(" From ").append(leftTableName);
+					queryBuilder.append(" " + joinType + " ").append(rightTableName).append(" ON ")
+							.append(leftTableName).append(".").append(leftJoinColumn).append(" " + conditionType + " ")
+							.append(rightTableName).append(".").append(rightJoinColumn);
+				} else if (index > 0) {
+					queryBuilder.append(" " + joinType + " ").append(leftTableName).append(" ON ").append(leftTableName)
+							.append(".").append(leftJoinColumn).append(" " + conditionType + " ").append(rightTableName)
+							.append(".").append(rightJoinColumn);
+				} else if (condition > 0) {
+					queryBuilder.append(" " + previousValue + " ").append(leftTableName).append(".")
+							.append(leftJoinColumn).append(" " + conditionType + " ").append(rightTableName).append(".")
+							.append(rightJoinColumn);
+				}
+				previousValue = logicalCondition;
+			}
+		}
+		List<WhereGroupListDto> whereCla = joinDatas.get(0).getWhereGroupList();
+		if (whereCla != null) {
+			queryBuilder.append(" Where ");
+			WhereClause whereClause = new WhereClause();
+			StringBuilder whereBuilder = whereClause.whereCondition(builderRequestPojo, 0);
+			return jdbcTemplate.queryForList(queryBuilder.toString() + whereBuilder);
+		} else {
+			return jdbcTemplate.queryForList(queryBuilder.toString());
+		}
+
+	}
+
+	// 5. This Api is filter condition of the selected columns for the tables
+	@Override
+	public List<Map<String, Object>> filterCondition(BuilderRequestPojo builderRequestPojo) {
+		WhereClause whereClause = new WhereClause();
+		List<Map<String, Object>> response = new ArrayList<>();// add the execuited query set of table value and return.
+		List<FilterDataPojo> filterPojos = builderRequestPojo.getFilterData();
+		for (int index = 0; index < filterPojos.size(); index++) {
+			List<WhereGroupListDto> whereCla = filterPojos.get(index).getWhereGroupList();
+			List<String> columnNames = filterPojos.get(index).getColumnNames();
+			String columnName = String.join(",", columnNames);
+			String table = builderRequestPojo.getFilterData().get(index).getTableName();
+			if (whereCla != null) {
+				StringBuilder whereBuilder = whereClause.whereCondition(builderRequestPojo, index);
+				String sql = "Select " + columnName + " From " + table + " Where " + whereBuilder;
+				List<Map<String, Object>> queryResponse = jdbcTemplate.queryForList(sql);
+				Map<String, Object> tableResult = new HashMap<>();
+				tableResult.put("tableName", table);
+				tableResult.put("filterResponse", queryResponse);
+				response.add(tableResult);
+			} else {
+				String sql = "Select " + columnName + " From " + table;
+				List<Map<String, Object>> queryResponse = jdbcTemplate.queryForList(sql);
+				Map<String, Object> tableResult = new HashMap<>();
+				tableResult.put("tableName", table);
+				tableResult.put("filterResponse", queryResponse);
+				response.add(tableResult);
+			}
+		}
+		return response;
+
+	}
+
+	@Override
+	public List<Map<String, Object>> getFilterQuery(BuilderRequestPojo builderRequestPojo) {
+		WhereClause whereClause = new WhereClause();
+		List<Map<String, Object>> previewQuery = new ArrayList<>();// query
+		List<FilterDataPojo> filterPojos = builderRequestPojo.getFilterData();
+		for (int index = 0; index < filterPojos.size(); index++) {
+			List<WhereGroupListDto> whereCla = filterPojos.get(index).getWhereGroupList();
+			List<String> columnNames = filterPojos.get(index).getColumnNames();
+			String columnName = String.join(",", columnNames);
+			String table = builderRequestPojo.getFilterData().get(index).getTableName();
+			if (whereCla != null) {
+				StringBuilder whereBuilder = whereClause.whereCondition(builderRequestPojo, index);
+				String sql = "Select " + columnName + " From " + table + " Where " + whereBuilder;
+				Map<String, Object> query = new HashMap<>();
+				query.put(table, sql);
+				previewQuery.add(query);
+			} else {
+				String sql = "SELECT " + columnName + " FROM " + table;
+				Map<String, Object> query = new HashMap<>();
+				query.put(table, sql);
+				previewQuery.add(query);
+			}
+		}
+		return previewQuery;
+
+	}
+
+	@Override
+	public List<Map<String, Object>> getJoinQuery(BuilderRequestPojo builderRequestPojo) {
+		LogicalCondition previousValue = null; // Variable to store the previous value of Group
+		StringBuilder queryBuilder = new StringBuilder();
+		List<FilterDataPojo> joinDatas = builderRequestPojo.getFilterData();
+		List<String> columnNames = joinDatas.get(0).getColumnNames();
 		queryBuilder.append("SELECT ");
 		for (String column : columnNames) {
 			queryBuilder.append(column).append(", ");
@@ -119,15 +238,15 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		for (int index = 0; index < joinDatas.size(); index++) {
 			String leftTableName = joinDatas.get(index).getLsTableName();
 			String rightTableName = joinDatas.get(index).getRsTableName();
-			String joinType = joinDatas.get(index).getJoinType();
+			String joinType = joinDatas.get(index).getJoinsTypes().getOperator();
 			int joinConditionSize = joinDatas.get(index).getJoinCondition().size();
-			String operators = joinDatas.get(index).getOperators();
-
 			for (int condition = 0; condition < joinConditionSize; condition++) {
-				String leftJoinColumn = joinDatas.get(index).getJoinCondition().get(condition).getLscolumn();
-				String rightJoinColumn = joinDatas.get(index).getJoinCondition().get(condition).getRscolumn();
-				String conditionType = joinDatas.get(index).getJoinCondition().get(condition).getConditionType();
-
+				LogicalCondition logicalCondition = joinDatas.get(index).getJoinCondition().get(condition)
+						.getLogicalCondition();
+				String leftJoinColumn = joinDatas.get(index).getJoinCondition().get(condition).getLsColumn();
+				String rightJoinColumn = joinDatas.get(index).getJoinCondition().get(condition).getRsColumn();
+				String conditionType = joinDatas.get(index).getJoinCondition().get(condition).getCondition()
+						.getOperator();
 				if (index == 0 && condition == 0) {
 					queryBuilder.append(" FROM ").append(leftTableName);
 					queryBuilder.append(" " + joinType + " ").append(rightTableName).append(" ON ")
@@ -138,64 +257,32 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 							.append(".").append(leftJoinColumn).append(" " + conditionType + " ").append(rightTableName)
 							.append(".").append(rightJoinColumn);
 				} else if (condition > 0) {
-					queryBuilder.append(" " + operators + " ").append(leftTableName).append(".").append(leftJoinColumn)
-							.append(" " + conditionType + " ").append(rightTableName).append(".")
+					queryBuilder.append(" " + previousValue + " ").append(leftTableName).append(".")
+							.append(leftJoinColumn).append(" " + conditionType + " ").append(rightTableName).append(".")
 							.append(rightJoinColumn);
 				}
+				previousValue = logicalCondition;
 			}
 		}
 
-		queryBuilder.append(" WHERE ");
-
-		int jsonDataSize = builderRequestPojo.getJoinData().size();
-		int whereClauses=builderRequestPojo.getJoinData().get(0).getWhereClause().size();
-		int whereConditions=builderRequestPojo.getJoinData().get(jsonDataSize).getWhereClause().get(whereClauses).getWhereConditon().size();
-		for (int where = 0; where < whereClauses; where++) {
-			List<WhereConditionDTO > whereCondition = builderRequestPojo.getJoinData().get(where).getWhereClause()
-					.get(where).getWhereConditon();
-			for (int condition = 0; condition < whereCondition.size(); condition++) {
-//where ((product_id= 1 and store_details.store_id=1)or(product_name='productBV'));
-				String values=whereCondition.get(condition).getValue();
-				String operator=whereCondition.get(condition).getOperator();
-				String columnName=whereCondition.get(condition).getColumnName();
-				
-//				if (condition > 0) {
-//					queryBuilder.append(" " + builderRequestPojo.getJoinData().get(where).getWhereClause()
-//							.get(where).getWhereConditon().get(where).getOperator() + " ");
-//				}
-				//if (condition==0) {
-					queryBuilder.append(" "+columnName +" "+ operator +values);
-				//}
-				
-			}
+		List<WhereGroupListDto> whereCla = joinDatas.get(0).getWhereGroupList();
+		if (whereCla != null) {
+			queryBuilder.append(" WHERE ");
+			WhereClause whereClause = new WhereClause();
+			StringBuilder whereBuilder = whereClause.whereCondition(builderRequestPojo, 0);
+			List<Map<String, Object>> previewQuery = new ArrayList<>();// query
+			Map<String, Object> query = new HashMap<>();
+			query.put("Joindata", queryBuilder.toString() + whereBuilder);
+			previewQuery.add(query);
+			return previewQuery;
+		} else {
+			List<Map<String, Object>> previewQuery = new ArrayList<>();// query
+			Map<String, Object> query = new HashMap<>();
+			query.put("Joindata", queryBuilder.toString());
+			previewQuery.add(query);
+			return previewQuery;
 		}
-		
-		return jdbcTemplate.queryForList(queryBuilder.toString());
 
-		
-	}
-
-	// 5. This Api is filter condition of the selected columns for the tables
-	@Override
-	public List<Map<String, Object>> intFilterCondition(BuilderRequestPojo builderRequestPojo) {
-		List<FilterDataPojo> filterPojos = builderRequestPojo.getFilterPojos();
-		List<Map<String, Object>> response = new ArrayList<>();// add the execuited query one by one
-		List<String> responseQuery = new ArrayList<>();// returnQuery
-		for (int index = 0; index < filterPojos.size(); index++) {
-			String column = filterPojos.get(index).getColumnName();
-			String table = filterPojos.get(index).getTableNames();
-			String whereCondition = filterPojos.get(index).getWhereCondition();
-			String sql = "SELECT " + column + " FROM " + table + " WHERE " + whereCondition;
-			responseQuery.add(sql);
-			List<Map<String, Object>> queryResponse = jdbcTemplate.queryForList(sql);
-			Map<String, Object> tableResult = new HashMap<>();
-			tableResult.put("tableName", table);
-			tableResult.put("whereCondtion", whereCondition);
-			tableResult.put("filterResponse", queryResponse);
-			response.add(tableResult);
-		}
-//		System.out.println(responseQuery);
-		return response;
 	}
 
 	// 6.This API is used to join the table with using inner join without on
@@ -255,11 +342,11 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 		// Construct the SQL query string with the schema name, SELECT, and GROUP By
 		// clauses
-
-		String sql1 = "SELECT" + " " + selectClause + " " + "FROM " + schemaName + "." + tableName + " GROUP BY "
+		
+		String sql = "SELECT" + " " + selectClause + " " + "FROM " + schemaName + "." + tableName + " GROUP BY "
 				+ groupByClause;
 		// Execute the query using jdbcTemplate
-		return jdbcTemplate.queryForList(sql1);
+		return jdbcTemplate.queryForList(sql);
 
 	}
 
@@ -373,4 +460,11 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		});
 		return response;
 	}
+
+	public List<String> getPrimaryKeyAndIndexColumns(String databaseName, String tableName) {
+		String query = "SELECT COLUMN_NAME " + "FROM INFORMATION_SCHEMA.COLUMNS " + "WHERE TABLE_SCHEMA = ? "
+				+ "AND TABLE_NAME = ? " + "AND COLUMN_KEY in ('PRI','UNI','MUL')";
+		return jdbcTemplate.queryForList(query, new Object[] { databaseName, tableName }, String.class);
+	}
+
 }

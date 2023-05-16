@@ -1,8 +1,9 @@
 package com.query.builder.request;
 
+import java.util.LinkedList;
 import java.util.List;
 
-import com.query.builder.dto.WhereClause;
+import com.query.builder.dto.FilterDataPojo;
 
 public class BuilderRequestPojo {
 
@@ -22,22 +23,21 @@ public class BuilderRequestPojo {
 
 	private List<String> joinColumn;
 
-	private List<FilterDataPojo> filterPojos;
-
-	private List<JoinData> joinData;
-
-	private boolean isActive;
+	//private List<JoinData> joinData;
 
 	private List<String> joins; // executeDynamicQuery
 
-
+	//private List<FilterDataPojo> filterData; // this is filter data with where condition
 	
-	public boolean isActive() {
-		return isActive;
+	private LinkedList<FilterDataPojo>filterData;
+	
+	
+	public LinkedList<FilterDataPojo> getFilterData() {
+		return filterData;
 	}
 
-	public void setActive(boolean isActive) {
-		this.isActive = isActive;
+	public void setFilterData(LinkedList<FilterDataPojo> filterData) {
+		this.filterData = filterData;
 	}
 
 	public List<String> getJoins() {
@@ -48,21 +48,6 @@ public class BuilderRequestPojo {
 		this.joins = joins;
 	}
 
-	public List<JoinData> getJoinData() {
-		return joinData;
-	}
-
-	public void setJoinData(List<JoinData> joinData) {
-		this.joinData = joinData;
-	}
-
-	public List<FilterDataPojo> getFilterPojos() {
-		return filterPojos;
-	}
-
-	public void setFilterPojos(List<FilterDataPojo> filterPojos) {
-		this.filterPojos = filterPojos;
-	}
 
 	public String getWhereCondition() {
 		return whereCondition;
@@ -111,8 +96,6 @@ public class BuilderRequestPojo {
 	public void setColumnNames(List<String> columnNames) {
 		this.columnNames = columnNames;
 	}
-
-
 
 	public String getDataBase() {
 		return dataBase;
