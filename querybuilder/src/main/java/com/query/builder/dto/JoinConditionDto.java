@@ -1,14 +1,20 @@
 package com.query.builder.dto;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
 import com.query.builder.enums.Condition;
 import com.query.builder.enums.LogicalCondition;
 
 public class JoinConditionDto {
 
+	@NotBlank(message = "Enter the LeftColumn")
 	private String lsColumn;
 
+	@NotBlank(message = "Enter the Right Column")
 	private String rsColumn;
 
+	@NotNull(message = "Enter the Condition")
 	private Condition condition;
 
 	private LogicalCondition logicalCondition;

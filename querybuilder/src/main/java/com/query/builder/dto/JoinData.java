@@ -1,67 +1,54 @@
-package com.query.builder.request;
+package com.query.builder.dto;
 
+import java.util.LinkedList;
 import java.util.List;
 
-import com.query.builder.dto.WhereClause;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
+import com.query.builder.enums.JoinsTypes;
+import com.query.builder.validation.NoWhitespaceList;
 
 public class JoinData {
+	// joins
+	@Valid
+	private LinkedList<JoinConditionDto> joinCondition;
 
-	
-	private List<WhereClause> whereClause; // this is dynmaic where clause used for joins and filter where clause
-	
-	private List<String> columnNames;
+	@Valid
+	private LinkedList<WhereGroupListDto> whereGroupList;
 
-	private List<JoinConditionDto> joinCondition;
-
+	@NotBlank(message = "Enter the Left TableName")
 	private String lsTableName;
 
+	@NotBlank(message = "Enter the Right TableName")
 	private String rsTableName;
 
-	private String joinType;
+	private JoinsTypes joinsTypes;
 
-	private String whereCondition;
-	
-	private String operators;
-	
-	private boolean isActive;
+	//@NotEmpty(message = "String list cannot be empty")
+	@Size(min = 1, message = "Minimum One column should be selected")
+	@NoWhitespaceList
+	private List<String> columnNames;
 
-	
-	
-	
-	public List<WhereClause> getWhereClause() {
-		return whereClause;
+	public LinkedList<WhereGroupListDto> getWhereGroupList() {
+		return whereGroupList;
 	}
 
-	public void setWhereClause(List<WhereClause> whereClause) {
-		this.whereClause = whereClause;
-	}
-
-	public String getWhereCondition() {
-		return whereCondition;
-	}
-
-	public boolean isActive() {
-		return isActive;
-	}
-
-	public void setActive(boolean isActive) {
-		this.isActive = isActive;
-	}
-
-	public List<JoinConditionDto> getJoinCondition() {
-		return joinCondition;
-	}
-
-	public void setJoinCondition(List<JoinConditionDto> joinCondition) {
-		this.joinCondition = joinCondition;
-	}
-
-	public void setWhereCondition(String whereCondition) {
-		this.whereCondition = whereCondition;
+	public void setWhereGroupList(LinkedList<WhereGroupListDto> whereGroupList) {
+		this.whereGroupList = whereGroupList;
 	}
 
 	public List<String> getColumnNames() {
 		return columnNames;
+	}
+
+	public void setColumnNames(List<String> columnNames) {
+		this.columnNames = columnNames;
+	}
+
+	public LinkedList<JoinConditionDto> getJoinCondition() {
+		return joinCondition;
 	}
 
 	public String getLsTableName() {
@@ -72,12 +59,12 @@ public class JoinData {
 		return rsTableName;
 	}
 
-	public String getJoinType() {
-		return joinType;
+	public JoinsTypes getJoinsTypes() {
+		return joinsTypes;
 	}
 
-	public void setColumnNames(List<String> columnNames) {
-		this.columnNames = columnNames;
+	public void setJoinCondition(LinkedList<JoinConditionDto> joinCondition) {
+		this.joinCondition = joinCondition;
 	}
 
 	public void setLsTableName(String lsTableName) {
@@ -88,16 +75,8 @@ public class JoinData {
 		this.rsTableName = rsTableName;
 	}
 
-	public void setJoinType(String joinType) {
-		this.joinType = joinType;
-	}
-
-	public String getOperators() {
-		return operators;
-	}
-
-	public void setOperators(String operators) {
-		this.operators = operators;
+	public void setJoinsTypes(JoinsTypes joinsTypes) {
+		this.joinsTypes = joinsTypes;
 	}
 
 }

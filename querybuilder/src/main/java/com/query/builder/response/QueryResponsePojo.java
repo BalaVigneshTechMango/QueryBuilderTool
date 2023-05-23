@@ -1,6 +1,5 @@
 package com.query.builder.response;
 
-
 public class QueryResponsePojo {
 
 	private String message;
@@ -23,12 +22,19 @@ public class QueryResponsePojo {
 		this.message = message;
 	}
 
-	public void setResponseData(Object object) {
-		this.responseData = object;
+	public void setResponseData(Object responseData) {
+		this.responseData = responseData;
 	}
 
-	public void setIsSuccess(Boolean istrue) {
-		this.isSuccess = istrue;
+	public void setIsSuccess(Boolean isSuccess) {
+		this.isSuccess = isSuccess;
+	}
+
+	public void response(String message, Object responseData, boolean isSuccess) {
+
+	 	setMessage(message);
+		setResponseData(responseData);
+		setIsSuccess(isSuccess);
 	}
 
 }

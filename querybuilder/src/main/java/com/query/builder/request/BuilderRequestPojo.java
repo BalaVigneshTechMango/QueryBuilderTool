@@ -1,116 +1,46 @@
 package com.query.builder.request;
 
 import java.util.LinkedList;
-import java.util.List;
 
-import com.query.builder.dto.FilterDataPojo;
+import javax.validation.Valid;
+import org.springframework.context.annotation.Configuration;
 
+import com.query.builder.dto.FilterData;
+import com.query.builder.dto.JoinData;
+
+@Configuration
 public class BuilderRequestPojo {
 
 	private String dataBase;
 
-	private String tableName;
+	@Valid
+	private LinkedList<JoinData> joinDatas;
 
-	private String whereCondition;
+	@Valid
+	private FilterData filterData;
 
-	private String dataType;
-
-	private String filterCondition;
-
-	private List<String> columnNames;
-
-	private List<String> listTableName;
-
-	private List<String> joinColumn;
-
-	//private List<JoinData> joinData;
-
-	private List<String> joins; // executeDynamicQuery
-
-	//private List<FilterDataPojo> filterData; // this is filter data with where condition
-	
-	private LinkedList<FilterDataPojo>filterData;
-	
-	
-	public LinkedList<FilterDataPojo> getFilterData() {
+	public FilterData getFilterData() {
 		return filterData;
 	}
 
-	public void setFilterData(LinkedList<FilterDataPojo> filterData) {
+	public void setFilterData(FilterData filterData) {
 		this.filterData = filterData;
 	}
 
-	public List<String> getJoins() {
-		return joins;
+	public LinkedList<JoinData> getJoinDatas() {
+		return joinDatas;
 	}
 
-	public void setJoins(List<String> joins) {
-		this.joins = joins;
-	}
-
-
-	public String getWhereCondition() {
-		return whereCondition;
-	}
-
-	public void setWhereCondition(String whereCondition) {
-		this.whereCondition = whereCondition;
-	}
-
-	public List<String> getJoinColumn() {
-		return joinColumn;
-	}
-
-	public void setJoinColumn(List<String> joinColumn) {
-		this.joinColumn = joinColumn;
-	}
-
-	public String getFilterCondition() {
-		return filterCondition;
-	}
-
-	public void setFilterCondition(String filterCondition) {
-		this.filterCondition = filterCondition;
-	}
-
-	public String getDataType() {
-		return dataType;
-	}
-
-	public void setDataType(String dataType) {
-		this.dataType = dataType;
-	}
-
-	public List<String> getListTableName() {
-		return listTableName;
-	}
-
-	public void setListTableName(List<String> listTableName) {
-		this.listTableName = listTableName;
-	}
-
-	public List<String> getColumnNames() {
-		return columnNames;
-	}
-
-	public void setColumnNames(List<String> columnNames) {
-		this.columnNames = columnNames;
+	public void setJoinDatas(LinkedList<JoinData> joinDatas) {
+		this.joinDatas = joinDatas;
 	}
 
 	public String getDataBase() {
 		return dataBase;
 	}
 
-	public void setDataBase(String database) {
-		this.dataBase = database;
-	}
-
-	public String getTableName() {
-		return tableName;
-	}
-
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
+	public void setDataBase(String dataBase) {
+		this.dataBase = dataBase;
 	}
 
 }
