@@ -1,6 +1,6 @@
 package com.query.builder.enums;
 
-public enum JoinsTypes {
+public enum JoinTypes {
 	
 	INNERJOIN("INNER JOIN"),
 	LEFTJOIN("LEFT JOIN"),
@@ -10,7 +10,7 @@ public enum JoinsTypes {
 
 	private final String operator;
 
-	JoinsTypes(String operator) {
+	JoinTypes(String operator) {
 		this.operator = operator;
 	}
 

@@ -11,14 +11,14 @@ public interface QueryBuilderService {
 	public Map<String, Map<String, String>> getTableColumn(BuilderRequestPojo builderRequestPojo);
 
 	// This Api is filter condition of the selected columns for the tables
-	public Map<String, Object> getFilterData(BuilderRequestPojo builderRequestPojo);
+	public Map<String, Object> getFilterData(Map<String, String> query);
 
 	Map<String, String> getFilterQuery(BuilderRequestPojo builderRequestPojo);
 
 	// This Api for dynamic join query for multiple tables
-	List<Map<String, Object>> getJoinData(BuilderRequestPojo builderRequestPojo);
+	Map<String, Object> getJoinData(Map<String, String> query);
 
-	List<Map<String, Object>> getJoinQuery(BuilderRequestPojo builderRequestPojo);
+	Map<String, String> getJoinQuery(BuilderRequestPojo builderRequestPojo);
 
 
 }

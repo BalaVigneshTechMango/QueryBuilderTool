@@ -1,5 +1,6 @@
 package com.query.builder.controller;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,11 +37,11 @@ public class QueryBuilderController {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
 			String dataBase = builderRequestPojo.getDataBase();
-			if (!dataBase.isBlank()) {
+			if (!dataBase.trim().isEmpty()) {
 				Map<String, Map<String, String>> response = queryBuilderService.getTableColumn(builderRequestPojo);
-				queryResponsePojo.response("Get Column And tableName of the database", response, true);
+				queryResponsePojo.response("Entire table Details of the Database", response, true);
 			} else {
-				queryResponsePojo.response("Enter value", "is Empty", false);
+				queryResponsePojo.response("Enter DataBaseName value", "is Empty", false);
 			}
 		} catch (NullPointerException e) {
 			queryResponsePojo.response("Enter the Database", e.getMessage(), false);
@@ -54,13 +55,24 @@ public class QueryBuilderController {
 	@PostMapping("/getFilterData")
 	public QueryResponsePojo getFilterData(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		FilterData filterData = builderRequestPojo.getFilterData();
+		FilterData filterData = builderRequestPojo.getRequestData();
 		LinkedList<JoinData> joinDatas = builderRequestPojo.getJoinDatas();
 		if (filterData != null) {
-			Object response = queryBuilderService.getFilterData(builderRequestPojo);
-			queryResponsePojo.response("Selected Data", response, true);
+			Map<String, String> query = queryBuilderService.getFilterQuery(builderRequestPojo);
+			Map<String, Object> response = queryBuilderService.getFilterData(query);
+			Object value = response.get("filterResponse");
+			if (value instanceof List) {
+				List<?> listValue = (List<?>) value;
+				if (listValue.isEmpty()) {
+					queryResponsePojo.response("No data found", null, false);
+				} else {
+					queryResponsePojo.response("Selected table details", response, true);
+				}
+			}
 		} else if (joinDatas != null) {
-			List<Map<String, Object>> response = queryBuilderService.getJoinData(builderRequestPojo);
+			Map<String, String> query = queryBuilderService.getJoinQuery(builderRequestPojo);
+			Map<String, Object> response = queryBuilderService.getJoinData(query);
+
 			queryResponsePojo.response("Join Data", response, true);
 		} else {
 			queryResponsePojo.response("Field cannot be blank", null, false);
@@ -72,13 +84,13 @@ public class QueryBuilderController {
 	@PostMapping("/getFilterQuery")
 	public QueryResponsePojo getFilterQuery(@RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		FilterData filterData = builderRequestPojo.getFilterData();
+		FilterData filterData = builderRequestPojo.getRequestData();
 		LinkedList<JoinData> joinDatas = builderRequestPojo.getJoinDatas();
 		if (filterData != null) {
 			Map<String, String> response = queryBuilderService.getFilterQuery(builderRequestPojo);
 			queryResponsePojo.response("Selected Data", response, true);
 		} else if (joinDatas != null) {
-			List<Map<String, Object>> response = queryBuilderService.getJoinQuery(builderRequestPojo);
+			Map<String, String> response = queryBuilderService.getJoinQuery(builderRequestPojo);
 			queryResponsePojo.response("Join Data", response, true);
 		} else {
 			queryResponsePojo.response("Field cannot be blank", null, false);

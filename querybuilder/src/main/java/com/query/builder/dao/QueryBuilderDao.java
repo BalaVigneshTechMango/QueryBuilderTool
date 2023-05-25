@@ -12,14 +12,14 @@ public interface QueryBuilderDao {
 	public Map<String, Map<String, String>> getTableColumn(String schemaName);
 
 	// This Api for dynamic join query for multiple tables
-	public Map<String, Object> getFilterData(FilterData filterData);
+	public Map<String, Object> getFilterData(Map<String, String> query);
 	
 	public Map<String, String> getFilterQuery(FilterData filterData);
 
 	// This Api is filter condition of the selected columns for the tables
-	List<Map<String, Object>> getJoinedData(BuilderRequestPojo builderRequestPojo);
+	Map<String, Object> getJoinedData(Map<String, String> query);
 
-	public List<Map<String, Object>> getJoinQuery(BuilderRequestPojo builderRequestPojo);
+	public Map<String, String> getJoinQuery(BuilderRequestPojo builderRequestPojo);
 
 
 }

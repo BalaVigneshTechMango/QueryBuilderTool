@@ -7,16 +7,16 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-import com.query.builder.enums.JoinsTypes;
+import com.query.builder.enums.JoinTypes;
 import com.query.builder.validation.NoWhitespaceList;
 
 public class JoinData {
-	// joins
+
 	@Valid
 	private LinkedList<JoinConditionDto> joinCondition;
 
 	@Valid
-	private LinkedList<WhereGroupListDto> whereGroupList;
+	private LinkedList<WhereGroupListDto> whereData;
 
 	@NotBlank(message = "Enter the Left TableName")
 	private String lsTableName;
@@ -24,19 +24,19 @@ public class JoinData {
 	@NotBlank(message = "Enter the Right TableName")
 	private String rsTableName;
 
-	private JoinsTypes joinsTypes;
+	private JoinTypes joinType;
 
-	//@NotEmpty(message = "String list cannot be empty")
+	// @NotEmpty(message = "String list cannot be empty")
 	@Size(min = 1, message = "Minimum One column should be selected")
 	@NoWhitespaceList
 	private List<String> columnNames;
 
-	public LinkedList<WhereGroupListDto> getWhereGroupList() {
-		return whereGroupList;
+	public LinkedList<WhereGroupListDto> getWhereData() {
+		return whereData;
 	}
 
-	public void setWhereGroupList(LinkedList<WhereGroupListDto> whereGroupList) {
-		this.whereGroupList = whereGroupList;
+	public void setWhereData(LinkedList<WhereGroupListDto> whereGroupList) {
+		this.whereData = whereGroupList;
 	}
 
 	public List<String> getColumnNames() {
@@ -59,8 +59,8 @@ public class JoinData {
 		return rsTableName;
 	}
 
-	public JoinsTypes getJoinsTypes() {
-		return joinsTypes;
+	public JoinTypes getJoinType() {
+		return joinType;
 	}
 
 	public void setJoinCondition(LinkedList<JoinConditionDto> joinCondition) {
@@ -75,8 +75,8 @@ public class JoinData {
 		this.rsTableName = rsTableName;
 	}
 
-	public void setJoinsTypes(JoinsTypes joinsTypes) {
-		this.joinsTypes = joinsTypes;
+	public void setJoinType(JoinTypes joinsTypes) {
+		this.joinType = joinsTypes;
 	}
 
 }

@@ -3,12 +3,9 @@ package com.query.builder.request;
 import java.util.LinkedList;
 
 import javax.validation.Valid;
-import org.springframework.context.annotation.Configuration;
-
 import com.query.builder.dto.FilterData;
 import com.query.builder.dto.JoinData;
 
-@Configuration
 public class BuilderRequestPojo {
 
 	private String dataBase;
@@ -17,14 +14,15 @@ public class BuilderRequestPojo {
 	private LinkedList<JoinData> joinDatas;
 
 	@Valid
-	private FilterData filterData;
+	private FilterData requestData;
 
-	public FilterData getFilterData() {
-		return filterData;
+	
+	public FilterData getRequestData() {
+		return requestData;
 	}
 
-	public void setFilterData(FilterData filterData) {
-		this.filterData = filterData;
+	public void setRequestData(FilterData requestData) {
+		this.requestData = requestData;
 	}
 
 	public LinkedList<JoinData> getJoinDatas() {

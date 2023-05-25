@@ -1,6 +1,7 @@
 package com.query.builder.dao.impl;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -27,6 +28,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	public QueryBuilderDaoImpl(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
+
+	private String dataBaseName;
 
 	// 3 This method will return the column And TableName of the database
 	@Override
@@ -66,28 +69,19 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		tableNameMap.put("tableNames", tableNamesString);
 		schemaMap.put("tableName", tableNameMap);
 
+		dataBaseName = dataBase;
 		return schemaMap;
 	}
 
 	// 5. This Api is filter condition of the selected columns for the tables
-	public Map<String, Object> getFilterData(FilterData filterData) {
-		WhereClause whereClause = new WhereClause();
+	public Map<String, Object> getFilterData(Map<String, String> query) {
+
 		Map<String, Object> response = new HashMap<>();
-		List<WhereGroupListDto> whereCondition = filterData.getWhereGroupList();
-		List<String> columnNames = filterData.getColumnNames();
-		String columnName = String.join(",", columnNames);
-		String table = filterData.getTableName();
-		if (whereCondition != null) {
-			StringBuilder whereBuilder = whereClause.whereCondition(filterData);
-			String sql = "SELECT " + columnName + " From " + table + " Where " + whereBuilder;
-			List<Map<String, Object>> queryResponse = jdbcTemplate.queryForList(sql);
-			response.put("filterResponse", queryResponse);
-		} else {
-			String sql = "Select " + columnName + " From " + table;
-			List<Map<String, Object>> queryResponse = jdbcTemplate.queryForList(sql);
-			response.put("filterResponse", queryResponse);
-			
-		}
+		Collection<String> collection = query.values();
+		String delimiter = ","; // Delimiter to separate the elements
+		String sql = String.join(delimiter, collection);
+		List<Map<String, Object>> queryResponse = jdbcTemplate.queryForList(sql);
+		response.put("filterResponse", queryResponse);
 		return response;
 
 	}
@@ -96,90 +90,48 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	public Map<String, String> getFilterQuery(FilterData filterData) {
 		WhereClause whereClause = new WhereClause();
 		Map<String, String> previewQuery = new HashMap<>();// query
-		List<WhereGroupListDto> whereCla = filterData.getWhereGroupList();
+		List<WhereGroupListDto> whereCla = filterData.getWhereData();
 		List<String> columnNames = filterData.getColumnNames();
 		String columnName = String.join(",", columnNames);
 		String table = filterData.getTableName();
 		if (whereCla != null) {
 			StringBuilder whereBuilder = whereClause.whereCondition(filterData);
-			String sql = "Select " + columnName + " From " + table + " Where " + whereBuilder;
+			String sql = "Select " + columnName + " From " + dataBaseName + "." + table + " Where " + whereBuilder;
 			previewQuery.put("query", sql);
 		} else {
-			String sql = "SELECT " + columnName + " FROM " + table;
+			String sql = "SELECT " + columnName + " FROM " + dataBaseName + "." + table;
 			previewQuery.put("query", sql);
 		}
+
 		return previewQuery;
 
 	}
 
 	// 4. select * from L1 inner join R1 on ((LT1 == RT1) and (Lt2 != RT2))
 	// This Api for dynamic join query for multiple tables
-	public List<Map<String, Object>> getJoinedData(BuilderRequestPojo builderRequestPojo) {
-		LogicalCondition previousValue = null; // Variable to store the previous value of Group
-		StringBuilder queryBuilder = new StringBuilder();
-		List<JoinData> joinDatas = builderRequestPojo.getJoinDatas();
-		List<String> columnNames = joinDatas.get(0).getColumnNames();
-		queryBuilder.append("Select ");
-		for (String column : columnNames) {
-			queryBuilder.append(column).append(", ");
-		}
-		queryBuilder.setLength(queryBuilder.length() - 2);
-		for (int index = 0; index < joinDatas.size(); index++) {
-			String leftTableName = joinDatas.get(index).getLsTableName();
-			String rightTableName = joinDatas.get(index).getRsTableName();
-			String joinType = joinDatas.get(index).getJoinsTypes().getOperator();
-			int joinConditionSize = joinDatas.get(index).getJoinCondition().size();
-			for (int condition = 0; condition < joinConditionSize; condition++) {
-				LogicalCondition logicalCondition = joinDatas.get(index).getJoinCondition().get(condition)
-						.getLogicalCondition();
-				String leftJoinColumn = joinDatas.get(index).getJoinCondition().get(condition).getLsColumn();
-				String rightJoinColumn = joinDatas.get(index).getJoinCondition().get(condition).getRsColumn();
-				String conditionType = joinDatas.get(index).getJoinCondition().get(condition).getCondition()
-						.getOperator();
-				if (index == 0 && condition == 0) {
-					queryBuilder.append(" From ").append(leftTableName);
-					queryBuilder.append(" " + joinType + " ").append(rightTableName).append(" ON ")
-							.append(leftTableName).append(".").append(leftJoinColumn).append(" " + conditionType + " ")
-							.append(rightTableName).append(".").append(rightJoinColumn);
-				} else if (index > 0) {
-					queryBuilder.append(" " + joinType + " ").append(leftTableName).append(" ON ").append(leftTableName)
-							.append(".").append(leftJoinColumn).append(" " + conditionType + " ").append(rightTableName)
-							.append(".").append(rightJoinColumn);
-				} else if (condition > 0) {
-					queryBuilder.append(" " + previousValue + " ").append(leftTableName).append(".")
-							.append(leftJoinColumn).append(" " + conditionType + " ").append(rightTableName).append(".")
-							.append(rightJoinColumn);
-				}
-				previousValue = logicalCondition;
-			}
-		}
-		List<WhereGroupListDto> whereCla = joinDatas.get(0).getWhereGroupList();
-		if (whereCla != null) {
-			queryBuilder.append(" Where ");
-			WhereClause whereClause = new WhereClause();
-			StringBuilder whereBuilder = whereClause.whereConditions(builderRequestPojo, 0);
-			return jdbcTemplate.queryForList(queryBuilder.toString() + whereBuilder);
-		} else {
-			return jdbcTemplate.queryForList(queryBuilder.toString());
-		}
-
+	public Map<String, Object> getJoinedData(Map<String, String> query) {
+		Map<String, Object> response = new HashMap<>();
+		Collection<String> collection = query.values();
+		String delimiter = ","; // Delimiter to separate the elements
+		String sql = String.join(delimiter, collection);
+		List<Map<String, Object>> joinData = jdbcTemplate.queryForList(sql);
+		response.put("JoinResponse", joinData);
+		return response;
 	}
 
 	@Override
-	public List<Map<String, Object>> getJoinQuery(BuilderRequestPojo builderRequestPojo) {
+	public Map<String, String> getJoinQuery(BuilderRequestPojo builderRequestPojo) {
+		Map<String, String> response = new HashMap<>();
 		LogicalCondition previousValue = null; // Variable to store the previous value of Group
 		StringBuilder queryBuilder = new StringBuilder();
 		List<JoinData> joinDatas = builderRequestPojo.getJoinDatas();
 		List<String> columnNames = joinDatas.get(0).getColumnNames();
-		queryBuilder.append("SELECT ");
-		for (String column : columnNames) {
-			queryBuilder.append(column).append(", ");
-		}
-		queryBuilder.setLength(queryBuilder.length() - 2);
+
+		// queryBuilder.setLength(queryBuilder.length() - 2);
 		for (int index = 0; index < joinDatas.size(); index++) {
 			String leftTableName = joinDatas.get(index).getLsTableName();
 			String rightTableName = joinDatas.get(index).getRsTableName();
-			String joinType = joinDatas.get(index).getJoinsTypes().getOperator();
+			String joinType = joinDatas.get(index).getJoinType().getOperator();
 			int joinConditionSize = joinDatas.get(index).getJoinCondition().size();
 			for (int condition = 0; condition < joinConditionSize; condition++) {
 				LogicalCondition logicalCondition = joinDatas.get(index).getJoinCondition().get(condition)
@@ -205,23 +157,21 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 				previousValue = logicalCondition;
 			}
 		}
-		List<WhereGroupListDto> whereCla = joinDatas.get(0).getWhereGroupList();
+		String columnName = String.join(",", columnNames);
+
+		// String sql="Select " + columnName + " From " + dataBaseName+"."+table;
+		List<WhereGroupListDto> whereCla = joinDatas.get(0).getWhereData();
 		if (whereCla != null) {
 			queryBuilder.append(" WHERE ");
 			WhereClause whereClause = new WhereClause();
 			StringBuilder whereBuilder = whereClause.whereConditions(builderRequestPojo, 0);
-			List<Map<String, Object>> previewQuery = new ArrayList<>();// query
-			Map<String, Object> query = new HashMap<>();
-			query.put("Joindata", queryBuilder.toString() + whereBuilder);
-			previewQuery.add(query);
-			return previewQuery;
+			response.put("query", queryBuilder.toString() + whereBuilder);
+
 		} else {
-			List<Map<String, Object>> previewQuery = new ArrayList<>();// query
-			Map<String, Object> query = new HashMap<>();
-			query.put("Joindata", queryBuilder.toString());
-			previewQuery.add(query);
-			return previewQuery;
+			response.put("query", queryBuilder.toString());
+
 		}
+		return response;
 
 	}
 

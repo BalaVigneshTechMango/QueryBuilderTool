@@ -3,7 +3,13 @@ package com.query.builder.enums;
 public enum Condition {
 
 	EQUAL("="),
-    NOTEQUAL("!=");
+	NE("!="),
+	LT("<"),
+	GT(">"),
+	GTE(">="),
+	LTE("<="),
+    CONTAINS("CONTAINS"),
+    LIKE("LIKE");
 
     private final String operator;
 

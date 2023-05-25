@@ -26,28 +26,26 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 
 	// This Api is filter condition of the selected columns for the tables
 	@Override
-	public Map<String, Object> getFilterData(BuilderRequestPojo builderRequestPojo) {
-
-		FilterData filterDataPojo=builderRequestPojo.getFilterData();
-		return queryBuilderDao.getFilterData(filterDataPojo);
+	public Map<String, Object> getFilterData(Map<String, String> query) {
+		return queryBuilderDao.getFilterData(query);
 
 	}
 
 	@Override
 	public Map<String, String> getFilterQuery(BuilderRequestPojo builderRequestPojo) {
-		FilterData filterData=builderRequestPojo.getFilterData();
+		FilterData filterData=builderRequestPojo.getRequestData();
 		return queryBuilderDao.getFilterQuery(filterData);
 	}
 
 	// This Api for dynamic join query for multiple tables
 	@Override
-	public List<Map<String, Object>> getJoinData(BuilderRequestPojo builderRequestPojo) {
+	public Map<String, Object> getJoinData(Map<String, String> query) {
 
-		return queryBuilderDao.getJoinedData(builderRequestPojo);
+		return queryBuilderDao.getJoinedData(query);
 	}
 
 	@Override
-	public List<Map<String, Object>> getJoinQuery(BuilderRequestPojo builderRequestPojo) {
+	public Map<String, String> getJoinQuery(BuilderRequestPojo builderRequestPojo) {
 		return queryBuilderDao.getJoinQuery(builderRequestPojo);
 	}
 

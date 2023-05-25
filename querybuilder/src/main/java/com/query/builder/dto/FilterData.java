@@ -13,7 +13,10 @@ import com.query.builder.validation.NoWhitespaceList;
 public class FilterData {
 
 	@Valid
-	private LinkedList<WhereGroupListDto> whereGroupList;
+	private LinkedList<WhereGroupListDto> whereData;
+	
+	@Valid
+	private LinkedList<JoinData> joinDatas;
 
 	@NotBlank(message = "Enter the tableName")
 	private String tableName;
@@ -22,13 +25,25 @@ public class FilterData {
 	@Size(min = 1, message = "Minimum One column should be selected")
 	@NoWhitespaceList
 	private List<String> columnNames;
+	
+	
+	
+	
 
-	public LinkedList<WhereGroupListDto> getWhereGroupList() {
-		return whereGroupList;
+	public LinkedList<JoinData> getJoinDatas() {
+		return joinDatas;
 	}
 
-	public void setWhereGroupList(LinkedList<WhereGroupListDto> whereGroupList) {
-		this.whereGroupList = whereGroupList;
+	public void setJoinDatas(LinkedList<JoinData> joinDatas) {
+		this.joinDatas = joinDatas;
+	}
+
+	public LinkedList<WhereGroupListDto> getWhereData() {
+		return whereData;
+	}
+
+	public void setWhereData(LinkedList<WhereGroupListDto> whereData) {
+		this.whereData = whereData;
 	}
 
 	public String getTableName() {
