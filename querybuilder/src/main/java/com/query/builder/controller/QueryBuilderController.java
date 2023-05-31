@@ -1,6 +1,5 @@
 package com.query.builder.controller;
 
-import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -36,66 +35,94 @@ public class QueryBuilderController {
 	public QueryResponsePojo getTableColumn(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
-			String dataBase = builderRequestPojo.getDataBase();
-			if (!dataBase.trim().isEmpty()) {
-				Map<String, Map<String, String>> response = queryBuilderService.getTableColumn(builderRequestPojo);
-				queryResponsePojo.response("Entire table Details of the Database", response, true);
+			String schemaName = builderRequestPojo.getSchemaName();
+			if (schemaName.trim().isEmpty()) {
+				queryResponsePojo.response("Enter the SchemaName", "Empty Schema", false);
 			} else {
-				queryResponsePojo.response("Enter DataBaseName value", "is Empty", false);
+				Boolean schemaExist = queryBuilderService.schemaExists(schemaName);
+				if (Boolean.TRUE.equals(schemaExist)) {
+					Map<String, Map<String, String>> response = queryBuilderService.getTableColumn(builderRequestPojo);
+					Map<String, String> tableNameMap = response.get("tableName");
+					String tableNamesValue = tableNameMap.get("tableNames");
+					if (!tableNamesValue.isBlank()) {
+						queryResponsePojo.response("Table Details of the Schema", response, true);
+					} else {
+						queryResponsePojo.response("No table in this Schema", "No table", false);
+					}
+				} else {
+					queryResponsePojo.response("Enter SchemaName Properly ", "No Schema Found", false);
+				}
 			}
-		} catch (NullPointerException e) {
-			queryResponsePojo.response("Enter the Database", e.getMessage(), false);
+		} catch (Exception e) {
+			queryResponsePojo.response("Bad Requests", e.getMessage(), false);
 		}
 		return queryResponsePojo;
 	}
 
 	/**
-	 * .This Api is filter condition of the selected columns for the tables
+	 * This Api is to get the query for filterQuery api and get executed based on
+	 * the request.
 	 */
 	@PostMapping("/getFilterData")
 	public QueryResponsePojo getFilterData(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		FilterData filterData = builderRequestPojo.getRequestData();
-		LinkedList<JoinData> joinDatas = builderRequestPojo.getJoinDatas();
-		if (filterData != null) {
-			Map<String, String> query = queryBuilderService.getFilterQuery(builderRequestPojo);
-			Map<String, Object> response = queryBuilderService.getFilterData(query);
-			Object value = response.get("filterResponse");
-			if (value instanceof List) {
-				List<?> listValue = (List<?>) value;
-				if (listValue.isEmpty()) {
+		try {
+			FilterData filterData = builderRequestPojo.getRequestData();
+			LinkedList<JoinData> joinDatas = builderRequestPojo.getJoinDatas();
+			if (filterData != null) {
+				Map<String, String> query = queryBuilderService.getFilterQuery(builderRequestPojo);
+				Map<String, Object> response = queryBuilderService.getFilterData(query);
+				Object data = response.get("filterResponse");
+				String responseData = data.toString();
+				if (responseData.isBlank()) {
 					queryResponsePojo.response("No data found", null, false);
 				} else {
 					queryResponsePojo.response("Selected table details", response, true);
 				}
+			} else if (joinDatas != null) {
+				Map<String, String> query = queryBuilderService.getJoinQuery(builderRequestPojo);
+				Map<String, Object> response = queryBuilderService.getJoinData(query);
+				queryResponsePojo.response("Join Data", response, true);
+			} else {
+				queryResponsePojo.response("Field cannot be blank", "Bad Request", false);
 			}
-		} else if (joinDatas != null) {
-			Map<String, String> query = queryBuilderService.getJoinQuery(builderRequestPojo);
-			Map<String, Object> response = queryBuilderService.getJoinData(query);
-
-			queryResponsePojo.response("Join Data", response, true);
-		} else {
-			queryResponsePojo.response("Field cannot be blank", null, false);
+		} catch (Exception e) {
+			queryResponsePojo.response("Bad Request", e.getMessage(), false);
 		}
 		return queryResponsePojo;
-
 	}
 
+	/**
+	 * This api will get the query for the join or select query with and without
+	 * where clause
+	 */
 	@PostMapping("/getFilterQuery")
-	public QueryResponsePojo getFilterQuery(@RequestBody BuilderRequestPojo builderRequestPojo) {
+	public QueryResponsePojo getFilterQuery(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		FilterData filterData = builderRequestPojo.getRequestData();
-		LinkedList<JoinData> joinDatas = builderRequestPojo.getJoinDatas();
-		if (filterData != null) {
-			Map<String, String> response = queryBuilderService.getFilterQuery(builderRequestPojo);
-			queryResponsePojo.response("Selected Data", response, true);
-		} else if (joinDatas != null) {
-			Map<String, String> response = queryBuilderService.getJoinQuery(builderRequestPojo);
-			queryResponsePojo.response("Join Data", response, true);
-		} else {
-			queryResponsePojo.response("Field cannot be blank", null, false);
+		try {
+			FilterData filterData = builderRequestPojo.getRequestData();
+			LinkedList<JoinData> joinDatas = builderRequestPojo.getJoinDatas();
+			String schemaName = builderRequestPojo.getRequestData().getSchemaName();
+			Boolean schemaExist = queryBuilderService.schemaExists(schemaName);
+			if (Boolean.TRUE.equals(schemaExist)) {
+				if (filterData != null) {
+					Map<String, String> response = queryBuilderService.getFilterQuery(builderRequestPojo);
+					queryResponsePojo.response("Selected Data", response, true);
+				} else if (joinDatas != null) {
+					Map<String, String> response = queryBuilderService.getJoinQuery(builderRequestPojo);
+					queryResponsePojo.response("Join Data", response, true);
+				} else {
+					queryResponsePojo.response("Field cannot be blank", null, false);
+				}
+			} else if (schemaName.trim().isEmpty()) {
+				queryResponsePojo.response("Enter SchemaName Name ", "Enter validate Schema", false);
+			} else {
+				queryResponsePojo.response("Enter SchemaName Properly ", "No Schema Found", false);
+			}
+		} catch (Exception e) {
+			queryResponsePojo.response("Bad Request", e.getMessage(), false);
 		}
 		return queryResponsePojo;
-	}
 
+	}
 }

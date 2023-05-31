@@ -26,6 +26,7 @@ public class ExpectionValidation {
 		});
 		responsePojo.setMessage("Not Valid Request");
 		responsePojo.setResponseData(errors);
+		responsePojo.setIsSuccess(false);
 		return responsePojo;
 	}
 }

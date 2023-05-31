@@ -14,21 +14,37 @@ public class FilterData {
 
 	@Valid
 	private LinkedList<WhereGroupListDto> whereData;
-	
+
 	@Valid
 	private LinkedList<JoinData> joinDatas;
 
 	@NotBlank(message = "Enter the tableName")
 	private String tableName;
+	@NotBlank(message = "Enter the SchemaName")
+	private String schemaName;
+
+	private String dataBase;
 
 	@NotEmpty(message = "String list cannot be empty")
 	@Size(min = 1, message = "Minimum One column should be selected")
 	@NoWhitespaceList
 	private List<String> columnNames;
-	
-	
-	
-	
+
+	public String getDataBase() {
+		return dataBase;
+	}
+
+	public void setDataBase(String dataBase) {
+		this.dataBase = dataBase;
+	}
+
+	public String getSchemaName() {
+		return schemaName;
+	}
+
+	public void setSchemaName(String schemaName) {
+		this.schemaName = schemaName;
+	}
 
 	public LinkedList<JoinData> getJoinDatas() {
 		return joinDatas;

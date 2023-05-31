@@ -1,7 +1,7 @@
 package com.query.builder.dao;
 
-import java.util.List;
 import java.util.Map;
+
 
 import com.query.builder.dto.FilterData;
 import com.query.builder.request.BuilderRequestPojo;
@@ -20,6 +20,10 @@ public interface QueryBuilderDao {
 	Map<String, Object> getJoinedData(Map<String, String> query);
 
 	public Map<String, String> getJoinQuery(BuilderRequestPojo builderRequestPojo);
+
+	Map<String, Map<String, String>> dataTypeColumn(String tableName, String schemaName);
+
+	boolean schemaExists(String schemaName);
 
 
 }

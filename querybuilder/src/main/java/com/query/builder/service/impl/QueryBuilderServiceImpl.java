@@ -1,6 +1,5 @@
 package com.query.builder.service.impl;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,8 +19,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	// 3 This method will return the column And TableName of the database
 	@Override
 	public Map<String, Map<String, String>> getTableColumn(BuilderRequestPojo builderRequestPojo) {
-		String dataBase = builderRequestPojo.getDataBase();
-		return queryBuilderDao.getTableColumn(dataBase);
+		String schemaName = builderRequestPojo.getSchemaName();
+		return queryBuilderDao.getTableColumn(schemaName);
 	}
 
 	// This Api is filter condition of the selected columns for the tables
@@ -47,6 +46,12 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public Map<String, String> getJoinQuery(BuilderRequestPojo builderRequestPojo) {
 		return queryBuilderDao.getJoinQuery(builderRequestPojo);
+	}
+
+	@Override
+	public Boolean schemaExists(String schemaName) {
+		
+		return queryBuilderDao.schemaExists(schemaName);
 	}
 
 }

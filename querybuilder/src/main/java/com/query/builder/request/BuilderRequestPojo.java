@@ -8,7 +8,12 @@ import com.query.builder.dto.JoinData;
 
 public class BuilderRequestPojo {
 
+	private String schemaName;
+	
 	private String dataBase;
+	
+	//temp
+	private String tableName;
 
 	@Valid
 	private LinkedList<JoinData> joinDatas;
@@ -17,6 +22,14 @@ public class BuilderRequestPojo {
 	private FilterData requestData;
 
 	
+	public String getDataBase() {
+		return dataBase;
+	}
+
+	public void setDataBase(String dataBase) {
+		this.dataBase = dataBase;
+	}
+
 	public FilterData getRequestData() {
 		return requestData;
 	}
@@ -33,12 +46,22 @@ public class BuilderRequestPojo {
 		this.joinDatas = joinDatas;
 	}
 
-	public String getDataBase() {
-		return dataBase;
+
+
+	public String getSchemaName() {
+		return schemaName;
 	}
 
-	public void setDataBase(String dataBase) {
-		this.dataBase = dataBase;
+	public void setSchemaName(String schemaName) {
+		this.schemaName = schemaName;
+	}
+
+	public String getTableName() {
+		return tableName;
+	}
+
+	public void setTableName(String tableName) {
+		this.tableName = tableName;
 	}
 
 }

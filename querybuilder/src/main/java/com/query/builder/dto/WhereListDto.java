@@ -1,17 +1,21 @@
 package com.query.builder.dto;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.query.builder.enums.Condition;
 import com.query.builder.enums.LogicalCondition;
+import com.query.builder.validation.EnumValue;
 import com.query.builder.validation.ObjectNoWhiteSpace;
 
 public class WhereListDto {
 
 	@NotBlank(message = "Enter column")
 	private String column;
+
 	@NotNull(message = "Enter the Condition")
+	@EnumValue
 	private Condition condition;
 
 	@ObjectNoWhiteSpace

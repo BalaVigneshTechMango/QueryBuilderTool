@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.query.builder</groupId>
 	<artifactId>querybuilder</artifactId>
-		<version>1.2.1-SNAPSHOT</version>
+		<version>1.3.1-SNAPSHOT</version>
 	<name>querybuilder</name>
 	<description>QueryBuilder</description>
 	<properties>
@@ -23,6 +23,11 @@
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/org.gcube.informationsystem/is-collector-stubs -->
 
+ <dependency>
+        <groupId>com.google.code.gson</groupId>
+        <artifactId>gson</artifactId>
+        <version>2.8.9</version>
+    </dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
