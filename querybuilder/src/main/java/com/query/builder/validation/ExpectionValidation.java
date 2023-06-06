@@ -19,7 +19,7 @@ public class ExpectionValidation {
 	public QueryResponsePojo handleValidationExceptions(MethodArgumentNotValidException ex) {
 		QueryResponsePojo responsePojo = new QueryResponsePojo();
 		Map<String, String> errors = new HashMap<>();
-		ex.getBindingResult().getAllErrors().forEach((error) -> {
+		ex.getBindingResult().getAllErrors().forEach(error -> {
 			String fieldName = ((FieldError) error).getField();
 			String message = error.getDefaultMessage();
 			errors.put(fieldName, message);

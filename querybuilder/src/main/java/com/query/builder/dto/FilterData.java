@@ -1,6 +1,5 @@
 package com.query.builder.dto;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -13,29 +12,28 @@ import com.query.builder.validation.NoWhitespaceList;
 public class FilterData {
 
 	@Valid
-	private LinkedList<WhereGroupListDto> whereData;
-
-	@Valid
-	private LinkedList<JoinData> joinDatas;
+	private List<WhereGroupListDto> whereData;
 
 	@NotBlank(message = "Enter the tableName")
 	private String tableName;
 	@NotBlank(message = "Enter the SchemaName")
 	private String schemaName;
 
-	private String dataBase;
+	@NotBlank(message = "Enter Schema Name")
+	private String database;
 
 	@NotEmpty(message = "String list cannot be empty")
 	@Size(min = 1, message = "Minimum One column should be selected")
 	@NoWhitespaceList
 	private List<String> columnNames;
 
-	public String getDataBase() {
-		return dataBase;
+	
+	public String getDatabase() {
+		return database;
 	}
 
-	public void setDataBase(String dataBase) {
-		this.dataBase = dataBase;
+	public void setDatabase(String database) {
+		this.database = database;
 	}
 
 	public String getSchemaName() {
@@ -46,19 +44,14 @@ public class FilterData {
 		this.schemaName = schemaName;
 	}
 
-	public LinkedList<JoinData> getJoinDatas() {
-		return joinDatas;
-	}
 
-	public void setJoinDatas(LinkedList<JoinData> joinDatas) {
-		this.joinDatas = joinDatas;
-	}
 
-	public LinkedList<WhereGroupListDto> getWhereData() {
+
+	public List<WhereGroupListDto> getWhereData() {
 		return whereData;
 	}
 
-	public void setWhereData(LinkedList<WhereGroupListDto> whereData) {
+	public void setWhereData(List<WhereGroupListDto> whereData) {
 		this.whereData = whereData;
 	}
 

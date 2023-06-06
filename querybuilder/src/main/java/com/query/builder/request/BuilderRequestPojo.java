@@ -1,34 +1,20 @@
 package com.query.builder.request;
 
-import java.util.LinkedList;
 
 import javax.validation.Valid;
+
 import com.query.builder.dto.FilterData;
-import com.query.builder.dto.JoinData;
 
 public class BuilderRequestPojo {
 
-	private String schemaName;
-	
-	private String dataBase;
-	
-	//temp
-	private String tableName;
 
-	@Valid
-	private LinkedList<JoinData> joinDatas;
+	private String schemaName;
+
+	private String database;
 
 	@Valid
 	private FilterData requestData;
 
-	
-	public String getDataBase() {
-		return dataBase;
-	}
-
-	public void setDataBase(String dataBase) {
-		this.dataBase = dataBase;
-	}
 
 	public FilterData getRequestData() {
 		return requestData;
@@ -38,16 +24,6 @@ public class BuilderRequestPojo {
 		this.requestData = requestData;
 	}
 
-	public LinkedList<JoinData> getJoinDatas() {
-		return joinDatas;
-	}
-
-	public void setJoinDatas(LinkedList<JoinData> joinDatas) {
-		this.joinDatas = joinDatas;
-	}
-
-
-
 	public String getSchemaName() {
 		return schemaName;
 	}
@@ -56,12 +32,12 @@ public class BuilderRequestPojo {
 		this.schemaName = schemaName;
 	}
 
-	public String getTableName() {
-		return tableName;
+	public String getDatabase() {
+		return database;
 	}
 
-	public void setTableName(String tableName) {
-		this.tableName = tableName;
+	public void setDatabase(String database) {
+		this.database = database;
 	}
 
 }

@@ -2,7 +2,9 @@ package com.query.builder.service;
 
 import java.util.Map;
 
+import com.query.builder.dto.FilterData;
 import com.query.builder.request.BuilderRequestPojo;
+import com.query.builder.response.QueryResponsePojo;
 
 public interface QueryBuilderService {
 
@@ -10,16 +12,12 @@ public interface QueryBuilderService {
 	public Map<String, Map<String, String>> getTableColumn(BuilderRequestPojo builderRequestPojo);
 
 	// This is filter condition of the selected columns for the tables
-	public Map<String, Object> getFilterData(Map<String, String> query);
-    // 
-	Map<String, String> getFilterQuery(BuilderRequestPojo builderRequestPojo);
+	public Map<String, Object> getQueryExecution(Map<String, String> query);
 
-	// This Api for dynamic join query for multiple tables
-	Map<String, Object> getJoinData(Map<String, String> query);
+	Map<String, String> getQueryBuild(BuilderRequestPojo builderRequestPojo);
 
-	Map<String, String> getJoinQuery(BuilderRequestPojo builderRequestPojo);
+	public QueryResponsePojo schemaCheck(String schemaName,String database);
 
-	public Boolean schemaExists(String schemaName);
-
+	QueryResponsePojo schemaTableColumn(FilterData filterData);
 
 }

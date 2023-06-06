@@ -3,8 +3,6 @@ package com.query.builder.dto;
 import java.util.List;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 import com.query.builder.enums.LogicalCondition;
 
 public class WhereGroupListDto {
