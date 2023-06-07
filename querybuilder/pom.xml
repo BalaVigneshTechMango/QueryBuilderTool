@@ -9,8 +9,7 @@
 	<version>2.7.10</version>
 	<relativePath/> <!-- lookup parent from repository -->
 </parent>
-
-<groupId>com.tm.queryBuilder</groupId>
+<groupId>com.tm.querybuilder</groupId>
      <artifactId>querybuilder</artifactId>
 	 <version>1.3.2-SNAPSHOT</version>
      <name>querybuilder</name>
