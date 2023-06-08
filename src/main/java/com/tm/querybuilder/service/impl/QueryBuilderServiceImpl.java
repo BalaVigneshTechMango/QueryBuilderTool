@@ -24,14 +24,14 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	// table and columm by using schema name get the details with dao layer.
 	@Override
 	public Map<String, Map<String, String>> getTableColumn(BuilderRequestPojo builderRequestPojo) {
-		String schemaName = builderRequestPojo.getSchemaName();
-		return queryBuilderDao.getTableColumn(schemaName);
+		String schemaString = builderRequestPojo.getSchemaName();
+		return queryBuilderDao.getTableColumn(schemaString);
 	}
 
 	// This Api is filter condition of the selected columns for the tables
 	@Override
-	public Map<String, Object> getQueryExecution(Map<String, String> query) {
-		return queryBuilderDao.getQueryExecution(query);
+	public Map<String, Object> getQueryExecution(Map<String, String> queryMap) {
+		return queryBuilderDao.getQueryExecution(queryMap);
 
 	}
 
@@ -41,33 +41,33 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	public Map<String, String> getQueryBuild(BuilderRequestPojo builderRequestPojo) {
 
 		FilterData filterData = builderRequestPojo.getRequestData();
-		String schemaName = filterData.getSchemaName();
-		Map<String, String> previewQuery = new HashMap<>();
-		String columnName = String.join(",", filterData.getColumnNames());
-		String table = filterData.getTableName();
+		String schemaString = filterData.getSchemaName();
+		Map<String, String> previewQueryMap = new HashMap<>();
+		String columnString = String.join(",", filterData.getColumnName());
+		String tableString = filterData.getTableName();
 		// select query with where clause of single table
 		if (filterData.getWhereData() != null) {
 			StringBuilder whereBuilder = queryBuilderDao.whereCondition(filterData);
-			String sql = "Select " + columnName + " From " + schemaName + "." + table + " Where " + whereBuilder;
-			previewQuery.put(QUERY, sql);
+			String sqlString = "Select " + columnString + " From " + schemaString + "." + tableString + " Where " + whereBuilder;
+			previewQueryMap.put(QUERY, sqlString);
 		} else {
 			// select query without where clause of single table
-			String sql = "SELECT " + columnName + " FROM " + schemaName + "." + table;
-			previewQuery.put(QUERY, sql);
+			String sqlString = "SELECT " + columnString + " FROM " + schemaString + "." + tableString;
+			previewQueryMap.put(QUERY, sqlString);
 		}
-		return previewQuery;
+		return previewQueryMap;
 
 	}
 
 	// This method will check the data base name and table exist in dao.
 	@Override
-	public QueryResponsePojo schemaCheck(String schemaName, String database) {
+	public QueryResponsePojo schemaCheck(String schemaNameString, String databaseString) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 
-		if (!schemaName.trim().isEmpty() && !database.trim().isEmpty()) {
-			Boolean schemaExist = queryBuilderDao.schemaExists(schemaName);
-			if (Boolean.TRUE.equals(schemaExist)) {
-				queryBuilderDao.checkTablesExistInSchema(schemaName);
+		if (!schemaNameString.trim().isEmpty() && !databaseString.trim().isEmpty()) {
+			Boolean schemaExistBoolean = queryBuilderDao.schemaExists(schemaNameString);
+			if (Boolean.TRUE.equals(schemaExistBoolean)) {
+				queryBuilderDao.checkTablesExistInSchema(schemaNameString);
 				queryResponsePojo.setIsSuccess(true);
 			} else {
 				queryResponsePojo.setIsSuccess(false);
@@ -84,11 +84,11 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public QueryResponsePojo schemaTableColumn(FilterData filterData) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		String schemaName = filterData.getSchemaName();
-		if (!schemaName.trim().isEmpty() && Boolean.TRUE.equals(queryBuilderDao.schemaExists(schemaName))) {
-			if (Boolean.TRUE.equals(queryBuilderDao.validateTableExists(filterData.getTableName(), schemaName))) {
-				if (queryBuilderDao.validateColumnsExist(filterData.getColumnNames(), filterData.getTableName(),
-						schemaName)) {
+		String schemaString = filterData.getSchemaName();
+		if (!schemaString.trim().isEmpty() && Boolean.TRUE.equals(queryBuilderDao.schemaExists(schemaString))) {
+			if (Boolean.TRUE.equals(queryBuilderDao.validateTableExists(filterData.getTableName(), schemaString))) {
+				if (queryBuilderDao.validateColumnsExist(filterData.getColumnName(), filterData.getTableName(),
+						schemaString)) {
 					queryResponsePojo.setIsSuccess(true);
 				} else {
 					queryResponsePojo.setIsSuccess(false);

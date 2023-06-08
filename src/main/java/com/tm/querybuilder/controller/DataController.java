@@ -37,24 +37,25 @@ public class DataController {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
 			FilterData filterData = builderRequestPojo.getRequestData();
-			QueryResponsePojo queryResponseValid = queryBuilderService.schemaTableColumn(filterData);
-			if (Boolean.TRUE.equals(queryResponseValid.getIsSuccess())) {
-				Map<String, String> query = queryBuilderService.getQueryBuild(builderRequestPojo);
-				Map<String, Object> response = queryBuilderService.getQueryExecution(query);
-				Object data = response.get("filterResponse");
-				if (data.toString().trim().equals("[]")) {
+			QueryResponsePojo responseValidPojo = queryBuilderService.schemaTableColumn(filterData);
+			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
+				Map<String, String> queryMap = queryBuilderService.getQueryBuild(builderRequestPojo);
+				Map<String, Object> responseMap = queryBuilderService.getQueryExecution(queryMap);
+				Object dataObject = responseMap.get("filterResponse");
+				if (dataObject.toString().trim().equals("[]")) {
 					queryResponsePojo.response("No data found", null, false);
 				} else {
-					queryResponsePojo.response("Selected table details", response, true);
+					queryResponsePojo.response("Selected table details", responseMap, true);
 				}
 			} else {
-				queryResponsePojo.response(queryResponseValid.getMessage(), null, queryResponseValid.getIsSuccess());
+				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
 			}
-		} catch (Exception e) {
-			queryResponsePojo.response("Bad Request", e.getMessage(), false);
+		} catch (Exception exception) {
+			queryResponsePojo.response("Bad Request", exception.getMessage(), false);
 		}
 		return queryResponsePojo;
 	}
+
 
 	
 }

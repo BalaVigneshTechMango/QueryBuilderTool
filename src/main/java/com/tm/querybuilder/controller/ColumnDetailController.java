@@ -30,17 +30,17 @@ public class ColumnDetailController {
 	public QueryResponsePojo getTableColumn(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
-			String schemaName = builderRequestPojo.getSchemaName();
-			String database = builderRequestPojo.getDatabase();
-			QueryResponsePojo queryResponseValid = queryBuilderService.schemaCheck(schemaName, database);
-			if (Boolean.TRUE.equals(queryResponseValid.getIsSuccess())) {
-				Map<String, Map<String, String>> response = queryBuilderService.getTableColumn(builderRequestPojo);
-				queryResponsePojo.response("Table Details of the Schema", response, true);
+			String schemaString = builderRequestPojo.getSchemaName();
+			String databaseString = builderRequestPojo.getDatabase();
+			QueryResponsePojo responseValidPojo = queryBuilderService.schemaCheck(schemaString, databaseString);
+			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
+				Map<String, Map<String, String>> responseMap = queryBuilderService.getTableColumn(builderRequestPojo);
+				queryResponsePojo.response("Table Details of the Schema", responseMap, true);
 			} else {
-				queryResponsePojo.response(queryResponseValid.getMessage(), null, queryResponseValid.getIsSuccess());
+				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
 			}
-		} catch (Exception e) {
-			queryResponsePojo.response("Bad Requests", e.getMessage(), false);
+		} catch (Exception exception) {
+			queryResponsePojo.response("Bad Requests", exception.getMessage(), false);
 		}
 		return queryResponsePojo;
 	}

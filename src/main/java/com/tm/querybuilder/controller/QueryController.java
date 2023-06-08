@@ -35,17 +35,18 @@ public class QueryController {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
 			FilterData filterData = builderRequestPojo.getRequestData();
-			QueryResponsePojo queryResponseValid = queryBuilderService.schemaTableColumn(filterData);
-			if (Boolean.TRUE.equals(queryResponseValid.getIsSuccess())) {
-				Map<String, String> response = queryBuilderService.getQueryBuild(builderRequestPojo);
-				queryResponsePojo.response("Selected Data", response, true);
+			QueryResponsePojo responseValidPojo = queryBuilderService.schemaTableColumn(filterData);
+			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
+				Map<String, String> responseMap = queryBuilderService.getQueryBuild(builderRequestPojo);
+				queryResponsePojo.response("Selected Data", responseMap, true);
 			} else {
-				queryResponsePojo.response(queryResponseValid.getMessage(), null, queryResponseValid.getIsSuccess());
+				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
 			}
-		} catch (Exception e) {
-			queryResponsePojo.response("Bad Request", e.getMessage(), false);
+		} catch (Exception exception) {
+			queryResponsePojo.response("Bad Request", exception.getMessage(), false);
 		}
 		return queryResponsePojo;
 	}
+
 
 }
