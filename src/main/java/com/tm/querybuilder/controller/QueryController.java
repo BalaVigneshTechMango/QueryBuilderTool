@@ -1,7 +1,5 @@
 package com.tm.querybuilder.controller;
 
-import java.util.Map;
-
 import javax.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.request.BuilderRequestPojo;
 import com.tm.querybuilder.response.QueryResponsePojo;
 import com.tm.querybuilder.service.QueryBuilderService;
@@ -24,7 +21,6 @@ public class QueryController {
 	@Autowired
 	private QueryBuilderService queryBuilderService;
 
-
 	/**
 	 * Before Buildling query In this API it will validate the schema exist for the
 	 * schema the table and its column should be match the it allow to build query
@@ -34,11 +30,11 @@ public class QueryController {
 	public QueryResponsePojo getQueryBuild(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
-			FilterData filterData = builderRequestPojo.getRequestData();
-			QueryResponsePojo responseValidPojo = queryBuilderService.schemaTableColumn(filterData);
+			QueryResponsePojo responseValidPojo = queryBuilderService
+					.schemaTableColumn(builderRequestPojo.getRequestData());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
-				Map<String, String> responseMap = queryBuilderService.getQueryBuild(builderRequestPojo);
-				queryResponsePojo.response("Selected Data", responseMap, true);
+				queryResponsePojo.response("Selected Data", queryBuilderService.getQueryBuild(builderRequestPojo),
+						true);
 			} else {
 				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
 			}
@@ -47,6 +43,5 @@ public class QueryController {
 		}
 		return queryResponsePojo;
 	}
-
 
 }

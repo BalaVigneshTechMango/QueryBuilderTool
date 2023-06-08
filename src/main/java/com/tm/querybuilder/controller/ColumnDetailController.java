@@ -1,6 +1,5 @@
 package com.tm.querybuilder.controller;
 
-import java.util.Map;
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -30,12 +29,11 @@ public class ColumnDetailController {
 	public QueryResponsePojo getTableColumn(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
-			String schemaString = builderRequestPojo.getSchemaName();
-			String databaseString = builderRequestPojo.getDatabase();
-			QueryResponsePojo responseValidPojo = queryBuilderService.schemaCheck(schemaString, databaseString);
+			QueryResponsePojo responseValidPojo = queryBuilderService.schemaCheck(builderRequestPojo.getSchemaName(),
+					builderRequestPojo.getDatabase());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
-				Map<String, Map<String, String>> responseMap = queryBuilderService.getTableColumn(builderRequestPojo);
-				queryResponsePojo.response("Table Details of the Schema", responseMap, true);
+				queryResponsePojo.response("Table Details of the Schema",
+						queryBuilderService.getTableColumn(builderRequestPojo), true);
 			} else {
 				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
 			}

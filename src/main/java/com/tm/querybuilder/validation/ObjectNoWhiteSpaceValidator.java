@@ -15,7 +15,6 @@ public class ObjectNoWhiteSpaceValidator implements ConstraintValidator<ObjectNo
 			return true; // Null values are considered valid
 		}
 
-		String stringValue = value.toString();
-		return stringValue.trim().length() > 0; // Validate white space
+		return value.toString().trim().length() > 0; // Validate white space
 	}
 }

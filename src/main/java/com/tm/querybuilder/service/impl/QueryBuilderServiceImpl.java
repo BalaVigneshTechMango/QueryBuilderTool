@@ -24,8 +24,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	// table and columm by using schema name get the details with dao layer.
 	@Override
 	public Map<String, Map<String, String>> getTableColumn(BuilderRequestPojo builderRequestPojo) {
-		String schemaString = builderRequestPojo.getSchemaName();
-		return queryBuilderDao.getTableColumn(schemaString);
+		return queryBuilderDao.getTableColumn(builderRequestPojo.getSchemaName());
 	}
 
 	// This Api is filter condition of the selected columns for the tables
@@ -47,8 +46,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		String tableString = filterData.getTableName();
 		// select query with where clause of single table
 		if (filterData.getWhereData() != null) {
-			StringBuilder whereBuilder = queryBuilderDao.whereCondition(filterData);
-			String sqlString = "Select " + columnString + " From " + schemaString + "." + tableString + " Where " + whereBuilder;
+			String sqlString = "Select " + columnString + " From " + schemaString + "." + tableString + " Where "
+					+ queryBuilderDao.whereCondition(filterData);
 			previewQueryMap.put(QUERY, sqlString);
 		} else {
 			// select query without where clause of single table
@@ -63,7 +62,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public QueryResponsePojo schemaCheck(String schemaNameString, String databaseString) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-
 		if (!schemaNameString.trim().isEmpty() && !databaseString.trim().isEmpty()) {
 			Boolean schemaExistBoolean = queryBuilderDao.schemaExists(schemaNameString);
 			if (Boolean.TRUE.equals(schemaExistBoolean)) {

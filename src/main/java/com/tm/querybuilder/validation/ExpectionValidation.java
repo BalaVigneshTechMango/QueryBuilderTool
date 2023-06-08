@@ -20,9 +20,7 @@ public class ExpectionValidation {
 		QueryResponsePojo responsePojo = new QueryResponsePojo();
 		Map<String, String> errors = new HashMap<>();
 		ex.getBindingResult().getAllErrors().forEach(error -> {
-			String fieldName = ((FieldError) error).getField();
-			String message = error.getDefaultMessage();
-			errors.put(fieldName, message);
+			errors.put(((FieldError) error).getField(), error.getDefaultMessage());
 		});
 		responsePojo.setMessage("Not Valid Request");
 		responsePojo.setResponseData(errors);

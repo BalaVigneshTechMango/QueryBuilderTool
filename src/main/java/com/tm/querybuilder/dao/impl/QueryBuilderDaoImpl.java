@@ -2,7 +2,6 @@ package com.tm.querybuilder.dao.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -56,7 +55,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 		// Build a query and store in string.
 		String sqlString = "SELECT EXISTS (" + "   SELECT 1" + "    FROM information_schema.tables"
-				+ "    WHERE table_schema = ?" + ")";
+				+ "WHERE table_schema = :schemaName )";
+		paramsObj.addValue(SCHEMA_NAME, schemaString);
 		return namedParameterJdbcTemplate.queryForObject(sqlString, paramsObj, Boolean.class);
 
 	}
@@ -78,7 +78,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	@Override
 	public boolean validateColumnsExist(List<String> columnsList, String tableString, String schemaString) {
 		// Build a query and store in string.
-		String queryString= "SELECT COUNT(*) FROM information_schema.columns WHERE column_name IN (:columns) AND table_name = :tableName AND table_schema = :schemaName";
+		String queryString = "SELECT COUNT(*) FROM information_schema.columns WHERE column_name IN (:columns) AND table_name = :tableName AND table_schema = :schemaName";
 		MapSqlParameterSource parametersObj = new MapSqlParameterSource();
 		parametersObj.addValue("columns", columnsList);
 		parametersObj.addValue(TABLE_NAME, tableString);
@@ -123,9 +123,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		}
 		// Add the table names to the schema map as a separate entry for easy access
 
-		String tableNamesString = String.join(",", tableList);
 		Map<String, String> tableNameMap = new LinkedHashMap<>();
-		tableNameMap.put("tableNames", tableNamesString);
+		tableNameMap.put("tableNames", String.join(",", tableList));
 		schemaMap.put(TABLE_NAME, tableNameMap);
 
 		return schemaMap;
@@ -135,9 +134,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	@Override
 	public Map<String, Object> getQueryExecution(Map<String, String> queryMap) {
 		Map<String, Object> responseMap = new HashMap<>();
-		Collection<String> collection = queryMap.values();
-		String delimiter = ","; // Delimiter to separate the elements
-		String sqlString = String.join(delimiter, collection);
+		String sqlString = String.join(",", queryMap.values());
 		List<Map<String, Object>> queryResponseMap = jdbcTemplate.queryForList(sqlString);
 		responseMap.put("filterResponse", queryResponseMap);
 		return responseMap;
@@ -148,22 +145,20 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	@Override
 	public Map<String, Map<String, String>> getDataType(FilterData filterData) {
 		MapSqlParameterSource paramsObj = new MapSqlParameterSource();
-		String schemaString = filterData.getSchemaName();
 		String tableString = filterData.getTableName();
 		Map<String, Map<String, String>> schemaMap = new LinkedHashMap<>();
 		List<String> columnsList = new ArrayList<>();
 		List<WhereGroupListDto> whereClauseList = filterData.getWhereData();
 		for (int whereGroup = 0; whereGroup < whereClauseList.size(); whereGroup++) {
-			List<WhereListDto> whereGroupList = filterData.getWhereData().get(whereGroup).getWhereList();
-			for (int whereList = 0; whereList < whereGroupList.size(); whereList++) {
-				String columnString = whereClauseList.get(whereGroup).getWhereList().get(whereList).getColumn();
-				columnsList.add(columnString);
+			for (int whereList = 0; whereList < filterData.getWhereData().get(whereGroup).getWhereList()
+					.size(); whereList++) {
+				columnsList.add(whereClauseList.get(whereGroup).getWhereList().get(whereList).getColumn());
 			}
 		}
 		// Build a query and store in string
 		String sqlString = "SELECT column_name, data_type " + "FROM information_schema.columns "
 				+ "WHERE table_schema = :schemaName AND table_name = :tableName AND column_name IN (:column)";
-		paramsObj.addValue(SCHEMA_NAME, schemaString);
+		paramsObj.addValue(SCHEMA_NAME, filterData.getSchemaName());
 		paramsObj.addValue(TABLE_NAME, tableString);
 		paramsObj.addValue("column", columnsList);
 		SqlRowSet rowSet = namedParameterJdbcTemplate.queryForRowSet(sqlString, paramsObj);
@@ -185,13 +180,11 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		LogicalCondition previousGroupList = null; // Variable to store the previous value of groupList
 		LogicalCondition previousGroup = null; // Variable to store the previous value of Group
 		List<WhereGroupListDto> whereClauseList = filterData.getWhereData();
-		String tableString = filterData.getTableName();
-
 		Map<String, Map<String, String>> schemaMap = getDataType(filterData);
 		String jsonString = gson.toJson(schemaMap);
 		JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
 		// Find the corresponding table in the JSON
-		JsonObject table = jsonObject.getAsJsonObject(tableString);
+		JsonObject table = jsonObject.getAsJsonObject(filterData.getTableName());
 		// this whereData list will be iterated in this loop by getting where clause
 		// size
 		for (int whereGroupInt = 0; whereGroupInt < whereClauseList.size(); whereGroupInt++) {

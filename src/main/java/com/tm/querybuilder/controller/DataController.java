@@ -11,11 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.request.BuilderRequestPojo;
 import com.tm.querybuilder.response.QueryResponsePojo;
 import com.tm.querybuilder.service.QueryBuilderService;
-
 
 @CrossOrigin
 @RestController
@@ -24,8 +22,7 @@ public class DataController {
 
 	@Autowired
 	private QueryBuilderService queryBuilderService;
-	
-	
+
 	/**
 	 * Before Execution In this API it will validate the schema exist for the schema
 	 * the table and its column should be match the it allow to build query by using
@@ -36,13 +33,12 @@ public class DataController {
 	public QueryResponsePojo getQueryExecution(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
-			FilterData filterData = builderRequestPojo.getRequestData();
-			QueryResponsePojo responseValidPojo = queryBuilderService.schemaTableColumn(filterData);
+			QueryResponsePojo responseValidPojo = queryBuilderService
+					.schemaTableColumn(builderRequestPojo.getRequestData());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
-				Map<String, String> queryMap = queryBuilderService.getQueryBuild(builderRequestPojo);
-				Map<String, Object> responseMap = queryBuilderService.getQueryExecution(queryMap);
-				Object dataObject = responseMap.get("filterResponse");
-				if (dataObject.toString().trim().equals("[]")) {
+				Map<String, Object> responseMap = queryBuilderService
+						.getQueryExecution(queryBuilderService.getQueryBuild(builderRequestPojo));
+				if (responseMap.get("filterResponse").toString().trim().equals("[]")) {
 					queryResponsePojo.response("No data found", null, false);
 				} else {
 					queryResponsePojo.response("Selected table details", responseMap, true);
@@ -56,6 +52,4 @@ public class DataController {
 		return queryResponsePojo;
 	}
 
-
-	
 }
