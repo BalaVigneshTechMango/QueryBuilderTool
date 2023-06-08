@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.request.BuilderRequestPojo;
 import com.tm.querybuilder.response.QueryResponsePojo;
 import com.tm.querybuilder.service.QueryBuilderService;
@@ -30,11 +31,11 @@ public class QueryController {
 	public QueryResponsePojo fetchQuery(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
-			QueryResponsePojo responseValidPojo = queryBuilderService
-					.schemaDetailsExist(builderRequestPojo.getRequestData());
+			FilterData filterData = builderRequestPojo.getRequestData();
+			QueryResponsePojo responseValidPojo = queryBuilderService.schemaDetailsExist(filterData.getSchemaName(),
+					filterData.getTableName(), filterData.getColumnName());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
-				queryResponsePojo.response("Selected Data", queryBuilderService.fetchQuery(builderRequestPojo),
-						true);
+				queryResponsePojo.response("Selected Data", queryBuilderService.fetchQuery(filterData), true);
 			} else {
 				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
 			}

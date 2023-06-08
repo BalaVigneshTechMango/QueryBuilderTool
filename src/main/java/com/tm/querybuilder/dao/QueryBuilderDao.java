@@ -11,7 +11,7 @@ public interface QueryBuilderDao {
 	public Map<String, Map<String, String>> fetchColumnDetails(String schemaString);
 
 	// This Api for dynamic join query for multiple tables
-	public Map<String, Object> fetchResultData(Map<String, String> queryMap);
+	public Map<String, Object> fetchResultData(String queryMap);
 	
 	// this method is to check the schema exist in the db.
 	boolean schemaExistDetails(String schemaString);
@@ -30,6 +30,7 @@ public interface QueryBuilderDao {
 
 	//In this method validate the column by using schema and table name using column list
 	boolean validateColumns(List<String> columnsList, String tableString, String schemaString);
+
 
 
 }

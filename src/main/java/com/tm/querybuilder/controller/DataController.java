@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.request.BuilderRequestPojo;
 import com.tm.querybuilder.response.QueryResponsePojo;
 import com.tm.querybuilder.service.QueryBuilderService;
@@ -33,11 +34,12 @@ public class DataController {
 	public QueryResponsePojo fetchResultData(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
-			QueryResponsePojo responseValidPojo = queryBuilderService
-					.schemaDetailsExist(builderRequestPojo.getRequestData());
+			FilterData filterData = builderRequestPojo.getRequestData();
+			QueryResponsePojo responseValidPojo = queryBuilderService.schemaDetailsExist(filterData.getSchemaName(),
+					filterData.getTableName(), filterData.getColumnName());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
 				Map<String, Object> responseMap = queryBuilderService
-						.fetchResultData(queryBuilderService.fetchQuery(builderRequestPojo));
+						.fetchResultData(queryBuilderService.fetchQuery(filterData));
 				if (responseMap.get("filterResponse").toString().trim().equals("[]")) {
 					queryResponsePojo.response("No data found", null, false);
 				} else {

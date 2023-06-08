@@ -132,10 +132,9 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	// This method will get the query in parameter and execute
 	@Override
-	public Map<String, Object> fetchResultData(Map<String, String> queryMap) {
+	public Map<String, Object> fetchResultData(String queryString) {
 		Map<String, Object> responseMap = new HashMap<>();
-		String sqlString = String.join(",", queryMap.values());
-		List<Map<String, Object>> queryResponseMap = jdbcTemplate.queryForList(sqlString);
+		List<Map<String, Object>> queryResponseMap = jdbcTemplate.queryForList(queryString);
 		responseMap.put("filterResponse", queryResponseMap);
 		return responseMap;
 

@@ -1,6 +1,6 @@
 package com.tm.querybuilder.service.impl;
 
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.tm.querybuilder.dao.QueryBuilderDao;
 import com.tm.querybuilder.dto.FilterData;
-import com.tm.querybuilder.request.BuilderRequestPojo;
 import com.tm.querybuilder.response.QueryResponsePojo;
 import com.tm.querybuilder.service.QueryBuilderService;
 
@@ -18,43 +17,39 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Autowired
 	private QueryBuilderDao queryBuilderDao;
 
-	private static final String QUERY = "query";
-
 	// The method get request from the BuilderRequestPojo to get the details of
 	// table and columm by using schema name get the details with dao layer.
 	@Override
-	public Map<String, Map<String, String>> fetchColumnDetails(BuilderRequestPojo builderRequestPojo) {
-		return queryBuilderDao.fetchColumnDetails(builderRequestPojo.getSchemaName());
+	public Map<String, Map<String, String>> fetchColumnDetails(String schemaName) {
+
+		return queryBuilderDao.fetchColumnDetails(schemaName);
+
 	}
 
 	// This Api is filter condition of the selected columns for the tables
 	@Override
-	public Map<String, Object> fetchResultData(Map<String, String> queryMap) {
-		return queryBuilderDao.fetchResultData(queryMap);
+	public Map<String, Object> fetchResultData(String queryString) {
+		return queryBuilderDao.fetchResultData(queryString);
 
 	}
 
 	// In this method get request from pojo based on the request this method will
 	// send data to dao layer. select query with and without where caluse
 	@Override
-	public Map<String, String> fetchQuery(BuilderRequestPojo builderRequestPojo) {
+	public String fetchQuery(FilterData filterData) {
 
-		FilterData filterData = builderRequestPojo.getRequestData();
 		String schemaString = filterData.getSchemaName();
-		Map<String, String> previewQueryMap = new HashMap<>();
 		String columnString = String.join(",", filterData.getColumnName());
 		String tableString = filterData.getTableName();
 		// select query with where clause of single table
 		if (filterData.getWhereData() != null) {
-			String sqlString = "Select " + columnString + " From " + schemaString + "." + tableString + " Where "
+			return "Select " + columnString + " From " + schemaString + "." + tableString + " Where "
 					+ queryBuilderDao.whereCondition(filterData);
-			previewQueryMap.put(QUERY, sqlString);
 		} else {
 			// select query without where clause of single table
-			String sqlString = "SELECT " + columnString + " FROM " + schemaString + "." + tableString;
-			previewQueryMap.put(QUERY, sqlString);
+			return "SELECT " + columnString + " FROM " + schemaString + "." + tableString;
+
 		}
-		return previewQueryMap;
 
 	}
 
@@ -80,13 +75,12 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 
 	// This method will check the schema and table and column in dao.
 	@Override
-	public QueryResponsePojo schemaDetailsExist(FilterData filterData) {
+	public QueryResponsePojo schemaDetailsExist(String schemaString, String tableName, List<String> columnList) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		String schemaString = filterData.getSchemaName();
+
 		if (!schemaString.trim().isEmpty() && Boolean.TRUE.equals(queryBuilderDao.schemaExistDetails(schemaString))) {
-			if (Boolean.TRUE.equals(queryBuilderDao.validateTable(filterData.getTableName(), schemaString))) {
-				if (queryBuilderDao.validateColumns(filterData.getColumnName(), filterData.getTableName(),
-						schemaString)) {
+			if (Boolean.TRUE.equals(queryBuilderDao.validateTable(tableName, schemaString))) {
+				if (queryBuilderDao.validateColumns(columnList, tableName, schemaString)) {
 					queryResponsePojo.setIsSuccess(true);
 				} else {
 					queryResponsePojo.setIsSuccess(false);

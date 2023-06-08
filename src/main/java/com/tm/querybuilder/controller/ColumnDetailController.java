@@ -33,7 +33,7 @@ public class ColumnDetailController {
 					builderRequestPojo.getDatabase());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
 				queryResponsePojo.response("Table Details of the Schema",
-						queryBuilderService.fetchColumnDetails(builderRequestPojo), true);
+						queryBuilderService.fetchColumnDetails(builderRequestPojo.getSchemaName()), true);
 			} else {
 				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
 			}
