@@ -1,4 +1,4 @@
-package com.query.builder.validation;
+package com.tm.querybuilder.validation;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.query.builder.response.QueryResponsePojo;
+import com.tm.querybuilder.response.QueryResponsePojo;
 
 @RestControllerAdvice
 public class ExpectionValidation {

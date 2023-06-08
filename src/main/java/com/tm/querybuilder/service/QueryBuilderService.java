@@ -1,10 +1,10 @@
-package com.query.builder.service;
+package com.tm.querybuilder.service;
 
 import java.util.Map;
 
-import com.query.builder.dto.FilterData;
-import com.query.builder.request.BuilderRequestPojo;
-import com.query.builder.response.QueryResponsePojo;
+import com.tm.querybuilder.dto.FilterData;
+import com.tm.querybuilder.request.BuilderRequestPojo;
+import com.tm.querybuilder.response.QueryResponsePojo;
 
 public interface QueryBuilderService {
 

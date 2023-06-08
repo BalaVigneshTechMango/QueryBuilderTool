@@ -1,4 +1,4 @@
-package com.query.builder.dto;
+package com.tm.querybuilder.dto;
 
 import java.util.List;
 
@@ -7,7 +7,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
 
-import com.query.builder.validation.NoWhitespaceList;
+import com.tm.querybuilder.validation.NoWhitespaceList;
 
 public class FilterData {
 

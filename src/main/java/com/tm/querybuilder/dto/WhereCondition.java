@@ -1,7 +1,8 @@
-//package com.query.builder.dto;
+package com.tm.querybuilder.dto;
+//package com.tm.querybuilder.dto;
 //
-//import com.query.builder.enums.Condition;
-//import com.query.builder.enums.LogicalCondition;
+//import com.tm.querybuilder.enums.Condition;
+//import com.tm.querybuilder.enums.LogicalCondition;
 //
 //public class WhereCondition {
 //	

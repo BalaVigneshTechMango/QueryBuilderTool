@@ -1,9 +1,9 @@
-package com.query.builder.dao;
+package com.tm.querybuilder.dao;
 
 import java.util.List;
 import java.util.Map;
 
-import com.query.builder.dto.FilterData;
+import com.tm.querybuilder.dto.FilterData;
 
 public interface QueryBuilderDao {
 

@@ -1,4 +1,4 @@
-package com.query.builder.response;
+package com.tm.querybuilder.response;
 
 
 public class QueryResponsePojo {

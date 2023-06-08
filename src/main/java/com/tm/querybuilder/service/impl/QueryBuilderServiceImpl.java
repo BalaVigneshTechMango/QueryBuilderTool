@@ -1,4 +1,4 @@
-package com.query.builder.service.impl;
+package com.tm.querybuilder.service.impl;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,11 +6,11 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.query.builder.dao.QueryBuilderDao;
-import com.query.builder.dto.FilterData;
-import com.query.builder.request.BuilderRequestPojo;
-import com.query.builder.response.QueryResponsePojo;
-import com.query.builder.service.QueryBuilderService;
+import com.tm.querybuilder.dao.QueryBuilderDao;
+import com.tm.querybuilder.dto.FilterData;
+import com.tm.querybuilder.request.BuilderRequestPojo;
+import com.tm.querybuilder.response.QueryResponsePojo;
+import com.tm.querybuilder.service.QueryBuilderService;
 
 @Service
 public class QueryBuilderServiceImpl implements QueryBuilderService {

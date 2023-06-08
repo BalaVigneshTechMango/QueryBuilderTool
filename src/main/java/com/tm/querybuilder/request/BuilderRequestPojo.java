@@ -1,9 +1,9 @@
-package com.query.builder.request;
+package com.tm.querybuilder.request;
 
 
 import javax.validation.Valid;
 
-import com.query.builder.dto.FilterData;
+import com.tm.querybuilder.dto.FilterData;
 
 public class BuilderRequestPojo {
 

@@ -1,4 +1,4 @@
-package com.query.builder.controller;
+package com.tm.querybuilder.controller;
 
 import java.util.Map;
 import javax.validation.Valid;
@@ -9,10 +9,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.query.builder.dto.FilterData;
-import com.query.builder.request.BuilderRequestPojo;
-import com.query.builder.response.QueryResponsePojo;
-import com.query.builder.service.QueryBuilderService;
+import com.tm.querybuilder.dto.FilterData;
+import com.tm.querybuilder.request.BuilderRequestPojo;
+import com.tm.querybuilder.response.QueryResponsePojo;
+import com.tm.querybuilder.service.QueryBuilderService;
 
 @CrossOrigin
 @RestController

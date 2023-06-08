@@ -1,9 +1,10 @@
-package com.query.builder.dto;
+package com.tm.querybuilder.dto;
 
 import java.util.List;
 
 import javax.validation.Valid;
-import com.query.builder.enums.LogicalCondition;
+
+import com.tm.querybuilder.enums.LogicalCondition;
 
 public class WhereGroupListDto {
 

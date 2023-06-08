@@ -1,4 +1,4 @@
-package com.query.builder.enums;
+package com.tm.querybuilder.enums;
 
 public enum LogicalCondition {
 

@@ -1,4 +1,4 @@
-package com.query.builder.dao.impl;
+package com.tm.querybuilder.dao.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -20,11 +20,11 @@ import org.springframework.stereotype.Service;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.query.builder.dao.QueryBuilderDao;
-import com.query.builder.dto.FilterData;
-import com.query.builder.dto.WhereGroupListDto;
-import com.query.builder.dto.WhereListDto;
-import com.query.builder.enums.LogicalCondition;
+import com.tm.querybuilder.dao.QueryBuilderDao;
+import com.tm.querybuilder.dto.FilterData;
+import com.tm.querybuilder.dto.WhereGroupListDto;
+import com.tm.querybuilder.dto.WhereListDto;
+import com.tm.querybuilder.enums.LogicalCondition;
 
 @Service
 public class QueryBuilderDaoImpl implements QueryBuilderDao {

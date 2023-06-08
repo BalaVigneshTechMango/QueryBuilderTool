@@ -1,10 +1,10 @@
-package com.query.builder.dto;
+package com.tm.querybuilder.dto;
 
 import javax.validation.constraints.NotBlank;
 
-import com.query.builder.enums.Condition;
-import com.query.builder.enums.LogicalCondition;
-import com.query.builder.validation.ObjectNoWhiteSpace;
+import com.tm.querybuilder.enums.Condition;
+import com.tm.querybuilder.enums.LogicalCondition;
+import com.tm.querybuilder.validation.ObjectNoWhiteSpace;
 
 public class WhereListDto {
 

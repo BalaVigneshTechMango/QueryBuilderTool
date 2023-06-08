@@ -1,4 +1,4 @@
-package com.query.builder.validation;
+package com.tm.querybuilder.validation;
 
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
