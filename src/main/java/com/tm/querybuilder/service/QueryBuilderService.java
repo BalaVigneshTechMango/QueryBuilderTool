@@ -8,16 +8,20 @@ import com.tm.querybuilder.response.QueryResponsePojo;
 
 public interface QueryBuilderService {
 
-	// 3.This method will return the column And TableName of the database
+	// The method get request from the Builder request pojo to get the details of
+	// table and column
 	public Map<String, Map<String, String>> getTableColumn(BuilderRequestPojo builderRequestPojo);
 
-	// This is filter condition of the selected columns for the tables
+	// By getting string as query in parameter based on the query in will execute.
 	public Map<String, Object> getQueryExecution(Map<String, String> query);
-
+	
+	// This method build the query based on the request.
 	Map<String, String> getQueryBuild(BuilderRequestPojo builderRequestPojo);
 
-	public QueryResponsePojo schemaCheck(String schemaName,String database);
+	// This method will check the schema name and table exist in dao.
+	public QueryResponsePojo schemaCheck(String schemaName, String database);
 
+	// This method will check the schema and table and  column in dao.
 	QueryResponsePojo schemaTableColumn(FilterData filterData);
 
 }

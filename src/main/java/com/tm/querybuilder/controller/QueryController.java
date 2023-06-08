@@ -25,6 +25,11 @@ public class QueryController {
 	private QueryBuilderService queryBuilderService;
 
 
+	/**
+	 * Before Buildling query In this API it will validate the schema exist for the
+	 * schema the table and its column should be match the it allow to build query
+	 * depend on the request select query with and without where clause.
+	 */
 	@PostMapping("/fetchQuery")
 	public QueryResponsePojo getQueryBuild(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();

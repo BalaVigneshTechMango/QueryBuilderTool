@@ -21,14 +21,18 @@ public class ColumnDetailController {
 	@Autowired
 	private QueryBuilderService queryBuilderService;
 
-	
+	/**
+	 * By using schema name get the list of tables and column and its datatype. In
+	 * this API it will check the schema is valid and for the schema it should have
+	 * atleast one Table in the schema to get the details of table.
+	 */
 	@PostMapping("/fetchColumnDetails")
 	public QueryResponsePojo getTableColumn(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
 			String schemaName = builderRequestPojo.getSchemaName();
-			String database=builderRequestPojo.getDatabase();
-			QueryResponsePojo queryResponseValid = queryBuilderService.schemaCheck(schemaName,database);
+			String database = builderRequestPojo.getDatabase();
+			QueryResponsePojo queryResponseValid = queryBuilderService.schemaCheck(schemaName, database);
 			if (Boolean.TRUE.equals(queryResponseValid.getIsSuccess())) {
 				Map<String, Map<String, String>> response = queryBuilderService.getTableColumn(builderRequestPojo);
 				queryResponsePojo.response("Table Details of the Schema", response, true);
@@ -40,7 +44,5 @@ public class ColumnDetailController {
 		}
 		return queryResponsePojo;
 	}
-
-
 
 }

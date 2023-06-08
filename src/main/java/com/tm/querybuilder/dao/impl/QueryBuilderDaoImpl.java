@@ -44,23 +44,27 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	@Override
 	public boolean schemaExists(String schemaName) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
+		// Build a query and store in string.
 		String schemaExistsSql = "SELECT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = :schemaName)";
 		params.addValue(SCHEMA_NAME, schemaName);
 		return namedParameterJdbcTemplate.queryForObject(schemaExistsSql, params, Boolean.class);
 	}
 
+	// In the schema check whether the table is exist or not.
 	@Override
 	public boolean checkTablesExistInSchema(String schemaName) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
+		// Build a query and store in string.
 		String sql = "SELECT EXISTS (" + "   SELECT 1" + "    FROM information_schema.tables"
 				+ "    WHERE table_schema = ?" + ")";
 		return namedParameterJdbcTemplate.queryForObject(sql, params, Boolean.class);
 
 	}
 
+	// In this method it validate the table in the schema
 	@Override
 	public boolean validateTableExists(String tableName, String schemaName) {
-
+		// Build a query and store in string.
 		String query = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :tableName AND table_schema = :schemaName";
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue(TABLE_NAME, tableName);
@@ -69,14 +73,19 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		return count != null && count > 0;
 	}
 
+	// In this method validate the column by using schema and table name using
+	// column list
 	@Override
 	public boolean validateColumnsExist(List<String> columns, String tableName, String schemaName) {
+		// Build a query and store in string.
 		String query = "SELECT COUNT(*) FROM information_schema.columns WHERE column_name IN (:columns) AND table_name = :tableName AND table_schema = :schemaName";
 		MapSqlParameterSource parameters = new MapSqlParameterSource();
 		parameters.addValue("columns", columns);
 		parameters.addValue(TABLE_NAME, tableName);
 		parameters.addValue(SCHEMA_NAME, schemaName);
 		Integer count = namedParameterJdbcTemplate.queryForObject(query, parameters, Integer.class);
+		// if the count not equal to null and colunt the column size and if the both
+		// condition is okay the returns
 		return count != null && count == columns.size();
 	}
 
@@ -135,6 +144,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	}
 
+	// get the data type of the column in where clause
 	@Override
 	public Map<String, Map<String, String>> getDataType(FilterData filterData) {
 		MapSqlParameterSource params = new MapSqlParameterSource();
@@ -150,6 +160,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 				columns.add(column);
 			}
 		}
+		// Build a query and store in string
 		String sql = "SELECT column_name, data_type " + "FROM information_schema.columns "
 				+ "WHERE table_schema = :schemaName AND table_name = :tableName AND column_name IN (:column)";
 		params.addValue(SCHEMA_NAME, schemaName);
@@ -157,6 +168,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		params.addValue("column", columns);
 		SqlRowSet rowSet = namedParameterJdbcTemplate.queryForRowSet(sql, params);
 		Map<String, String> columnMap = new LinkedHashMap<>();
+		// while will get the column and datatype of the from rowset and put in
+		// columnMap
 		while (rowSet.next()) {
 			columnMap.put(rowSet.getString(COLUMN_NAME), rowSet.getString(DATA_TYPE));
 		}
@@ -164,6 +177,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		return schemaMap;
 	}
 
+	// This method will build the entire where group and where list.
 	@Override
 	public StringBuilder whereCondition(FilterData filterData) {
 		Gson gson = new Gson();
@@ -178,6 +192,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		JsonObject jsonObject = JsonParser.parseString(jsonString).getAsJsonObject();
 		// Find the corresponding table in the JSON
 		JsonObject table = jsonObject.getAsJsonObject(tableName);
+		// this whereData list will be iterated in this loop by getting where clause
+		// size
 		for (int whereGroup = 0; whereGroup < whereClause.size(); whereGroup++) {
 			List<WhereListDto> whereGroupList = filterData.getWhereData().get(whereGroup).getWhereList();
 			LogicalCondition logicalConWhereGroup = whereClause.get(whereGroup).getLogicalCondition();
@@ -188,14 +204,15 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 				String conditionOperator = whereGroupList.get(whereList).getCondition().getOperator();
 
 				LogicalCondition logicalConWhereList = whereGroupList.get(whereList).getLogicalCondition();
-
+				// get the datatype of column in wherelist one by one
 				String dataType = table.get(column).getAsString();
 
 				Set<String> operatorInt = new HashSet<>(
 						Arrays.asList("int", "float", "tinyint", "bigint", "double", "decimal"));
 				Set<String> operatorString = new HashSet<>(Arrays.asList("varchar", "char", "enum", "text"));
-
+				// this if/else will check the datatype by using contains in hashset
 				if (operatorInt.contains(dataType)) {
+					// this if/else if will build query as per index in the loop
 					if (whereList == 0 && whereGroup == 0) {
 						whereBuilder.append("(").append(column).append(" ").append(conditionOperator).append(" ")
 								.append(value);
@@ -207,6 +224,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 								.append(" ").append(conditionOperator).append(" ").append(value);
 					}
 				} else if (operatorString.contains(dataType)) {
+					// this if/else if will build query as per index in the loop
 					if (whereList == 0 && whereGroup == 0) {
 						whereBuilder.append("(").append(column).append(" ").append(conditionOperator).append(" '")
 								.append(value).append("'");
