@@ -26,14 +26,14 @@ public class ColumnDetailController {
 	 * atleast one Table in the schema to get the details of table.
 	 */
 	@PostMapping("/fetchColumnDetails")
-	public QueryResponsePojo getTableColumn(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
+	public QueryResponsePojo fetchColumnDetails(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
-			QueryResponsePojo responseValidPojo = queryBuilderService.schemaCheck(builderRequestPojo.getSchemaName(),
+			QueryResponsePojo responseValidPojo = queryBuilderService.schemaExistDetails(builderRequestPojo.getSchemaName(),
 					builderRequestPojo.getDatabase());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
 				queryResponsePojo.response("Table Details of the Schema",
-						queryBuilderService.getTableColumn(builderRequestPojo), true);
+						queryBuilderService.fetchColumnDetails(builderRequestPojo), true);
 			} else {
 				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
 			}

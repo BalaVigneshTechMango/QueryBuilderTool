@@ -8,16 +8,16 @@ import com.tm.querybuilder.dto.FilterData;
 public interface QueryBuilderDao {
 
 	// This method will return the column And TableName of the database
-	public Map<String, Map<String, String>> getTableColumn(String schemaString);
+	public Map<String, Map<String, String>> fetchColumnDetails(String schemaString);
 
 	// This Api for dynamic join query for multiple tables
-	public Map<String, Object> getQueryExecution(Map<String, String> queryMap);
+	public Map<String, Object> fetchResultData(Map<String, String> queryMap);
 	
 	// this method is to check the schema exist in the db.
-	boolean schemaExists(String schemaString);
+	boolean schemaExistDetails(String schemaString);
 
 	// In the schema check whether the table is exist or not. 
-	boolean checkTablesExistInSchema(String schemaString);
+	boolean tablesInSchema(String schemaString);
 
 	// get the data type of the column in where clause
 	Map<String, Map<String, String>> getDataType(FilterData filterData);
@@ -26,10 +26,10 @@ public interface QueryBuilderDao {
 	StringBuilder whereCondition(FilterData filterData);
 
 	// In this method it validate the table in the schema
-	boolean validateTableExists(String tableString, String schemaString);
+	boolean validateTable(String tableString, String schemaString);
 
 	//In this method validate the column by using schema and table name using column list
-	boolean validateColumnsExist(List<String> columnsList, String tableString, String schemaString);
+	boolean validateColumns(List<String> columnsList, String tableString, String schemaString);
 
 
 }

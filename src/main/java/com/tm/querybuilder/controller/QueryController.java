@@ -27,13 +27,13 @@ public class QueryController {
 	 * depend on the request select query with and without where clause.
 	 */
 	@PostMapping("/fetchQuery")
-	public QueryResponsePojo getQueryBuild(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
+	public QueryResponsePojo fetchQuery(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
 			QueryResponsePojo responseValidPojo = queryBuilderService
-					.schemaTableColumn(builderRequestPojo.getRequestData());
+					.schemaDetailsExist(builderRequestPojo.getRequestData());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
-				queryResponsePojo.response("Selected Data", queryBuilderService.getQueryBuild(builderRequestPojo),
+				queryResponsePojo.response("Selected Data", queryBuilderService.fetchQuery(builderRequestPojo),
 						true);
 			} else {
 				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());

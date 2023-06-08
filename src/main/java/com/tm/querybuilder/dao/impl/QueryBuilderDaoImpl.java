@@ -41,7 +41,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	// this method will check schema Name in database
 	@Override
-	public boolean schemaExists(String schemaString) {
+	public boolean schemaExistDetails(String schemaString) {
 		MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 		// Build a query and store in string.
 		String existsSqlString = "SELECT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = :schemaName)";
@@ -51,7 +51,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	// In the schema check whether the table is exist or not.
 	@Override
-	public boolean checkTablesExistInSchema(String schemaString) {
+	public boolean tablesInSchema(String schemaString) {
 		MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 		// Build a query and store in string.
 		String sqlString = "SELECT EXISTS (" + "   SELECT 1" + "    FROM information_schema.tables"
@@ -63,7 +63,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	// In this method it validate the table in the schema
 	@Override
-	public boolean validateTableExists(String tableString, String schemaString) {
+	public boolean validateTable(String tableString, String schemaString) {
 		// Build a query and store in string.
 		String queryString = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :tableName AND table_schema = :schemaName";
 		MapSqlParameterSource parametersObj = new MapSqlParameterSource();
@@ -76,7 +76,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	// In this method validate the column by using schema and table name using
 	// column list
 	@Override
-	public boolean validateColumnsExist(List<String> columnsList, String tableString, String schemaString) {
+	public boolean validateColumns(List<String> columnsList, String tableString, String schemaString) {
 		// Build a query and store in string.
 		String queryString = "SELECT COUNT(*) FROM information_schema.columns WHERE column_name IN (:columns) AND table_name = :tableName AND table_schema = :schemaName";
 		MapSqlParameterSource parametersObj = new MapSqlParameterSource();
@@ -91,7 +91,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	// This method will return the column And TableName of the database
 	@Override
-	public Map<String, Map<String, String>> getTableColumn(String schemaString) {
+	public Map<String, Map<String, String>> fetchColumnDetails(String schemaString) {
 		MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 		Map<String, Map<String, String>> schemaMap = new LinkedHashMap<>();
 		List<String> tableList = new ArrayList<>();
@@ -132,7 +132,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	// This method will get the query in parameter and execute
 	@Override
-	public Map<String, Object> getQueryExecution(Map<String, String> queryMap) {
+	public Map<String, Object> fetchResultData(Map<String, String> queryMap) {
 		Map<String, Object> responseMap = new HashMap<>();
 		String sqlString = String.join(",", queryMap.values());
 		List<Map<String, Object>> queryResponseMap = jdbcTemplate.queryForList(sqlString);

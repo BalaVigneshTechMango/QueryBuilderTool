@@ -30,14 +30,14 @@ public class DataController {
 	 * select query with and without where clause.
 	 */
 	@PostMapping("/fetchResultData")
-	public QueryResponsePojo getQueryExecution(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
+	public QueryResponsePojo fetchResultData(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
 			QueryResponsePojo responseValidPojo = queryBuilderService
-					.schemaTableColumn(builderRequestPojo.getRequestData());
+					.schemaDetailsExist(builderRequestPojo.getRequestData());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
 				Map<String, Object> responseMap = queryBuilderService
-						.getQueryExecution(queryBuilderService.getQueryBuild(builderRequestPojo));
+						.fetchResultData(queryBuilderService.fetchQuery(builderRequestPojo));
 				if (responseMap.get("filterResponse").toString().trim().equals("[]")) {
 					queryResponsePojo.response("No data found", null, false);
 				} else {
