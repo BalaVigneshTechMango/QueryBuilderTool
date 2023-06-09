@@ -1,6 +1,5 @@
 package com.tm.querybuilder.dao.impl;
 
-
 import java.util.List;
 import java.util.Map;
 
@@ -32,15 +31,15 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	// In this method it validate the table in the schema
 	@Override
-	public boolean validateTable(String tableString, String schemaString) {
+	public Boolean validateTable(String schemaString, String tableString) {
 
 		MapSqlParameterSource parametersObj = new MapSqlParameterSource();
 		// Build a query and store in string.
 		String queryString = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :tableName AND table_schema = :schemaName";
 		parametersObj.addValue(TABLE_NAME, tableString);
 		parametersObj.addValue(SCHEMA_NAME, schemaString);
-		Integer countInt = namedParameterJdbcTemplate.queryForObject(queryString, parametersObj, Integer.class);
-		return countInt != null && countInt > 0;
+		Integer countInt= namedParameterJdbcTemplate.queryForObject(queryString, parametersObj, Integer.class);
+	    return countInt != null && countInt > 0;
 	}
 
 	// In this method validate the column by using schema and table name using
@@ -48,7 +47,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	@Override
 	public boolean validateColumns(List<String> columnsList, String tableString, String schemaString) {
 		MapSqlParameterSource parametersObj = new MapSqlParameterSource();
-		String queryString = "SELECT COUNT(*) FROM information_schema.columns WHERE column_name IN (:columns) AND table_name = :tableName AND table_schema = :schemaName";
+		String queryString = "SELECT COUNT(*) FROM information_schema.columns WHERE column_name IN (:columns) AND table_name = :tableName AND "
+				+ "table_schema = :schemaName";
 		parametersObj.addValue("columns", columnsList);
 		parametersObj.addValue(TABLE_NAME, tableString);
 		parametersObj.addValue(SCHEMA_NAME, schemaString);
@@ -71,7 +71,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	@Override
 	public SqlRowSet fetchColumnDetails(String schemaString, String tableString) {
 		// Query to get column names and data types for each table
-		String sqlString = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = :schemaName AND table_name = :tableName";
+		String sqlString = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = :schemaName AND "
+				+ "table_name= :tableName";
 		MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 		paramsObj.addValue(SCHEMA_NAME, schemaString);
 		paramsObj.addValue(TABLE_NAME, tableString);

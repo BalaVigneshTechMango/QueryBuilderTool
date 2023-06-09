@@ -32,12 +32,17 @@ public class QueryController {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
 			FilterData filterData = builderRequestPojo.getRequestData();
-			QueryResponsePojo responseValidPojo = queryBuilderService.schemaDetailsExist(filterData.getSchemaName(),
-					filterData.getTableName(), filterData.getColumnNames());
-			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
-				queryResponsePojo.response("Selected Data", queryBuilderService.fetchQuery(filterData), true);
+			String schemaString = filterData.getSchemaName();
+			if (queryBuilderService.schemaExistDetails(schemaString) > 0 && !schemaString.trim().isEmpty()) {
+				if (Boolean.TRUE.equals(queryBuilderService.validateColumns(filterData.getColumnNames(),
+						filterData.getTableName(), schemaString)
+						&& queryBuilderService.validateTable(schemaString, filterData.getTableName()))) {
+					queryResponsePojo.response("Selected Data", queryBuilderService.fetchQuery(filterData), true);
+				} else {
+					queryResponsePojo.response("Not a Valid column or table", null, false);
+				}
 			} else {
-				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
+				queryResponsePojo.response("Not a Valid Table", null, false);
 			}
 		} catch (Exception exception) {
 			queryResponsePojo.response("Bad Request", exception.getMessage(), false);

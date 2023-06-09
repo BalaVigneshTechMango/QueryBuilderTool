@@ -6,7 +6,6 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.tm.querybuilder.dto.FilterData;
-import com.tm.querybuilder.response.QueryResponsePojo;
 @Service
 public interface QueryBuilderService {
 
@@ -21,12 +20,14 @@ public interface QueryBuilderService {
 	String fetchQuery(FilterData filterData);
 
 	// This method will check the schema name and table exist in dao.
-	public QueryResponsePojo schemaExistDetails(String schemaString, String databaseString);
+	public Integer schemaExistDetails(String schemaString);
 
 	// This method will check the schema and table and column in dao.
-	QueryResponsePojo schemaDetailsExist(String schemaString,String tableName,List<String>columnList);
+	boolean validateTable(String schemaString,String tableName);
 	
 	Map<String, Map<String, String>> getDataType(FilterData filterData);
+
+	boolean validateColumns(List<String> columnList, String tableName, String schemaString);
 
 
 }

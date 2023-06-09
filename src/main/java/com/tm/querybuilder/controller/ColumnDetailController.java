@@ -1,5 +1,7 @@
 package com.tm.querybuilder.controller;
 
+import java.util.Map;
+
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -29,13 +31,16 @@ public class ColumnDetailController {
 	public QueryResponsePojo fetchColumnDetails(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
-			QueryResponsePojo responseValidPojo = queryBuilderService.schemaExistDetails(builderRequestPojo.getSchemaName(),
-					builderRequestPojo.getDatabase());
-			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
-				queryResponsePojo.response("Table Details of the Schema",
-						queryBuilderService.fetchColumnDetails(builderRequestPojo.getSchemaName()), true);
+			String schemaString = builderRequestPojo.getSchemaName();
+			if (!schemaString.trim().isEmpty()) {
+				if (queryBuilderService.schemaExistDetails(schemaString) > 0) {
+					queryResponsePojo.response("Table Details of the Schema",
+							queryBuilderService.fetchColumnDetails(schemaString), true);
+				} else {
+					queryResponsePojo.response("Enter valid Schema", null, false);
+				}
 			} else {
-				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
+				queryResponsePojo.response("Schema should not be empty", null, false);
 			}
 		} catch (Exception exception) {
 			queryResponsePojo.response("Bad Requests", exception.getMessage(), false);

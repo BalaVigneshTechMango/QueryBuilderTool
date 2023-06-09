@@ -1,5 +1,6 @@
 package com.tm.querybuilder.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,20 +35,27 @@ public class DataController {
 	@PostMapping("/fetchResultData")
 	public QueryResponsePojo fetchResultData(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+		Map<String, Object> response = new HashMap<>();
 		try {
 			FilterData filterData = builderRequestPojo.getRequestData();
-			QueryResponsePojo responseValidPojo = queryBuilderService.schemaDetailsExist(filterData.getSchemaName(),
-					filterData.getTableName(), filterData.getColumnNames());
-			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
-				List<Map<String, Object>> responseMap = queryBuilderService
-						.fetchResultData(queryBuilderService.fetchQuery(filterData));
-				if (responseMap.toString().trim().equals("[]")) {
-					queryResponsePojo.response("No data found", null, false);
+			String schemaString = filterData.getSchemaName();
+			if (queryBuilderService.schemaExistDetails(schemaString) > 0 && !schemaString.trim().isEmpty()) {
+				if (Boolean.TRUE.equals(queryBuilderService.validateColumns(filterData.getColumnNames(),
+						filterData.getTableName(), schemaString)
+						&& queryBuilderService.validateTable(schemaString, filterData.getTableName()))) {
+					List<Map<String, Object>> responseList = queryBuilderService
+							.fetchResultData(queryBuilderService.fetchQuery(filterData));
+					response.put("filterResponse", responseList);
+					if (response.toString().trim().equals("[]")) {
+						queryResponsePojo.response("No data found", null, false);
+					} else {
+						queryResponsePojo.response("Selected table details", response, true);
+					}
 				} else {
-					queryResponsePojo.response("Selected table details", responseMap, true);
+					queryResponsePojo.response("Not a Valid column or table", null, false);
 				}
 			} else {
-				queryResponsePojo.response(responseValidPojo.getMessage(), null, responseValidPojo.getIsSuccess());
+				queryResponsePojo.response("enter valid", null, false);
 			}
 		} catch (Exception exception) {
 			queryResponsePojo.response("Bad Request", exception.getMessage(), false);

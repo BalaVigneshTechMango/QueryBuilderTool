@@ -13,7 +13,6 @@ import com.tm.querybuilder.common.WhereClause;
 import com.tm.querybuilder.dao.QueryBuilderDao;
 import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.dto.WhereGroupListDto;
-import com.tm.querybuilder.response.QueryResponsePojo;
 import com.tm.querybuilder.service.QueryBuilderService;
 
 @Service
@@ -31,7 +30,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public Map<String, Map<String, String>> fetchColumnDetails(String schemaName) {
 		List<String> tableList = new ArrayList<>();
-		Map<String, String> columnMap = new LinkedHashMap<>();
 		Map<String, Map<String, String>> schemaMap = new LinkedHashMap<>();
 		SqlRowSet rowSet = queryBuilderDao.fetchTableDetails(schemaName);
 		// Iterate over the result set to get table names
@@ -41,11 +39,13 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		// Iterate over the table names and execute the query to get column names and
 		// data types
 		for (String tableString : tableList) {
+			Map<String, String> columnMap = new LinkedHashMap<>();
 			SqlRowSet sqlRowSet = queryBuilderDao.fetchColumnDetails(schemaName, tableString);
 			// Iterate over the result set to get column names and data types
 			while (sqlRowSet.next()) {
-				columnMap.put(rowSet.getString(COLUMN_NAME), rowSet.getString(DATA_TYPE));
+				columnMap.put(sqlRowSet.getString(COLUMN_NAME), sqlRowSet.getString(DATA_TYPE));
 			}
+
 			// Add the table name and column names and data types to the schema map
 			schemaMap.put(tableString, columnMap);
 			// Add the table names to the schema map as a separate entry for easy access
@@ -69,15 +69,15 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	// send data to dao layer. select query with and without where caluse
 	@Override
 	public String fetchQuery(FilterData filterData) {
-		
+
 		WhereClause whereClause = new WhereClause();
 		String schemaString = filterData.getSchemaName();
 		String columnString = String.join(",", filterData.getColumnNames());
 		String tableString = filterData.getTableName();
-		// select query with where clause of single table		
+		// select query with where clause of single table
 		if (filterData.getWhereData() != null) {
 			return "Select " + columnString + " From " + schemaString + "." + tableString + " Where "
-					+ whereClause.whereCondition(filterData,getDataType(filterData));
+					+ whereClause.whereCondition(filterData, getDataType(filterData));
 		} else {
 			// select query without where clause of single table
 			return "SELECT " + columnString + " FROM " + schemaString + "." + tableString;
@@ -87,45 +87,23 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 
 	// This method will check the data base name and table exist in dao.
 	@Override
-	public QueryResponsePojo schemaExistDetails(String schemaNameString, String databaseString) {
-		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		if (!schemaNameString.trim().isEmpty() && !databaseString.trim().isEmpty()) {
-			Integer schemaExistInt = queryBuilderDao.schemaExistDetails(schemaNameString);
-			if (schemaExistInt > 0) {
-				queryResponsePojo.setIsSuccess(true);
-			} else {
-				queryResponsePojo.setIsSuccess(false);
-				queryResponsePojo.setMessage("Enter Valid Schema Name");
-			}
-		} else {
-			queryResponsePojo.setMessage("Schema Name or Data Base Name is Empty");
-			queryResponsePojo.setIsSuccess(false);
-		}
-		return queryResponsePojo;
+	public Integer schemaExistDetails(String schemaNameString) {
+
+		return queryBuilderDao.schemaExistDetails(schemaNameString);
+
 	}
 
 	// This method will check the schema and table and column in dao.
 	@Override
-	public QueryResponsePojo schemaDetailsExist(String schemaString, String tableName, List<String> columnList) {
-		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+	public boolean validateTable(String schemaString, String tableName) {
 
-		if (!schemaString.trim().isEmpty() && queryBuilderDao.schemaExistDetails(schemaString) > 0) {
-			if (Boolean.TRUE.equals(queryBuilderDao.validateTable(tableName, schemaString))) {
-				if (queryBuilderDao.validateColumns(columnList, tableName, schemaString)) {
-					queryResponsePojo.setIsSuccess(true);
-				} else {
-					queryResponsePojo.setIsSuccess(false);
-					queryResponsePojo.setMessage("Enter Valid Column for the tables");
-				}
-			} else {
-				queryResponsePojo.setIsSuccess(false);
-				queryResponsePojo.setMessage("Enter Valid table of the Schema");
-			}
-		} else {
-			queryResponsePojo.setIsSuccess(false);
-			queryResponsePojo.setMessage("Enter the Valid Schema Name");
-		}
-		return queryResponsePojo;
+		return queryBuilderDao.validateTable(schemaString, tableName);
+
+	}
+
+	@Override
+	public boolean validateColumns(List<String> columnList, String tableName, String schemaString) {
+		return queryBuilderDao.validateColumns(columnList, tableName, schemaString);
 	}
 
 	@Override
