@@ -41,24 +41,12 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
 	// this method will check schema Name in database
 	@Override
-	public boolean schemaExistDetails(String schemaString) {
+	public Integer schemaExistDetails(String schemaString) {
 		MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 		// Build a query and store in string.
-		String existsSqlString = "SELECT EXISTS (SELECT 1 FROM information_schema.schemata WHERE schema_name = :schemaName)";
+		String existsSqlString = "SELECT count(table_schema) FROM information_schema.tables WHERE table_schema = :schemaName ";
 		paramsObj.addValue(SCHEMA_NAME, schemaString);
-		return namedParameterJdbcTemplate.queryForObject(existsSqlString, paramsObj, Boolean.class);
-	}
-
-	// In the schema check whether the table is exist or not.
-	@Override
-	public boolean tablesInSchema(String schemaString) {
-		MapSqlParameterSource paramsObj = new MapSqlParameterSource();
-		// Build a query and store in string.
-		String sqlString = "SELECT EXISTS (" + "   SELECT 1" + "    FROM information_schema.tables"
-				+ "WHERE table_schema = :schemaName )";
-		paramsObj.addValue(SCHEMA_NAME, schemaString);
-		return namedParameterJdbcTemplate.queryForObject(sqlString, paramsObj, Boolean.class);
-
+		return namedParameterJdbcTemplate.queryForObject(existsSqlString, paramsObj, Integer.class);
 	}
 
 	// In this method it validate the table in the schema
@@ -112,7 +100,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		// data types
 		for (String tableString : tableList) {
 			Map<String, String> columnMap = new LinkedHashMap<>();
-			rowSet = jdbcTemplate.queryForRowSet(sqlString, paramsObj, tableString);
+			rowSet = jdbcTemplate.queryForRowSet(sqlString, schemaString, tableString);
 
 			// Iterate over the result set to get column names and data types
 			while (rowSet.next()) {

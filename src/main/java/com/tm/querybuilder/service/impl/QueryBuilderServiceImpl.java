@@ -58,9 +58,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	public QueryResponsePojo schemaExistDetails(String schemaNameString, String databaseString) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		if (!schemaNameString.trim().isEmpty() && !databaseString.trim().isEmpty()) {
-			Boolean schemaExistBoolean = queryBuilderDao.schemaExistDetails(schemaNameString);
-			if (Boolean.TRUE.equals(schemaExistBoolean)) {
-				queryBuilderDao.tablesInSchema(schemaNameString);
+			Integer schemaExistInt = queryBuilderDao.schemaExistDetails(schemaNameString);
+			if (schemaExistInt > 0) {
 				queryResponsePojo.setIsSuccess(true);
 			} else {
 				queryResponsePojo.setIsSuccess(false);
@@ -78,7 +77,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	public QueryResponsePojo schemaDetailsExist(String schemaString, String tableName, List<String> columnList) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 
-		if (!schemaString.trim().isEmpty() && Boolean.TRUE.equals(queryBuilderDao.schemaExistDetails(schemaString))) {
+		if (!schemaString.trim().isEmpty() && queryBuilderDao.schemaExistDetails(schemaString) > 0) {
 			if (Boolean.TRUE.equals(queryBuilderDao.validateTable(tableName, schemaString))) {
 				if (queryBuilderDao.validateColumns(columnList, tableName, schemaString)) {
 					queryResponsePojo.setIsSuccess(true);

@@ -14,10 +14,7 @@ public interface QueryBuilderDao {
 	public Map<String, Object> fetchResultData(String queryMap);
 	
 	// this method is to check the schema exist in the db.
-	boolean schemaExistDetails(String schemaString);
-
-	// In the schema check whether the table is exist or not. 
-	boolean tablesInSchema(String schemaString);
+	Integer schemaExistDetails(String schemaString); 
 
 	// get the data type of the column in where clause
 	Map<String, Map<String, String>> getDataType(FilterData filterData);
