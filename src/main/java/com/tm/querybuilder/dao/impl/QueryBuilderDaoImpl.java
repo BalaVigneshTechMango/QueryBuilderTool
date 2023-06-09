@@ -10,7 +10,6 @@ import java.util.Map;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
@@ -27,9 +26,6 @@ import com.tm.querybuilder.enums.LogicalCondition;
 
 @Service
 public class QueryBuilderDaoImpl implements QueryBuilderDao {
-
-	@Autowired
-	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -80,27 +76,31 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	// This method will return the column And TableName of the database
 	@Override
 	public Map<String, Map<String, String>> fetchColumnDetails(String schemaString) {
-		MapSqlParameterSource paramsObj = new MapSqlParameterSource();
+		Map<String, Object> params = new HashMap<>();
 		Map<String, Map<String, String>> schemaMap = new LinkedHashMap<>();
 		List<String> tableList = new ArrayList<>();
 
-		paramsObj.addValue(SCHEMA_NAME, schemaString);
+		params.put(SCHEMA_NAME, schemaString);
 		// Query to get all table names in the database
 		String sqlString = "SELECT table_name FROM information_schema.tables WHERE table_schema = :schemaName";
-		SqlRowSet rowSet = namedParameterJdbcTemplate.queryForRowSet(sqlString, paramsObj);
+		SqlRowSet rowSet = namedParameterJdbcTemplate.queryForRowSet(sqlString, params);
 
 		// Iterate over the result set to get table names
 		while (rowSet.next()) {
 			tableList.add(rowSet.getString("table_name"));
 		}
 		// Query to get column names and data types for each table
-		sqlString = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = ? AND table_name = ?";
+		sqlString = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = :schemaName AND table_name = :tableName";
 
 		// Iterate over the table names and execute the query to get column names and
 		// data types
 		for (String tableString : tableList) {
+			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
+			paramsObj.addValue(SCHEMA_NAME, schemaString);
+			paramsObj.addValue(TABLE_NAME, tableString);
+
 			Map<String, String> columnMap = new LinkedHashMap<>();
-			rowSet = jdbcTemplate.queryForRowSet(sqlString, schemaString, tableString);
+			rowSet = namedParameterJdbcTemplate.queryForRowSet(sqlString, paramsObj);
 
 			// Iterate over the result set to get column names and data types
 			while (rowSet.next()) {
@@ -109,8 +109,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			// Add the table name and column names and data types to the schema map
 			schemaMap.put(tableString, columnMap);
 		}
-		// Add the table names to the schema map as a separate entry for easy access
 
+		// Add the table names to the schema map as a separate entry for easy access
 		Map<String, String> tableNameMap = new LinkedHashMap<>();
 		tableNameMap.put("tableNames", String.join(",", tableList));
 		schemaMap.put(TABLE_NAME, tableNameMap);
@@ -121,8 +121,9 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	// This method will get the query in parameter and execute
 	@Override
 	public Map<String, Object> fetchResultData(String queryString) {
+		MapSqlParameterSource params = new MapSqlParameterSource();
 		Map<String, Object> responseMap = new HashMap<>();
-		List<Map<String, Object>> queryResponseMap = jdbcTemplate.queryForList(queryString);
+		List<Map<String, Object>> queryResponseMap = namedParameterJdbcTemplate.queryForList(queryString, params);
 		responseMap.put("filterResponse", queryResponseMap);
 		return responseMap;
 
