@@ -33,7 +33,7 @@ public class QueryController {
 		try {
 			FilterData filterData = builderRequestPojo.getRequestData();
 			QueryResponsePojo responseValidPojo = queryBuilderService.schemaDetailsExist(filterData.getSchemaName(),
-					filterData.getTableName(), filterData.getColumnName());
+					filterData.getTableName(), filterData.getColumnNames());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
 				queryResponsePojo.response("Selected Data", queryBuilderService.fetchQuery(filterData), true);
 			} else {

@@ -1,5 +1,6 @@
 package com.tm.querybuilder.controller;
 
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -36,11 +37,11 @@ public class DataController {
 		try {
 			FilterData filterData = builderRequestPojo.getRequestData();
 			QueryResponsePojo responseValidPojo = queryBuilderService.schemaDetailsExist(filterData.getSchemaName(),
-					filterData.getTableName(), filterData.getColumnName());
+					filterData.getTableName(), filterData.getColumnNames());
 			if (Boolean.TRUE.equals(responseValidPojo.getIsSuccess())) {
-				Map<String, Object> responseMap = queryBuilderService
+				List<Map<String, Object>> responseMap = queryBuilderService
 						.fetchResultData(queryBuilderService.fetchQuery(filterData));
-				if (responseMap.get("filterResponse").toString().trim().equals("[]")) {
+				if (responseMap.toString().trim().equals("[]")) {
 					queryResponsePojo.response("No data found", null, false);
 				} else {
 					queryResponsePojo.response("Selected table details", responseMap, true);
