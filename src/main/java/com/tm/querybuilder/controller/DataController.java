@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tm.querybuilder.constant.Constants;
 import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.request.BuilderRequestPojo;
 import com.tm.querybuilder.response.QueryResponsePojo;
@@ -47,7 +48,7 @@ public class DataController {
 							.fetchResultData(queryBuilderService.fetchQuery(filterData));
 					response.put("filterResponse", responseList);
 					if (response.toString().trim().equals("[]")) {
-						queryResponsePojo.response("No data found", null, false);
+						queryResponsePojo.response(Constants.NO_DATA, null, false);
 					} else {
 						queryResponsePojo.response("Selected table details", response, true);
 					}
@@ -55,10 +56,10 @@ public class DataController {
 					queryResponsePojo.response("Not a Valid column or table", null, false);
 				}
 			} else {
-				queryResponsePojo.response("enter valid", null, false);
+				queryResponsePojo.response(Constants.SCHEMA_EMPTY, null, false);
 			}
 		} catch (Exception exception) {
-			queryResponsePojo.response("Bad Request", exception.getMessage(), false);
+			queryResponsePojo.response(Constants.BAD_REQUEST, exception.getMessage(), false);
 		}
 		return queryResponsePojo;
 	}

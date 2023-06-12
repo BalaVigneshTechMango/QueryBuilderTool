@@ -1,6 +1,5 @@
 package com.tm.querybuilder.controller;
 
-import java.util.Map;
 
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tm.querybuilder.constant.Constants;
 import com.tm.querybuilder.request.BuilderRequestPojo;
 import com.tm.querybuilder.response.QueryResponsePojo;
 import com.tm.querybuilder.service.QueryBuilderService;
@@ -37,13 +37,13 @@ public class ColumnDetailController {
 					queryResponsePojo.response("Table Details of the Schema",
 							queryBuilderService.fetchColumnDetails(schemaString), true);
 				} else {
-					queryResponsePojo.response("Enter valid Schema", null, false);
+					queryResponsePojo.response(Constants.VALID_SCHEMA, null, false);
 				}
 			} else {
-				queryResponsePojo.response("Schema should not be empty", null, false);
+				queryResponsePojo.response(Constants.SCHEMA_EMPTY, null, false);
 			}
 		} catch (Exception exception) {
-			queryResponsePojo.response("Bad Requests", exception.getMessage(), false);
+			queryResponsePojo.response(Constants.BAD_REQUEST, exception.getMessage(), false);
 		}
 		return queryResponsePojo;
 	}

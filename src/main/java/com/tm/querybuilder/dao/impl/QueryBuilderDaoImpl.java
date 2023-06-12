@@ -9,6 +9,8 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
+
+import com.tm.querybuilder.constant.Constants;
 import com.tm.querybuilder.dao.QueryBuilderDao;
 
 @Service
@@ -17,8 +19,6 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-	private static final String SCHEMA_NAME = "schemaName";
-	private static final String TABLE_NAME = "tableName";
 
 	// this method will check schema Name in database
 	@Override
@@ -27,7 +27,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 			// Build a query and store in string.
 			String existsSqlString = "SELECT count(table_schema) FROM information_schema.tables WHERE table_schema = :schemaName ";
-			paramsObj.addValue(SCHEMA_NAME, schemaString);
+			paramsObj.addValue(Constants.SCHEMA_NAME, schemaString);
 			return namedParameterJdbcTemplate.queryForObject(existsSqlString, paramsObj, Integer.class);
 		} catch (Exception exception) {
 			exception.printStackTrace();
@@ -42,8 +42,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			MapSqlParameterSource parametersObj = new MapSqlParameterSource();
 			// Build a query and store in string.
 			String queryString = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :tableName AND table_schema = :schemaName";
-			parametersObj.addValue(TABLE_NAME, tableString);
-			parametersObj.addValue(SCHEMA_NAME, schemaString);
+			parametersObj.addValue(Constants.TABLE_NAME, tableString);
+			parametersObj.addValue(Constants.SCHEMA_NAME, schemaString);
 			Integer countInt = namedParameterJdbcTemplate.queryForObject(queryString, parametersObj, Integer.class);
 			return countInt != null && countInt > 0;
 		} catch (Exception exception) {
@@ -58,11 +58,11 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	public boolean validateColumns(List<String> columnsList, String tableString, String schemaString) {
 		try {
 			MapSqlParameterSource parametersObj = new MapSqlParameterSource();
-			String queryString = "SELECT COUNT(*) FROM information_schema.columns WHERE column_name IN (:columns) AND table_name = :tableName AND "
+			String queryString = " SELECT COUNT(*) FROM information_schema.columns WHERE column_name IN (:columns) AND table_name = :tableName AND "
 					+ "table_schema = :schemaName";
 			parametersObj.addValue("columns", columnsList);
-			parametersObj.addValue(TABLE_NAME, tableString);
-			parametersObj.addValue(SCHEMA_NAME, schemaString);
+			parametersObj.addValue(Constants.TABLE_NAME, tableString);
+			parametersObj.addValue(Constants.SCHEMA_NAME, schemaString);
 			Integer countInt = namedParameterJdbcTemplate.queryForObject(queryString, parametersObj, Integer.class);
 			// if the count not equal to null and colunt the column size and if the both
 			// condition is okay the returns
@@ -71,15 +71,15 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			exception.printStackTrace();
 			return false;
 		}
-
 	}
+	
 
 	@Override
 	public SqlRowSet fetchTableDetails(String schemaString) {
 		try {
 			MapSqlParameterSource params = new MapSqlParameterSource();
 			String sqlString = "SELECT table_name FROM information_schema.tables WHERE table_schema = :schemaName";
-			params.addValue(SCHEMA_NAME, schemaString);
+			params.addValue(Constants.SCHEMA_NAME, schemaString);
 			return namedParameterJdbcTemplate.queryForRowSet(sqlString, params);
 		} catch (Exception exception) {
 			exception.printStackTrace();
@@ -95,8 +95,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			String sqlString = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = :schemaName AND "
 					+ "table_name= :tableName";
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
-			paramsObj.addValue(SCHEMA_NAME, schemaString);
-			paramsObj.addValue(TABLE_NAME, tableString);
+			paramsObj.addValue(Constants.SCHEMA_NAME, schemaString);
+			paramsObj.addValue(Constants.TABLE_NAME, tableString);
 			return namedParameterJdbcTemplate.queryForRowSet(sqlString, paramsObj);
 		} catch (Exception exception) {
 			exception.printStackTrace();
@@ -126,8 +126,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			// Build a query and store in string
 			String sqlString = "SELECT column_name, data_type " + "FROM information_schema.columns "
 					+ "WHERE table_schema = :schemaName AND table_name = :tableName AND column_name IN (:column)";
-			paramsObj.addValue(SCHEMA_NAME, schemaString);
-			paramsObj.addValue(TABLE_NAME, tableName);
+			paramsObj.addValue(Constants.SCHEMA_NAME, schemaString);
+			paramsObj.addValue(Constants.TABLE_NAME, tableName);
 			paramsObj.addValue("column", columnList);
 			return namedParameterJdbcTemplate.queryForRowSet(sqlString, paramsObj);
 		} catch (Exception exception) {

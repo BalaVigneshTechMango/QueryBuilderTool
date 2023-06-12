@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.tm.querybuilder.constant.Constants;
 import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.request.BuilderRequestPojo;
 import com.tm.querybuilder.response.QueryResponsePojo;
@@ -42,10 +43,10 @@ public class QueryController {
 					queryResponsePojo.response("Not a Valid column or table", null, false);
 				}
 			} else {
-				queryResponsePojo.response("Not a Valid Table", null, false);
+				queryResponsePojo.response(Constants.VALID_TABLE, null, false);
 			}
 		} catch (Exception exception) {
-			queryResponsePojo.response("Bad Request", exception.getMessage(), false);
+			queryResponsePojo.response(Constants.BAD_REQUEST, exception.getMessage(), false);
 		}
 		return queryResponsePojo;
 	}

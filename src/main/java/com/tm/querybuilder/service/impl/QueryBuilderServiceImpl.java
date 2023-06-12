@@ -11,6 +11,7 @@ import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
 import com.tm.querybuilder.common.WhereClause;
+import com.tm.querybuilder.constant.Constants;
 import com.tm.querybuilder.dao.QueryBuilderDao;
 import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.dto.WhereGroupListDto;
@@ -21,10 +22,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 
 	@Autowired
 	private QueryBuilderDao queryBuilderDao;
-
-	private static final String COLUMN_NAME = "column_name";
-	private static final String DATA_TYPE = "data_type";
-	private static final String TABLE_NAME = "tableName";
 
 	// The method get request from the BuilderRequestPojo to get the details of
 	// table and columm by using schema name get the details with dao layer.
@@ -45,7 +42,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				SqlRowSet sqlRowSet = queryBuilderDao.fetchColumnDetails(schemaName, tableString);
 				// Iterate over the result set to get column names and data types
 				while (sqlRowSet.next()) {
-					columnMap.put(sqlRowSet.getString(COLUMN_NAME), sqlRowSet.getString(DATA_TYPE));
+					columnMap.put(sqlRowSet.getString(Constants.COLUMN_NAME), sqlRowSet.getString(Constants.DATA_TYPE));
 				}
 				// Add the table name and column names and data types to the schema map
 				schemaMap.put(tableString, columnMap);
@@ -53,7 +50,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			}
 			Map<String, String> tableNameMap = new LinkedHashMap<>();
 			tableNameMap.put("tableNames", String.join(",", tableList));
-			schemaMap.put(TABLE_NAME, tableNameMap);
+			schemaMap.put(Constants.TABLE_NAME, tableNameMap);
 			return schemaMap;
 		} catch (Exception exception) {
 			exception.printStackTrace();
@@ -151,7 +148,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			// columnMap
 			SqlRowSet rowSet = queryBuilderDao.getDataType(filterData.getSchemaName(), tableString, columnsList);
 			while (rowSet.next()) {
-				columnMap.put(rowSet.getString(COLUMN_NAME), rowSet.getString(DATA_TYPE));
+				columnMap.put(rowSet.getString(Constants.COLUMN_NAME), rowSet.getString(Constants.DATA_TYPE));
 			}
 			schemaMap.put(tableString, columnMap);
 			return schemaMap;
