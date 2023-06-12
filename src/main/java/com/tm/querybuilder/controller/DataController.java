@@ -32,25 +32,28 @@ public class DataController {
 	 * the table and its column should be match the it allow to build query by using
 	 * build method and the by using this it will execute depend on the request
 	 * select query with and without where clause.
+	 * @param builderRequestPojo
+	 * @return QueryResponsePojo
 	 */
 	@PostMapping("/fetchResultData")
 	public QueryResponsePojo fetchResultData(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
-		Map<String, Object> response = new HashMap<>();
+		Map<String, Object> responseMap = new HashMap<>();
 		try {
 			FilterData filterData = builderRequestPojo.getRequestData();
 			String schemaString = filterData.getSchemaName();
-			if (queryBuilderService.schemaExistDetails(schemaString) > 0 && !schemaString.trim().isEmpty()) {
-				if (Boolean.TRUE.equals(queryBuilderService.validateColumns(filterData.getColumnNames(),
+			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))
+					&& !schemaString.trim().isEmpty()) {
+				if (Boolean.TRUE.equals(queryBuilderService.isValidateColumns(filterData.getColumnNames(),
 						filterData.getTableName(), schemaString)
-						&& queryBuilderService.validateTable(schemaString, filterData.getTableName()))) {
+						&& queryBuilderService.isValidateTable(schemaString, filterData.getTableName()))) {
 					List<Map<String, Object>> responseList = queryBuilderService
 							.fetchResultData(queryBuilderService.fetchQuery(filterData));
-					response.put("filterResponse", responseList);
-					if (response.toString().trim().equals("[]")) {
+					responseMap.put("filterResponse", responseList);
+					if (responseMap.toString().trim().equals("[]")) {
 						queryResponsePojo.response(Constants.NO_DATA, null, false);
 					} else {
-						queryResponsePojo.response("Selected table details", response, true);
+						queryResponsePojo.response("Selected table details", responseMap, true);
 					}
 				} else {
 					queryResponsePojo.response("Not a Valid column or table", null, false);

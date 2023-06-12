@@ -1,6 +1,5 @@
 package com.tm.querybuilder.controller;
 
-
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -26,6 +25,9 @@ public class ColumnDetailController {
 	 * By using schema name get the list of tables and column and its datatype. In
 	 * this API it will check the schema is valid and for the schema it should have
 	 * atleast one Table in the schema to get the details of table.
+	 * 
+	 * @param builderRequestPojo
+	 * @return QueryResponsePojo
 	 */
 	@PostMapping("/fetchColumnDetails")
 	public QueryResponsePojo fetchColumnDetails(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
@@ -33,7 +35,7 @@ public class ColumnDetailController {
 		try {
 			String schemaString = builderRequestPojo.getSchemaName();
 			if (!schemaString.trim().isEmpty()) {
-				if (queryBuilderService.schemaExistDetails(schemaString) > 0) {
+				if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
 					queryResponsePojo.response("Table Details of the Schema",
 							queryBuilderService.fetchColumnDetails(schemaString), true);
 				} else {
