@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +28,8 @@ public class QueryController {
 	@Autowired
 	private QueryBuilderService queryBuilderService;
 
+	private Logger logger = LoggerFactory.getLogger(QueryController.class);
+
 	/**
 	 * Before Buildling query In this API it will validate the schema exist for the
 	 * schema the table and its column should be match the it allow to build query
@@ -36,12 +40,13 @@ public class QueryController {
 	 */
 	@PostMapping("/fetchQuery")
 	public QueryResponsePojo fetchQuery(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
+		logger.info("fetch Query Api");
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
 			FilterData filterData = builderRequestPojo.getRequestData();
 			String schemaString = filterData.getSchemaName();
-			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))
-					&& !schemaString.trim().isEmpty()) {
+			if (!schemaString.trim().isEmpty()
+					&& Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
 				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),
 						filterData.getTableName(), schemaString)
 						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName()))) {
@@ -55,6 +60,7 @@ public class QueryController {
 				queryResponsePojo.response(Constants.VALID_TABLE, null, false);
 			}
 		} catch (Exception exception) {
+			logger.error(exception.getMessage());
 			queryResponsePojo.response(Constants.BAD_REQUEST, exception.getMessage(), false);
 		}
 		return queryResponsePojo;

@@ -6,6 +6,8 @@ import java.util.Map;
 
 import javax.validation.Valid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +29,8 @@ public class DataController {
 	@Autowired
 	private QueryBuilderService queryBuilderService;
 
+	private Logger logger = LoggerFactory.getLogger(DataController.class);
+
 	/**
 	 * Before Execution In this API it will validate the schema exist for the schema
 	 * the table and its column should be match the it allow to build query by using
@@ -38,6 +42,7 @@ public class DataController {
 	 */
 	@PostMapping("/fetchResultData")
 	public QueryResponsePojo fetchResultData(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
+		logger.info("fetch Result Data");
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		Map<String, Object> responseMap = new HashMap<>();
 		try {
@@ -63,6 +68,7 @@ public class DataController {
 				queryResponsePojo.response(Constants.SCHEMA_EMPTY, null, false);
 			}
 		} catch (Exception exception) {
+			logger.error(exception.getMessage());
 			queryResponsePojo.response(Constants.BAD_REQUEST, exception.getMessage(), false);
 		}
 		return queryResponsePojo;

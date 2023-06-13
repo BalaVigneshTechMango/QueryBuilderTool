@@ -6,6 +6,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
@@ -22,6 +24,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	@Autowired
 	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+	private Logger logger = LoggerFactory.getLogger(QueryBuilderDaoImpl.class);
+
 	/**
 	 * This method will check the schema name and table exist in dao.
 	 * 
@@ -30,6 +34,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public Boolean isSchemaExist(String schemaString) {
+		logger.info("isSchema Exist Dao");
 		boolean isSchemaExist = false;
 		try {
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
@@ -38,7 +43,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			paramsObj.addValue(Constants.SCHEMA_NAME, schemaString);
 			isSchemaExist = namedParameterJdbcTemplate.queryForObject(existsSqlString, paramsObj, Boolean.class);
 		} catch (DataAccessException exception) {
-			exception.printStackTrace();
+			logger.error("An error occurred while checking if the schema exists");
 			throw new DataAccessResourceFailureException("An error occurred while checking if the schema exists",
 					exception);
 		}
@@ -54,6 +59,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public Boolean isValidTable(String schemaString, String tableString) {
+
+		logger.info("isValid Table Dao");
 		boolean isValidTable = false;
 		try {
 			MapSqlParameterSource parametersObj = new MapSqlParameterSource();
@@ -63,6 +70,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			parametersObj.addValue(Constants.SCHEMA_NAME, schemaString);
 			isValidTable = namedParameterJdbcTemplate.queryForObject(queryString, parametersObj, Boolean.class);
 		} catch (DataAccessException exception) {
+			logger.error("An error occurred while checking if the isValid Table");
 			throw new DataAccessResourceFailureException("An error occurred while checking if the isValid Table",
 					exception);
 		}
@@ -80,6 +88,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public Boolean isValidColumns(List<String> columnsList, String tableString, String schemaString) {
+
+		logger.info("isValid Columns Dao");
 		boolean isValidColumn = false;
 		try {
 			MapSqlParameterSource parametersObj = new MapSqlParameterSource();
@@ -93,7 +103,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			// condition is okay the returns
 			isValidColumn = countInt != null && countInt == columnsList.size();
 		} catch (DataAccessException exception) {
-
+			logger.error("An error occurred while checking if the isValid Column");
 			throw new DataAccessResourceFailureException("An error occurred while checking if the isValid Column",
 					exception);
 		}
@@ -108,6 +118,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public List<String> fetchTableDetails(String schemaString) {
+
+		logger.info("fetch Table Details Dao");
 		List<String> tableList = new ArrayList<>();
 		MapSqlParameterSource params = new MapSqlParameterSource();
 		try {
@@ -115,7 +127,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			params.addValue(Constants.SCHEMA_NAME, schemaString);
 			tableList = namedParameterJdbcTemplate.queryForList(sqlString, params, String.class);
 		} catch (DataAccessException exception) {
-
+			logger.error("An error occurred while fetch the table Details");
 			throw new DataAccessResourceFailureException("An error occurred while fetch the table Details", exception);
 
 		}
@@ -132,6 +144,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public Map<String, Object> fetchColumnDetails(String schemaString, String tableString) {
+
+		logger.info("fetch column details dao");
 		List<Map<String, Object>> columnMap = new ArrayList<>();
 		Map<String, Object> columnDetails = new LinkedHashMap<>();
 		try {
@@ -149,6 +163,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			}
 
 		} catch (DataAccessException exception) {
+			logger.error("An error occurred while fetch Column Details");
 			throw new DataAccessResourceFailureException("An error occurred while fetch Column Details", exception);
 
 		}
@@ -164,11 +179,14 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public List<Map<String, Object>> fetchResultData(String queryString) {
+
+		logger.info("fetch Result Data Dao");
 		List<Map<String, Object>> responseList = new ArrayList<>();
 		try {
 			MapSqlParameterSource params = new MapSqlParameterSource();
 			responseList = namedParameterJdbcTemplate.queryForList(queryString, params);
 		} catch (DataAccessException exception) {
+			logger.error("An error occurred while fetch Result Data.");
 			throw new DataAccessResourceFailureException("An error occurred while fetch Result Data.", exception);
 		}
 		return responseList;
@@ -185,6 +203,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public Map<String, Object> getDataType(String schemaString, String tableName, List<String> columnList) {
+
+		logger.info("get Datatype dao");
 		Map<String, Object> columnDetails = new HashMap<>();
 		try {
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
@@ -194,7 +214,6 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			paramsObj.addValue(Constants.TABLE_NAME, tableName);
 			paramsObj.addValue("column", columnList);
 			List<Map<String, Object>> columnMap = namedParameterJdbcTemplate.queryForList(sqlString, paramsObj);
-
 			for (Map<String, Object> column : columnMap) {
 				String columnName = (String) column.get("column_name");
 				String dataType = (String) column.get("data_type");
@@ -202,6 +221,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			}
 
 		} catch (DataAccessException exception) {
+			logger.error("An error occurred while getting the Datatype");
 			throw new DataAccessResourceFailureException("An error occurred while getting the Datatype", exception);
 		}
 		return columnDetails;

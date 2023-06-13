@@ -1,6 +1,9 @@
 package com.tm.querybuilder.controller;
 
 import javax.validation.Valid;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -21,6 +24,8 @@ public class ColumnDetailController {
 	@Autowired
 	private QueryBuilderService queryBuilderService;
 
+	private Logger logger = LoggerFactory.getLogger(ColumnDetailController.class);
+
 	/**
 	 * By using schema name get the list of tables and column and its datatype. In
 	 * this API it will check the schema is valid and for the schema it should have
@@ -31,6 +36,7 @@ public class ColumnDetailController {
 	 */
 	@PostMapping("/fetchColumnDetails")
 	public QueryResponsePojo fetchColumnDetails(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
+		logger.info("fetch Column Details Api");
 		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
 		try {
 			String schemaString = builderRequestPojo.getSchemaName();
@@ -45,6 +51,7 @@ public class ColumnDetailController {
 				queryResponsePojo.response(Constants.SCHEMA_EMPTY, null, false);
 			}
 		} catch (Exception exception) {
+			logger.error(exception.getMessage());
 			queryResponsePojo.response(Constants.BAD_REQUEST, exception.getMessage(), false);
 		}
 		return queryResponsePojo;
