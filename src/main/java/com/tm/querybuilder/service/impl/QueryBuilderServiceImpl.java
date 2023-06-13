@@ -1,12 +1,14 @@
 package com.tm.querybuilder.service.impl;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Service;
 
 import com.tm.querybuilder.common.WhereClause;
@@ -29,23 +31,21 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 */
 	@Override
 	public Map<String, Map<String, Object>> fetchColumnDetails(String schemaString) {
+		Map<String, Map<String, Object>> schemaMap = new LinkedHashMap<>();
 		try {
-			Map<String, Map<String, Object >> schemaMap = new LinkedHashMap<>();
 			List<String> tableList = queryBuilderDao.fetchTableDetails(schemaString);
 			for (String tableString : tableList) {
 				Map<String, Object> columnMap = queryBuilderDao.fetchColumnDetails(schemaString, tableString);
-				// Add the table name and column names and data types to the schema map
 				schemaMap.put(tableString, columnMap);
-				// Add the table names to the schema map as a separate entry for easy access
 			}
 			Map<String, Object> tableNameMap = new LinkedHashMap<>();
 			tableNameMap.put("tableNames", String.join(",", tableList));
 			schemaMap.put(Constants.TABLE_NAME, tableNameMap);
-			return schemaMap;
-		} catch (Exception exception) {
-			exception.printStackTrace();
-			return new HashMap<>();
+		} catch (DataAccessException exception) {
+			throw new DataAccessResourceFailureException("An error occurred while fetch ColumnDetails.", exception);
+
 		}
+		return schemaMap;
 
 	}
 
@@ -56,13 +56,14 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 */
 	@Override
 	public List<Map<String, Object>> fetchResultData(String queryString) {
+		List<Map<String, Object>> responseList = new ArrayList<>();
 		try {
-			return queryBuilderDao.fetchResultData(queryString);
+			responseList = queryBuilderDao.fetchResultData(queryString);
 		} catch (Exception exception) {
-			exception.printStackTrace();
-			return new ArrayList<>();
-		}
+			throw new DataAccessResourceFailureException("An error occurred while fetch Data.", exception);
 
+		}
+		return responseList;
 	}
 
 	/**
@@ -73,6 +74,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 */
 	@Override
 	public String fetchQuery(FilterData filterData) {
+		String query = "";
 		try {
 			WhereClause whereClause = new WhereClause();
 			String schemaString = filterData.getSchemaName();
@@ -80,16 +82,17 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			String tableString = filterData.getTableName();
 			// select query with where clause of single table
 			if (filterData.getWhereData() != null) {
-				return "Select " + columnString + " From " + schemaString + "." + tableString + " Where "
+				query = "Select " + columnString + " From " + schemaString + "." + tableString + " Where "
 						+ whereClause.whereCondition(filterData, getDataType(filterData));
 			} else {
 				// select query without where clause of single table
-				return "SELECT " + columnString + " FROM " + schemaString + "." + tableString;
+				query = "SELECT " + columnString + " FROM " + schemaString + "." + tableString;
 			}
 		} catch (Exception exception) {
-			exception.printStackTrace();
-			return "";
+			throw new DataAccessResourceFailureException("An error occurred while fetch Query.", exception);
+
 		}
+		return query;
 	}
 
 	/**
@@ -98,13 +101,15 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * 
 	 */
 	@Override
-	public boolean isSchemaExist(String schemaNameString) {
+	public Boolean isSchemaExist(String schemaNameString) {
+		boolean isSchemaExist = false;
 		try {
-			return queryBuilderDao.isSchemaExist(schemaNameString);
+			isSchemaExist = queryBuilderDao.isSchemaExist(schemaNameString);
 		} catch (Exception exception) {
-			exception.printStackTrace();
-			return false;
+			throw new DataAccessResourceFailureException("An error occurred while checking is Schema Exist.",
+					exception);
 		}
+		return isSchemaExist;
 
 	}
 
@@ -114,13 +119,15 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @return This method will check the schema and table and column in dao.
 	 */
 	@Override
-	public boolean isValidateTable(String schemaString, String tableName) {
+	public Boolean isValidTable(String schemaString, String tableName) {
+		Boolean isValidTable = false;
 		try {
-			return queryBuilderDao.isValidateTable(schemaString, tableName);
+			isValidTable = queryBuilderDao.isValidTable(schemaString, tableName);
 		} catch (Exception exception) {
-			exception.printStackTrace();
-			return false;
+			throw new DataAccessResourceFailureException("An error occurred while checking is valid Table.", exception);
+
 		}
+		return isValidTable;
 
 	}
 
@@ -131,14 +138,14 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 *                     schema
 	 */
 	@Override
-	public boolean isValidateColumns(List<String> columnList, String tableName, String schemaString) {
+	public Boolean isValidColumns(List<String> columnList, String tableName, String schemaString) {
+		boolean isValidColumn = false;
 		try {
-			return queryBuilderDao.isValidateColumns(columnList, tableName, schemaString);
+			isValidColumn = queryBuilderDao.isValidColumns(columnList, tableName, schemaString);
 		} catch (Exception exception) {
-			exception.printStackTrace();
-			return false;
+			throw new DataAccessResourceFailureException("An error occurred Checking is valid Column.", exception);
 		}
-
+		return isValidColumn;
 	}
 
 	/**
@@ -147,9 +154,9 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 */
 	@Override
 	public Map<String, Map<String, Object>> getDataType(FilterData filterData) {
+		Map<String, Map<String, Object>> schemaMap = new LinkedHashMap<>();
 		try {
 			String tableString = filterData.getTableName();
-			Map<String, Map<String, Object>> schemaMap = new LinkedHashMap<>();
 			List<String> columnsList = new ArrayList<>();
 			List<WhereGroupListDto> whereClauseList = filterData.getWhereData();
 			for (int whereGroup = 0; whereGroup < whereClauseList.size(); whereGroup++) {
@@ -161,12 +168,11 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			Map<String, Object> columnMap = queryBuilderDao.getDataType(filterData.getSchemaName(), tableString,
 					columnsList);
 			schemaMap.put(tableString, columnMap);
-			return schemaMap;
 
 		} catch (Exception exception) {
-			exception.printStackTrace();
-			return new HashMap<>();
+			throw new DataAccessResourceFailureException("An error occurred while Getting Data Type.", exception);
 		}
+		return schemaMap;
 
 	}
 

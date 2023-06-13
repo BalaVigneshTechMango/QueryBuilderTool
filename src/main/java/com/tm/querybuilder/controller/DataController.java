@@ -32,6 +32,7 @@ public class DataController {
 	 * the table and its column should be match the it allow to build query by using
 	 * build method and the by using this it will execute depend on the request
 	 * select query with and without where clause.
+	 * 
 	 * @param builderRequestPojo
 	 * @return QueryResponsePojo
 	 */
@@ -44,15 +45,15 @@ public class DataController {
 			String schemaString = filterData.getSchemaName();
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))
 					&& !schemaString.trim().isEmpty()) {
-				if (Boolean.TRUE.equals(queryBuilderService.isValidateColumns(filterData.getColumnNames(),
+				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),
 						filterData.getTableName(), schemaString)
-						&& queryBuilderService.isValidateTable(schemaString, filterData.getTableName()))) {
+						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName()))) {
 					List<Map<String, Object>> responseList = queryBuilderService
 							.fetchResultData(queryBuilderService.fetchQuery(filterData));
-					responseMap.put("filterResponse", responseList);
-					if (responseMap.toString().trim().equals("[]")) {
+					if (responseList.isEmpty()) {
 						queryResponsePojo.response(Constants.NO_DATA, null, false);
 					} else {
+						responseMap.put("filterResponse", responseList);
 						queryResponsePojo.response("Selected table details", responseMap, true);
 					}
 				} else {

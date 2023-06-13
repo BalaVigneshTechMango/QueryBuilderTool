@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -28,17 +29,20 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public boolean isSchemaExist(String schemaString) {
+	public Boolean isSchemaExist(String schemaString) {
+		boolean isSchemaExist = false;
 		try {
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 			// Build a query and store in string.
 			String existsSqlString = "SELECT count(table_schema) FROM information_schema.tables WHERE table_schema = :schemaName ";
 			paramsObj.addValue(Constants.SCHEMA_NAME, schemaString);
-			return namedParameterJdbcTemplate.queryForObject(existsSqlString, paramsObj, Boolean.class);
+			isSchemaExist = namedParameterJdbcTemplate.queryForObject(existsSqlString, paramsObj, Boolean.class);
 		} catch (DataAccessException exception) {
 			exception.printStackTrace();
-			return false;
+			throw new DataAccessResourceFailureException("An error occurred while checking if the schema exists",
+					exception);
 		}
+		return isSchemaExist;
 	}
 
 	/**
@@ -49,19 +53,20 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public boolean isValidateTable(String schemaString, String tableString) {
+	public Boolean isValidTable(String schemaString, String tableString) {
+		boolean isValidTable = false;
 		try {
 			MapSqlParameterSource parametersObj = new MapSqlParameterSource();
 			// Build a query and store in string.
 			String queryString = "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = :tableName AND table_schema = :schemaName";
 			parametersObj.addValue(Constants.TABLE_NAME, tableString);
 			parametersObj.addValue(Constants.SCHEMA_NAME, schemaString);
-			Integer countInt = namedParameterJdbcTemplate.queryForObject(queryString, parametersObj, Integer.class);
-			return countInt != null && countInt > 0;
+			isValidTable = namedParameterJdbcTemplate.queryForObject(queryString, parametersObj, Boolean.class);
 		} catch (DataAccessException exception) {
-			exception.printStackTrace();
-			return false;
+			throw new DataAccessResourceFailureException("An error occurred while checking if the isValid Table",
+					exception);
 		}
+		return isValidTable;
 	}
 
 	/**
@@ -74,7 +79,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public boolean isValidateColumns(List<String> columnsList, String tableString, String schemaString) {
+	public Boolean isValidColumns(List<String> columnsList, String tableString, String schemaString) {
+		boolean isValidColumn = false;
 		try {
 			MapSqlParameterSource parametersObj = new MapSqlParameterSource();
 			String queryString = " SELECT COUNT(*) FROM information_schema.columns WHERE column_name IN (:columns) AND table_name = :tableName AND "
@@ -85,11 +91,13 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			Integer countInt = namedParameterJdbcTemplate.queryForObject(queryString, parametersObj, Integer.class);
 			// if the count not equal to null and colunt the column size and if the both
 			// condition is okay the returns
-			return countInt != null && countInt == columnsList.size();
+			isValidColumn = countInt != null && countInt == columnsList.size();
 		} catch (DataAccessException exception) {
-			exception.printStackTrace();
-			return false;
+
+			throw new DataAccessResourceFailureException("An error occurred while checking if the isValid Column",
+					exception);
 		}
+		return isValidColumn;
 	}
 
 	/**
@@ -106,11 +114,12 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			String sqlString = "SELECT table_name FROM information_schema.tables WHERE table_schema = :schemaName";
 			params.addValue(Constants.SCHEMA_NAME, schemaString);
 			tableList = namedParameterJdbcTemplate.queryForList(sqlString, params, String.class);
-			return tableList;
 		} catch (DataAccessException exception) {
-			exception.printStackTrace();
-			return new ArrayList<>();
+
+			throw new DataAccessResourceFailureException("An error occurred while fetch the table Details", exception);
+
 		}
+		return tableList;
 
 	}
 
@@ -123,7 +132,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public Map<String, Object> fetchColumnDetails(String schemaString, String tableString) {
-		Map<String, Object> columnMap = new LinkedHashMap<>();
+		List<Map<String, Object>> columnMap = new ArrayList<>();
+		Map<String, Object> columnDetails = new LinkedHashMap<>();
 		try {
 			// Query to get column names and data types for each table
 			String sqlString = "SELECT column_name, data_type FROM information_schema.columns WHERE table_schema = :schemaName AND "
@@ -131,12 +141,18 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 			paramsObj.addValue(Constants.SCHEMA_NAME, schemaString);
 			paramsObj.addValue(Constants.TABLE_NAME, tableString);
-			columnMap = namedParameterJdbcTemplate.queryForMap(sqlString, paramsObj);
-			return columnMap;
+			columnMap = namedParameterJdbcTemplate.queryForList(sqlString, paramsObj);
+			for (Map<String, Object> column : columnMap) {
+				String columnName = (String) column.get("column_name");
+				String dataType = (String) column.get("data_type");
+				columnDetails.put(columnName, dataType);
+			}
+
 		} catch (DataAccessException exception) {
-			exception.printStackTrace();
-			return new HashMap<>();
+			throw new DataAccessResourceFailureException("An error occurred while fetch Column Details", exception);
+
 		}
+		return columnDetails;
 
 	}
 
@@ -148,13 +164,14 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public List<Map<String, Object>> fetchResultData(String queryString) {
+		List<Map<String, Object>> responseList = new ArrayList<>();
 		try {
 			MapSqlParameterSource params = new MapSqlParameterSource();
-			return namedParameterJdbcTemplate.queryForList(queryString, params);
+			responseList = namedParameterJdbcTemplate.queryForList(queryString, params);
 		} catch (DataAccessException exception) {
-			exception.printStackTrace();
-			return new ArrayList<>();
+			throw new DataAccessResourceFailureException("An error occurred while fetch Result Data.", exception);
 		}
+		return responseList;
 
 	}
 
@@ -168,7 +185,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 */
 	@Override
 	public Map<String, Object> getDataType(String schemaString, String tableName, List<String> columnList) {
-		Map<String, Object> columnMap = new LinkedHashMap<>();
+		Map<String, Object> columnDetails = new HashMap<>();
 		try {
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 			String sqlString = "SELECT column_name, data_type " + "FROM information_schema.columns "
@@ -176,13 +193,18 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			paramsObj.addValue(Constants.SCHEMA_NAME, schemaString);
 			paramsObj.addValue(Constants.TABLE_NAME, tableName);
 			paramsObj.addValue("column", columnList);
-			columnMap = namedParameterJdbcTemplate.queryForMap(sqlString, paramsObj);
+			List<Map<String, Object>> columnMap = namedParameterJdbcTemplate.queryForList(sqlString, paramsObj);
 
-			return columnMap;
+			for (Map<String, Object> column : columnMap) {
+				String columnName = (String) column.get("column_name");
+				String dataType = (String) column.get("data_type");
+				columnDetails.put(columnName, dataType);
+			}
+
 		} catch (DataAccessException exception) {
-			exception.printStackTrace();
-			return new HashMap<>();
+			throw new DataAccessResourceFailureException("An error occurred while getting the Datatype", exception);
 		}
+		return columnDetails;
 
 	}
 

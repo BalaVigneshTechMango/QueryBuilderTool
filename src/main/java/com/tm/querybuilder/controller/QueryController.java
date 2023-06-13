@@ -42,9 +42,9 @@ public class QueryController {
 			String schemaString = filterData.getSchemaName();
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))
 					&& !schemaString.trim().isEmpty()) {
-				if (Boolean.TRUE.equals(queryBuilderService.isValidateColumns(filterData.getColumnNames(),
+				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),
 						filterData.getTableName(), schemaString)
-						&& queryBuilderService.isValidateTable(schemaString, filterData.getTableName()))) {
+						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName()))) {
 					Map<String, String> responseMap = new HashMap<>();
 					responseMap.put("query", queryBuilderService.fetchQuery(filterData));
 					queryResponsePojo.response("Selected Data", responseMap, true);

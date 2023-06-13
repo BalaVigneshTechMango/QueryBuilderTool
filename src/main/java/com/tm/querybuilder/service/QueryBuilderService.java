@@ -37,7 +37,7 @@ public interface QueryBuilderService {
 	 * @return
 	 * This method will check the schema name and table exist in dao.
 	 */
-	public boolean isSchemaExist(String schemaString);
+	public Boolean isSchemaExist(String schemaString);
 
 	
 	/**
@@ -46,7 +46,7 @@ public interface QueryBuilderService {
 	 * @return
 	 * This method will check the schema and table and column in dao.
 	 */
-	public boolean isValidateTable(String schemaString, String tableName);
+	public Boolean isValidTable(String schemaString, String tableName);
 
 	/**
 	 * @param filterData
@@ -61,6 +61,6 @@ public interface QueryBuilderService {
 	 * @param schemaString
 	 * get the column valid using columnList with its table and schema
 	 */
-	public boolean isValidateColumns(List<String> columnList, String tableName, String schemaString);
+	public Boolean isValidColumns(List<String> columnList, String tableName, String schemaString);
 
 }

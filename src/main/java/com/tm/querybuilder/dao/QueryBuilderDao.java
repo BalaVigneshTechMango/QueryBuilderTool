@@ -21,7 +21,7 @@ public interface QueryBuilderDao {
 	 * @param schemaString
 	 * @return boolean
 	 */
-	public boolean isSchemaExist(String schemaString);
+	public Boolean isSchemaExist(String schemaString);
 
 	/**
 	 * In this method it validate the table in the schema
@@ -30,7 +30,7 @@ public interface QueryBuilderDao {
 	 * @param tableString
 	 * @return
 	 */
-	public boolean isValidateTable(String schemaString, String tableString);
+	public Boolean isValidTable(String schemaString, String tableString);
 
 	/**
 	 * In this method validate the column by using schema and table name using
@@ -41,7 +41,7 @@ public interface QueryBuilderDao {
 	 * @param schemaString
 	 * @return
 	 */
-	public boolean isValidateColumns(List<String> columnsList, String tableString, String schemaString);
+	public Boolean isValidColumns(List<String> columnsList, String tableString, String schemaString);
 
 	/**
 	 * get the data type of the column in where clause
