@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tm.querybuilder.constant.Constants;
-import com.tm.querybuilder.request.BuilderRequestPojo;
-import com.tm.querybuilder.response.QueryResponsePojo;
+import com.tm.querybuilder.constant.MessageConstants;
+import com.tm.querybuilder.request.SchemaPOJO;
+import com.tm.querybuilder.response.QueryBuilderResponsePOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
 
 @CrossOrigin
@@ -24,37 +24,35 @@ public class ColumnDetailController {
 	@Autowired
 	private QueryBuilderService queryBuilderService;
 
-	private Logger logger = LoggerFactory.getLogger(ColumnDetailController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ColumnDetailController.class);
 
 	/**
 	 * By using schema name get the list of tables and column and its datatype. In
 	 * this API it will check the schema is valid and for the schema it should have
 	 * atleast one Table in the schema to get the details of table.
 	 * 
-	 * @param builderRequestPojo
-	 * @return QueryResponsePojo
+	 * @param schemaPojo
+	 * @return QueryBuilderResponsePOJO
 	 */
 	@PostMapping("/fetchColumnDetails")
-	public QueryResponsePojo fetchColumnDetails(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
-		logger.info("fetch Column Details Api");
-		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+	public QueryBuilderResponsePOJO fetchColumnDetails(@Valid @RequestBody SchemaPOJO schemaPojo) {
+		LOGGER.info("fetch Column Details Api:");
+		QueryBuilderResponsePOJO queryBuilderResponsePojo = new QueryBuilderResponsePOJO();
 		try {
-			String schemaString = builderRequestPojo.getSchemaName();
-			if (!schemaString.trim().isEmpty()) {
-				if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
-					queryResponsePojo.response("Table Details of the Schema",
-							queryBuilderService.fetchColumnDetails(schemaString), true);
-				} else {
-					queryResponsePojo.response(Constants.VALID_SCHEMA, null, false);
-				}
+			LOGGER.info(schemaPojo.getSchemaName());
+			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaPojo.getSchemaName()))) {
+				LOGGER.info(MessageConstants.SCHEMA_IS_VALID);
+				queryBuilderResponsePojo.response("Table Details of the Schema",
+						queryBuilderService.fetchColumnDetails(schemaPojo.getSchemaName()), true);
 			} else {
-				queryResponsePojo.response(Constants.SCHEMA_EMPTY, null, false);
+				LOGGER.error(MessageConstants.NOT_VALID_SCHEMA, schemaPojo.getSchemaName());
+				queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_SCHEMA, false);
 			}
 		} catch (Exception exception) {
-			logger.error(exception.getMessage());
-			queryResponsePojo.response(Constants.BAD_REQUEST, exception.getMessage(), false);
+			LOGGER.error(exception.getMessage());
+			queryBuilderResponsePojo.errorResponse(MessageConstants.BAD_REQUEST);
 		}
-		return queryResponsePojo;
+		return queryBuilderResponsePojo;
 	}
 
 }

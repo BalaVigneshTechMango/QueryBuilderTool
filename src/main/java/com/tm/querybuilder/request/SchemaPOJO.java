@@ -1,28 +1,14 @@
 package com.tm.querybuilder.request;
 
+import javax.validation.constraints.NotBlank;
 
-import javax.validation.Valid;
+public class SchemaPOJO {
 
-import com.tm.querybuilder.dto.FilterData;
-
-public class BuilderRequestPojo {
-
-
+	@NotBlank(message = "Enter the SchemaName")
 	private String schemaName;
 
+	@NotBlank(message = "Enter database Name")
 	private String database;
-
-	@Valid
-	private FilterData requestData;
-
-
-	public FilterData getRequestData() {
-		return requestData;
-	}
-
-	public void setRequestData(FilterData requestData) {
-		this.requestData = requestData;
-	}
 
 	public String getSchemaName() {
 		return schemaName;
@@ -39,5 +25,4 @@ public class BuilderRequestPojo {
 	public void setDatabase(String database) {
 		this.database = database;
 	}
-
 }

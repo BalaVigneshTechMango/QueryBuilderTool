@@ -28,7 +28,7 @@ public interface QueryBuilderService {
 	 * @param filterData
 	 * @return String This method build the query based on the request.
 	 */
-	public String fetchQuery(FilterData filterData);
+	public String fetchQuery(FilterData filterData,String schemaString);
 
 
 	
@@ -50,10 +50,9 @@ public interface QueryBuilderService {
 
 	/**
 	 * @param filterData
-	 * @return
-	 * get the datatype of column in the whereClause
+	 * @return get the datatype of column in the whereClause
 	 */
-	public Map<String, Map<String, Object>> getDataType(FilterData filterData);
+	Map<String, Map<String, Object>> getDataType(FilterData filterData, String schemaString);
 
 	/**
 	 * @param columnList
@@ -62,5 +61,7 @@ public interface QueryBuilderService {
 	 * get the column valid using columnList with its table and schema
 	 */
 	public Boolean isValidColumns(List<String> columnList, String tableName, String schemaString);
+
+	
 
 }

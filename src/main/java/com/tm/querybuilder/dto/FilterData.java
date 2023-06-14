@@ -16,36 +16,11 @@ public class FilterData {
 
 	@NotBlank(message = "Enter the tableName")
 	private String tableName;
-	@NotBlank(message = "Enter the SchemaName")
-	private String schemaName;
-
-	@NotBlank(message = "Enter Schema Name")
-	private String database;
 
 	@NotEmpty(message = "String list cannot be empty")
 	@Size(min = 1, message = "Minimum One column should be selected")
 	@NoWhitespaceList
 	private List<String> columnNames;
-
-	
-	public String getDatabase() {
-		return database;
-	}
-
-	public void setDatabase(String database) {
-		this.database = database;
-	}
-
-	public String getSchemaName() {
-		return schemaName;
-	}
-
-	public void setSchemaName(String schemaName) {
-		this.schemaName = schemaName;
-	}
-
-
-
 
 	public List<WhereGroupListDto> getWhereData() {
 		return whereData;

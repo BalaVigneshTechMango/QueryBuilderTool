@@ -10,18 +10,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.tm.querybuilder.response.QueryResponsePojo;
+import com.tm.querybuilder.response.QueryBuilderResponsePOJO;
 
 @RestControllerAdvice
 public class ExpectionValidation {
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public QueryResponsePojo handleValidationExceptions(MethodArgumentNotValidException ex) {
-		QueryResponsePojo responsePojo = new QueryResponsePojo();
+	public QueryBuilderResponsePOJO handleValidationExceptions(MethodArgumentNotValidException ex) {
+		QueryBuilderResponsePOJO responsePojo = new QueryBuilderResponsePOJO();
 		Map<String, String> errors = new HashMap<>();
-		ex.getBindingResult().getAllErrors().forEach(error -> {
-			errors.put(((FieldError) error).getField(), error.getDefaultMessage());
-		});
+		ex.getBindingResult().getAllErrors()
+				.forEach(error -> errors.put(((FieldError) error).getField(), error.getDefaultMessage()));
 		responsePojo.setMessage("Not Valid Request");
 		responsePojo.setResponseData(errors);
 		responsePojo.setIsSuccess(false);

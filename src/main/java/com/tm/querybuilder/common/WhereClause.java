@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -17,7 +16,14 @@ import com.tm.querybuilder.enums.LogicalCondition;
 
 public class WhereClause {
 
-	public StringBuilder whereCondition(FilterData filterData, Map<String, Map<String, String>> datatypeMap) {
+	/**
+	 * The method build the where condition by iterating the whereGroup data and where list data
+	 * 
+	 * @param filterData
+	 * @param datatypeMap
+	 * @return
+	 */
+	public StringBuilder whereCondition(FilterData filterData, Map<String, Map<String, Object>> datatypeMap) {
 
 		Gson gson = new Gson();
 		StringBuilder whereBuilder = new StringBuilder();
@@ -42,6 +48,7 @@ public class WhereClause {
 
 				LogicalCondition logicalConWhereList = whereGroupList.get(whereList).getLogicalCondition();
 				// get the datatype of column in wherelist one by one
+
 				String dataType = table.get(column).getAsString();
 
 				Set<String> operatorInt = new HashSet<>(

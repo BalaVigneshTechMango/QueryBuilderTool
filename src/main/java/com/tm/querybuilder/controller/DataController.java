@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.tm.querybuilder.constant.Constants;
+import com.tm.querybuilder.constant.MessageConstants;
 import com.tm.querybuilder.dto.FilterData;
-import com.tm.querybuilder.request.BuilderRequestPojo;
-import com.tm.querybuilder.response.QueryResponsePojo;
+import com.tm.querybuilder.request.QueryBuilderRequestPOJO;
+import com.tm.querybuilder.response.QueryBuilderResponsePOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
 
 @CrossOrigin
@@ -29,7 +29,7 @@ public class DataController {
 	@Autowired
 	private QueryBuilderService queryBuilderService;
 
-	private Logger logger = LoggerFactory.getLogger(DataController.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(DataController.class);
 
 	/**
 	 * Before Execution In this API it will validate the schema exist for the schema
@@ -37,41 +37,48 @@ public class DataController {
 	 * build method and the by using this it will execute depend on the request
 	 * select query with and without where clause.
 	 * 
-	 * @param builderRequestPojo
-	 * @return QueryResponsePojo
+	 * @param queryBuilderRequestPojo
+	 * @return QueryBuilderResponsePOJO
 	 */
 	@PostMapping("/fetchResultData")
-	public QueryResponsePojo fetchResultData(@Valid @RequestBody BuilderRequestPojo builderRequestPojo) {
-		logger.info("fetch Result Data");
-		QueryResponsePojo queryResponsePojo = new QueryResponsePojo();
+	public QueryBuilderResponsePOJO fetchResultData(
+			@Valid @RequestBody QueryBuilderRequestPOJO queryBuilderRequestPojo) {
+		LOGGER.info("fetch Result Data");
+		QueryBuilderResponsePOJO queryBuilderResponsePojo = new QueryBuilderResponsePOJO();
 		Map<String, Object> responseMap = new HashMap<>();
 		try {
-			FilterData filterData = builderRequestPojo.getRequestData();
-			String schemaString = filterData.getSchemaName();
-			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))
-					&& !schemaString.trim().isEmpty()) {
+			FilterData filterData = queryBuilderRequestPojo.getRequestData();
+			String schemaString = queryBuilderRequestPojo.getSchemaName();
+			LOGGER.info("schema Name:{}", schemaString);
+			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
+				LOGGER.info(MessageConstants.SCHEMA_IS_VALID, schemaString);
 				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),
 						filterData.getTableName(), schemaString)
 						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName()))) {
+					LOGGER.info(MessageConstants.VALID_TABLECOLUMN);
 					List<Map<String, Object>> responseList = queryBuilderService
-							.fetchResultData(queryBuilderService.fetchQuery(filterData));
+							.fetchResultData(queryBuilderService.fetchQuery(filterData, schemaString));
 					if (responseList.isEmpty()) {
-						queryResponsePojo.response(Constants.NO_DATA, null, false);
+						LOGGER.error(MessageConstants.NO_DATA);
+						queryBuilderResponsePojo.response(MessageConstants.NO_DATA, false);
 					} else {
 						responseMap.put("filterResponse", responseList);
-						queryResponsePojo.response("Selected table details", responseMap, true);
+						LOGGER.info(MessageConstants.RESULT_SUCCESS, responseMap);
+						queryBuilderResponsePojo.response(MessageConstants.RESULT_SUCCESS, responseMap, true);
 					}
 				} else {
-					queryResponsePojo.response("Not a Valid column or table", null, false);
+					LOGGER.error(MessageConstants.NOT_VALID_TABLECOLUMN);
+					queryBuilderResponsePojo.response("Not a Valid column or table", false);
 				}
 			} else {
-				queryResponsePojo.response(Constants.SCHEMA_EMPTY, null, false);
+				LOGGER.error(MessageConstants.NOT_VALID_SCHEMA);
+				queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_SCHEMA, false);
 			}
 		} catch (Exception exception) {
-			logger.error(exception.getMessage());
-			queryResponsePojo.response(Constants.BAD_REQUEST, exception.getMessage(), false);
+			LOGGER.error(exception.getMessage());
+			queryBuilderResponsePojo.errorResponse(MessageConstants.BAD_REQUEST);
 		}
-		return queryResponsePojo;
+		return queryBuilderResponsePojo;
 	}
 
 }
