@@ -64,11 +64,11 @@ public class DataController {
 					} else {
 						responseMap.put("filterResponse", responseList);
 						LOGGER.info(MessageConstants.RESULT_SUCCESS, responseMap);
-						queryBuilderResponsePojo.response(MessageConstants.RESULT_SUCCESS, responseMap, true);
+						queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
 					}
 				} else {
 					LOGGER.error(MessageConstants.NOT_VALID_TABLECOLUMN);
-					queryBuilderResponsePojo.response("Not a Valid column or table", false);
+					queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_TABLECOLUMN, false);
 				}
 			} else {
 				LOGGER.error(MessageConstants.NOT_VALID_SCHEMA);

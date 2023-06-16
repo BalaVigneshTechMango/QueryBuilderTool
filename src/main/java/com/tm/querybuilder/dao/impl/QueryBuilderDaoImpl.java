@@ -190,7 +190,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			MapSqlParameterSource params = new MapSqlParameterSource();
 			responseList = namedParameterJdbcTemplate.queryForList(queryString, params);
 		} catch (DataAccessException exception) {
-			LOGGER.error("An error occurred while fetch Result Data.");
+			LOGGER.error("An error occurred while fetch Result Data dao.");
 			throw new DataAccessResourceFailureException("An error occurred while fetch Result Data.", exception);
 		}
 		LOGGER.info("fetch Result Data dao:{}", responseList);

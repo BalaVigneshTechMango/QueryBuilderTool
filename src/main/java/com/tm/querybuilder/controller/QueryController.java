@@ -55,7 +55,7 @@ public class QueryController {
 					Map<String, String> responseMap = new HashMap<>();
 					responseMap.put("query", queryBuilderService.fetchQuery(filterData, schemaString));
 					LOGGER.info(MessageConstants.RESULT_SUCCESS, responseMap);
-					queryBuilderResponsePojo.response(MessageConstants.RESULT_SUCCESS, responseMap, true);
+					queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
 				} else {
 					LOGGER.error(MessageConstants.NOT_VALID_TABLECOLUMN);
 					queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_TABLECOLUMN, false);

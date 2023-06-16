@@ -45,7 +45,7 @@ public class ColumnDetailController {
 				queryBuilderResponsePojo.response("Table Details of the Schema",
 						queryBuilderService.fetchColumnDetails(schemaPojo.getSchemaName()), true);
 			} else {
-				LOGGER.error(MessageConstants.NOT_VALID_SCHEMA, schemaPojo.getSchemaName());
+				LOGGER.error(MessageConstants.NOT_VALIDSCHEMA, schemaPojo.getSchemaName());
 				queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_SCHEMA, false);
 			}
 		} catch (Exception exception) {
