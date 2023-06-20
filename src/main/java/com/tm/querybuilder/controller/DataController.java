@@ -43,27 +43,23 @@ public class DataController {
 	@PostMapping("/fetchResultData")
 	public QueryBuilderResponsePOJO fetchResultData(
 			@Valid @RequestBody QueryBuilderRequestPOJO queryBuilderRequestPojo) {
-		LOGGER.info("fetch Result Data");
+		LOGGER.info("fetch Result Data Api");
 		QueryBuilderResponsePOJO queryBuilderResponsePojo = new QueryBuilderResponsePOJO();
 		Map<String, Object> responseMap = new HashMap<>();
 		try {
 			FilterData filterData = queryBuilderRequestPojo.getRequestData();
 			String schemaString = queryBuilderRequestPojo.getSchemaName();
-			LOGGER.info("schema Name:{}", schemaString);
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
-				LOGGER.info(MessageConstants.SCHEMA_IS_VALID, schemaString);
 				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),
 						filterData.getTableName(), schemaString)
 						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName()))) {
-					LOGGER.info(MessageConstants.VALID_TABLECOLUMN);
 					List<Map<String, Object>> responseList = queryBuilderService
 							.fetchResultData(queryBuilderService.fetchQuery(filterData, schemaString));
 					if (responseList.isEmpty()) {
-						LOGGER.error(MessageConstants.NO_DATA);
+						LOGGER.error("Result No data Found for the Request Data:");
 						queryBuilderResponsePojo.response(MessageConstants.NO_DATA, false);
 					} else {
 						responseMap.put("filterResponse", responseList);
-						LOGGER.info(MessageConstants.RESULT_SUCCESS, responseMap);
 						queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
 					}
 				} else {

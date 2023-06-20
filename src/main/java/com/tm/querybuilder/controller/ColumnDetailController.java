@@ -39,13 +39,12 @@ public class ColumnDetailController {
 		LOGGER.info("fetch Column Details Api:");
 		QueryBuilderResponsePOJO queryBuilderResponsePojo = new QueryBuilderResponsePOJO();
 		try {
-			LOGGER.info(schemaPojo.getSchemaName());
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaPojo.getSchemaName()))) {
-				LOGGER.info(MessageConstants.SCHEMA_IS_VALID);
+				LOGGER.info("schema is valid and fetching the details for tables");
 				queryBuilderResponsePojo.response("Table Details of the Schema",
 						queryBuilderService.fetchColumnDetails(schemaPojo.getSchemaName()), true);
 			} else {
-				LOGGER.error(MessageConstants.NOT_VALIDSCHEMA, schemaPojo.getSchemaName());
+				LOGGER.error("Not Valid schema");
 				queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_SCHEMA, false);
 			}
 		} catch (Exception exception) {

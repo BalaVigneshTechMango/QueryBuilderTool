@@ -45,16 +45,14 @@ public class QueryController {
 		try {
 			FilterData filterData = queryBuilderRequestPojo.getRequestData();
 			String schemaString = queryBuilderRequestPojo.getSchemaName();
-			LOGGER.info(schemaString);
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
-				LOGGER.info("Schema Name is Valid:");
+				LOGGER.info("schema is valid, validating table and column details");
 				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),
 						filterData.getTableName(), schemaString)
 						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName()))) {
 					LOGGER.info(MessageConstants.VALID_TABLECOLUMN);
 					Map<String, String> responseMap = new HashMap<>();
 					responseMap.put("query", queryBuilderService.fetchQuery(filterData, schemaString));
-					LOGGER.info(MessageConstants.RESULT_SUCCESS, responseMap);
 					queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
 				} else {
 					LOGGER.error(MessageConstants.NOT_VALID_TABLECOLUMN);
