@@ -48,11 +48,6 @@ public interface QueryBuilderService {
 	 */
 	public Boolean isValidTable(String schemaString, String tableName);
 
-	/**
-	 * @param filterData
-	 * @return get the datatype of column in the whereClause
-	 */
-	Map<String, Map<String, Object>> getDataType(FilterData filterData, String schemaString);
 
 	/**
 	 * @param columnList

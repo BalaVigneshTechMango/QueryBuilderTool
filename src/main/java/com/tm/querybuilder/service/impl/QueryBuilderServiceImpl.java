@@ -171,8 +171,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @param filterData
 	 * @return get the datatype of column in the whereClause
 	 */
-	@Override
-	public Map<String, Map<String, Object>> getDataType(FilterData filterData, String schemaString) {
+	private Map<String, Map<String, Object>> getDataType(FilterData filterData, String schemaString) {
 		LOGGER.info("Get data type service");
 		Map<String, Map<String, Object>> schemaMap = new LinkedHashMap<>();
 		try {

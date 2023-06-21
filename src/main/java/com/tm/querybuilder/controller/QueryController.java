@@ -59,8 +59,8 @@ public class QueryController {
 					queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_TABLECOLUMN, false);
 				}
 			} else {
-				LOGGER.error(MessageConstants.NOT_VALID_TABLE);
-				queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_TABLE, false);
+				LOGGER.error(MessageConstants.NOT_VALID_SCHEMA);
+				queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_SCHEMA, false);
 			}
 		} catch (Exception exception) {
 			LOGGER.error(exception.getMessage());
