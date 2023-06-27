@@ -1,9 +1,12 @@
 package com.tm.querybuilder.service.impl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +15,13 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Service;
 
-import com.tm.querybuilder.common.WhereClause;
-import com.tm.querybuilder.constant.MessageConstants;
+import com.tm.querybuilder.constant.QueryConstants;
 import com.tm.querybuilder.dao.QueryBuilderDao;
+import com.tm.querybuilder.dto.ColumnDatatype;
+import com.tm.querybuilder.dto.ColumnDetails;
 import com.tm.querybuilder.dto.FilterData;
+import com.tm.querybuilder.dto.JoinConditionDto;
+import com.tm.querybuilder.dto.JoinData;
 import com.tm.querybuilder.dto.WhereGroupListDto;
 import com.tm.querybuilder.dto.WhereListDto;
 import com.tm.querybuilder.service.QueryBuilderService;
@@ -38,22 +44,20 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		LOGGER.info("fetch table,column and its datatype service method");
 		Map<String, Map<String, Object>> schemaMap = new LinkedHashMap<>();
 		try {
-			List<String> tableList = queryBuilderDao.fetchTableDetails(schemaString);
-			for (String tableString : tableList) {
-				Map<String, Object> columnMap = queryBuilderDao.fetchColumnDetails(schemaString, tableString);
-				schemaMap.put(tableString, columnMap);
+			List<ColumnDetails> columnDetailsList = queryBuilderDao.fetchColumnDetails(schemaString);
+			for (ColumnDetails columnDetails : columnDetailsList) {
+				String tableName = columnDetails.getTableName();
+				if (!schemaMap.containsKey(tableName)) {
+					schemaMap.put(tableName, new LinkedHashMap<>());
+				}
+				schemaMap.get(tableName).put(columnDetails.getColumnName(), columnDetails.getDataType());
 			}
-			Map<String, Object> tableNameMap = new LinkedHashMap<>();
-			tableNameMap.put("tableNames", String.join(",", tableList));
-			schemaMap.put(MessageConstants.TABLE_NAME, tableNameMap);
 		} catch (DataAccessException exception) {
-			LOGGER.error("An error occurred while fetch ColumnDetails.",exception);
+			LOGGER.error("An error occurred while fetch ColumnDetails.", exception);
 			throw new DataAccessResourceFailureException("An error occurred while fetch ColumnDetails.");
-
 		}
 		LOGGER.debug("Result of table,column and its datatype {}", schemaMap);
 		return schemaMap;
-
 	}
 
 	/**
@@ -68,9 +72,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		try {
 			responseList = queryBuilderDao.fetchResultData(queryString);
 		} catch (Exception exception) {
-			LOGGER.error("An error occurred while fetch Data in service layer.",exception);
+			LOGGER.error("An error occurred while fetch Data in service layer.", exception);
 			throw new DataAccessResourceFailureException("An error occurred while fetch Data .");
-
 		}
 		return responseList;
 	}
@@ -86,23 +89,34 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		LOGGER.info("fetch query service");
 		String query = "";
 		try {
-			WhereClause whereClause = new WhereClause();
+			String columnString = String.join(",", filterData.getColumnNames());
+			List<WhereGroupListDto> whereClauseList = filterData.getWhereData();
+			List<JoinData> joinsList = filterData.getJoin();
+			if (whereClauseList != null && !whereClauseList.isEmpty() && joinsList != null && !joinsList.isEmpty()) {
+				LOGGER.info("select query using Joins with whereClause");
+				String joinConditionString = getOnCondition(joinsList, schemaString, filterData.getTableName());
+				query = QueryConstants.SELECT + columnString + QueryConstants.FROM + joinConditionString + " WHERE "
+						+ whereCondition(whereClauseList, getDataType(filterData, schemaString));
+			} else if (joinsList != null && !joinsList.isEmpty()) {
+				LOGGER.info("select query with join condition");
+				String joinConditionString = getOnCondition(joinsList, schemaString, filterData.getTableName());
+				query = QueryConstants.SELECT + columnString + QueryConstants.FROM + joinConditionString;
+			}
 			// select query with where clause of single table
-			if (filterData.getWhereData() != null) {
+			else if (whereClauseList != null && !whereClauseList.isEmpty()) {
 				LOGGER.info("select query with whereClause");
-				query = "Select " + String.join(",", filterData.getColumnNames()) + " From " + schemaString + "."
-						+ filterData.getTableName() + " Where "
-						+ whereClause.whereCondition(filterData, getDataType(filterData, schemaString));
+				query = QueryConstants.SELECT + columnString + QueryConstants.FROM + schemaString + "."
+						+ filterData.getTableName() + " WHERE "
+						+ whereCondition(whereClauseList, getDataType(filterData, schemaString));
 			} else {
 				LOGGER.info("Select Query without whereClause");
 				// select query without where clause of single table
-				query = "SELECT " + String.join(",", filterData.getColumnNames()) + " FROM " + schemaString + "."
+				query = QueryConstants.SELECT + columnString + QueryConstants.FROM + schemaString + "."
 						+ filterData.getTableName();
 			}
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while fetch Query.");
 			throw new DataAccessResourceFailureException("An error occurred while fetch Query.", exception);
-
 		}
 		LOGGER.debug("Build Query for the request data service:{}", query);
 		return query;
@@ -134,11 +148,18 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @return This method will check the schema and table and column in dao.
 	 */
 	@Override
-	public Boolean isValidTable(String schemaString, String tableName) {
+	public Boolean isValidTable(String schemaString, String tableName, List<JoinData> joinData) {
 		LOGGER.info("isValid table service");
 		Boolean isValidTable = false;
 		try {
-			isValidTable = queryBuilderDao.isValidTable(schemaString, tableName);
+			Set<String> tablesList = new HashSet<>();
+			if (joinData != null && !joinData.isEmpty()) {
+				for (JoinData joinTable : joinData) {
+					tablesList.add(joinTable.getJoinTableName());
+				}
+			}
+			tablesList.add(tableName);
+			isValidTable = queryBuilderDao.isValidTable(schemaString, tablesList);
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while checking is valid Table.");
 			throw new DataAccessResourceFailureException("An error occurred while checking is valid Table.", exception);
@@ -155,11 +176,32 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 *                     schema
 	 */
 	@Override
-	public Boolean isValidColumns(List<String> columnList, String tableName, String schemaString) {
+	public Boolean isValidColumns(List<String> columnList, List<WhereGroupListDto> whereCondition, String tableName,
+			String schemaString, List<JoinData> joinData) {
 		LOGGER.info("Is Valid Column service method");
 		boolean isValidColumn = false;
 		try {
-			isValidColumn = queryBuilderDao.isValidColumns(columnList, tableName, schemaString);
+			Set<String> tablesList = new HashSet<>();
+			Set<String> columnsList = new HashSet<>();
+			if (joinData != null && !joinData.isEmpty()) {
+				for (JoinData joinTable : joinData) {
+					tablesList.add(joinTable.getJoinTableName());
+					for (JoinConditionDto joinConditionDto : joinTable.getJoinCondition()) {
+						columnsList.add(tableName + '.' + joinConditionDto.getLsColumn());
+						columnsList.add(joinTable.getJoinTableName() + '.' + joinConditionDto.getRsColumn());
+					}
+				}
+			}
+			if (whereCondition != null && !whereCondition.isEmpty()) {
+				for (WhereGroupListDto whereGroupListDto : whereCondition) {
+					for (WhereListDto whereListDto : whereGroupListDto.getWhereList()) {
+						columnsList.add(whereListDto.getColumn());
+					}
+				}
+			}
+			columnsList.addAll(columnList);
+			tablesList.add(tableName);
+			isValidColumn = queryBuilderDao.isValidColumns(columnsList, tablesList, schemaString);
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred Checking is valid Column.");
 			throw new DataAccessResourceFailureException("An error occurred Checking is valid Column.", exception);
@@ -171,12 +213,12 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @param filterData
 	 * @return get the datatype of column in the whereClause
 	 */
-	private Map<String, Map<String, Object>> getDataType(FilterData filterData, String schemaString) {
+	private Map<String, Object> getDataType(FilterData filterData, String schemaString) {
 		LOGGER.info("Get data type service");
-		Map<String, Map<String, Object>> schemaMap = new LinkedHashMap<>();
+		Map<String, Object> schemaMap = new LinkedHashMap<>();
 		try {
-			String tableString = filterData.getTableName();
-			List<String> columnsList = new ArrayList<>();
+			Set<String> tablesList = new HashSet<>();
+			Set<String> columnsList = new HashSet<>();
 			List<WhereGroupListDto> whereClauseList = filterData.getWhereData();
 			for (WhereGroupListDto whereGroupListDto : whereClauseList) {
 				List<WhereListDto> whereList = whereGroupListDto.getWhereList();
@@ -184,8 +226,16 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 					columnsList.add(whereListDto.getColumn());
 				}
 			}
-			Map<String, Object> columnMap = queryBuilderDao.getDataType(schemaString, tableString, columnsList);
-			schemaMap.put(tableString, columnMap);
+			if (filterData.getJoin() != null && !filterData.getJoin().isEmpty()) {
+				for (JoinData joinTable : filterData.getJoin()) {
+					tablesList.add(joinTable.getJoinTableName());
+				}
+			}
+			tablesList.add(filterData.getTableName());
+			List<ColumnDatatype> columnDetails = queryBuilderDao.getDataType(schemaString, tablesList, columnsList);
+			for (ColumnDatatype columnDetail : columnDetails) {
+				schemaMap.put(columnDetail.getTableColumn(), columnDetail.getDataType());
+			}
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while Getting Data Type.");
 			throw new DataAccessResourceFailureException("An error occurred while Getting Data Type.", exception);
@@ -193,6 +243,93 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		LOGGER.debug("get datatype service:{}", schemaMap);
 		return schemaMap;
 
+	}
+
+	/**
+	 * This method build on condition in joins using string builder.
+	 * 
+	 * @param joinDataList
+	 * @param schemaString
+	 * @return
+	 */
+	private String getOnCondition(List<JoinData> joinDataList, String schemaString, String tableName) {
+		LOGGER.info("build On condition using string builder method");
+		StringBuilder conditionBuilder = new StringBuilder();
+		try {
+			for (JoinData joinData : joinDataList) {
+				conditionBuilder.append(schemaString).append(".").append(tableName).append(" ")
+						.append(joinData.getJoinType().getOperator()).append(" ").append(schemaString).append(".")
+						.append(joinData.getJoinTableName()).append(" ").append("ON");
+				for (JoinConditionDto joinConditionDto : joinData.getJoinCondition()) {
+					conditionBuilder.append(" ").append("(").append(" ").append(tableName).append(".")
+							.append(joinConditionDto.getLsColumn()).append(" ")
+							.append(joinConditionDto.getCondition().getOperator()).append(" ")
+							.append(joinData.getJoinTableName()).append(".").append(joinConditionDto.getRsColumn())
+							.append(") ");
+					if (joinConditionDto.getLogicalCondition() != null) {
+						conditionBuilder.append(" ").append(joinConditionDto.getLogicalCondition());
+					}
+				}
+			}
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while Getting Join condition query.");
+			throw new DataAccessResourceFailureException("An error occurred while getting Join condition query.",
+					exception);
+		}
+		LOGGER.debug("On conditon : {}", conditionBuilder);
+		return conditionBuilder.toString();
+	}
+
+	/**
+	 * The method build the where condition by iterating the whereGroup data and
+	 * where list data
+	 * 
+	 * @param filterData
+	 * @param datatypeMap
+	 * @return
+	 */
+	private String whereCondition(List<WhereGroupListDto> whereClauseList, Map<String, Object> columnDataTypeMap) {
+		LOGGER.info("building where condition method");
+		StringBuilder whereBuilder = new StringBuilder();
+		try {
+			Set<String> operatorString = new HashSet<>(Arrays.asList("varchar", "char", "enum", "text"));
+			for (WhereGroupListDto whereGroupListDto : whereClauseList) {
+				List<WhereListDto> whereList = whereGroupListDto.getWhereList();
+				StringBuilder whereGroupBuilder = new StringBuilder();
+				for (WhereListDto whereListDto : whereList) {
+					whereGroupBuilder.append(whereListDto.getColumn())
+							.append(whereListDto.getCondition().getOperator());
+					// check whether the column data type is a part of operater list to add single
+					// quotes in prefix and suffix
+					if (operatorString.contains(columnDataTypeMap.get(whereListDto.getColumn()))) {
+						whereGroupBuilder.append("'").append(whereListDto.getValue()).append("'");
+					} else {
+						whereGroupBuilder.append(whereListDto.getValue());
+					}
+					// Append condition to the where group list if the condition has value
+					// Condition will be null if it is the last item of the list.
+					if (whereListDto.getLogicalCondition() != null) {
+						whereGroupBuilder.append(" ").append(whereListDto.getLogicalCondition()).append(" ");
+					}
+				}
+				// Start and close with paranthesis if inner condition list has value
+				// Append the where group string to the where list
+				if (!whereGroupBuilder.toString().isEmpty()) {
+					whereBuilder.append("(").append(whereGroupBuilder.toString()).append(")");
+				}
+				// Append condition to the where list if the condition has value
+				// Condition will be null if it is the last item of the list
+				if (whereGroupListDto.getLogicalCondition() != null) {
+					whereBuilder.append(" ").append(whereGroupListDto.getLogicalCondition().name()).append(" ");
+				}
+			}
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while building where condition.");
+			throw new DataAccessResourceFailureException("An error occurred while building where condition.",
+					exception);
+		}
+		LOGGER.debug("where Condition:{}", whereBuilder);
+		return whereBuilder.toString();
 	}
 
 }

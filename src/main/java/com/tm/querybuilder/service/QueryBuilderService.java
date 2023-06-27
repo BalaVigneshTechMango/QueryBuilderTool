@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.stereotype.Service;
 
 import com.tm.querybuilder.dto.FilterData;
+import com.tm.querybuilder.dto.JoinData;
+import com.tm.querybuilder.dto.WhereGroupListDto;
 
 @Service
 public interface QueryBuilderService {
@@ -46,7 +48,7 @@ public interface QueryBuilderService {
 	 * @return
 	 * This method will check the schema and table and column in dao.
 	 */
-	public Boolean isValidTable(String schemaString, String tableName);
+	public Boolean isValidTable(String schemaString, String tableName,List<JoinData>joinData);
 
 
 	/**
@@ -55,7 +57,9 @@ public interface QueryBuilderService {
 	 * @param schemaString
 	 * get the column valid using columnList with its table and schema
 	 */
-	public Boolean isValidColumns(List<String> columnList, String tableName, String schemaString);
+	public Boolean isValidColumns(List<String> columnList,List<WhereGroupListDto>whereCondition, String tableName, String schemaString, List<JoinData> joinData);
+
+
 
 	
 

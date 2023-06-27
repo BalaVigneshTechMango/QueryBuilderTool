@@ -1,10 +1,12 @@
 package com.tm.querybuilder.constant;
 
+
 public class MessageConstants {
 
 	private MessageConstants() {
 	}
 
+	public static final String FROM=" FROM ";
 	public static final String COLUMN_NAME = "column_name";
 	public static final String DATA_TYPE = "data_type";
 	public static final String TABLE_NAME = "tableName";
