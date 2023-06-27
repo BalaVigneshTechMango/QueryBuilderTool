@@ -2,11 +2,17 @@ package com.tm.querybuilder.dao;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
 import org.springframework.stereotype.Service;
+
+import com.tm.querybuilder.dto.ColumnDatatype;
+import com.tm.querybuilder.dto.ColumnDetails;
 
 @Service
 public interface QueryBuilderDao {
 
+	
 	/**
 	 * This Api for dynamic join query for multiple tables
 	 * 
@@ -30,7 +36,7 @@ public interface QueryBuilderDao {
 	 * @param tableString
 	 * @return
 	 */
-	public Boolean isValidTable(String schemaString, String tableString);
+	public Boolean isValidTable(String schemaString, Set<String> tableList);
 
 	/**
 	 * In this method validate the column by using schema and table name using
@@ -41,7 +47,7 @@ public interface QueryBuilderDao {
 	 * @param schemaString
 	 * @return
 	 */
-	public Boolean isValidColumns(List<String> columnsList, String tableString, String schemaString);
+	public Boolean isValidColumns(Set<String> columnsList, Set<String> tableList, String schemaString);
 
 	/**
 	 * get the data type of the column in where clause
@@ -51,15 +57,8 @@ public interface QueryBuilderDao {
 	 * @param columnList
 	 * @return
 	 */
-	public Map<String, Object> getDataType(String schemaString, String tableName, List<String> columnList);
+	public List<ColumnDatatype> getDataType(String schemaString, Set<String> tableList, Set<String> columnList);
 
-	/**
-	 * get the table details using schemaName
-	 * 
-	 * @param schemaName
-	 * @return
-	 */
-	public List<String> fetchTableDetails(String schemaName);
 
 	/**
 	 * This method will return the column And TableName of the database
@@ -68,6 +67,9 @@ public interface QueryBuilderDao {
 	 * @param tableString
 	 * @return
 	 */
-	public Map<String, Object> fetchColumnDetails(String schemaString, String tableString);
+	List<ColumnDetails> fetchColumnDetails(String schemaString);
+
+	
+	
 
 }

@@ -22,6 +22,17 @@ public class FilterData {
 	@NoWhitespaceList
 	private List<String> columnNames;
 
+	@Valid
+	private List<JoinData> join;
+
+	public List<JoinData> getJoin() {
+		return join;
+	}
+
+	public void setJoin(List<JoinData> join) {
+		this.join = join;
+	}
+
 	public List<WhereGroupListDto> getWhereData() {
 		return whereData;
 	}
