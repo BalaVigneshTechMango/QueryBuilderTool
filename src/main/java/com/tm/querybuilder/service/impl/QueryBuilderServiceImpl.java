@@ -86,7 +86,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			querBuilder.append("SELECT").append(" ").append(String.join(",", filterData.getColumnNames())).append(" ")
 					.append("FROM").append(" ").append(schemaString).append(".").append(filterData.getTableName());
 			if (!CollectionUtils.isEmpty(filterData.getJoin())) {
-				querBuilder.append(getOnCondition(filterData.getJoin(), schemaString,filterData.getTableName()));
+				querBuilder.append(getOnCondition(filterData.getJoin(), schemaString));
 			}
 			if (!CollectionUtils.isEmpty(filterData.getWhereData())) {
 				querBuilder.append(" ").append("WHERE")
@@ -233,7 +233,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @param schemaString
 	 * @return
 	 */
-	private String getOnCondition(List<JoinData> joinDataList, String schemaString,String tableString) {
+	private String getOnCondition(List<JoinData> joinDataList, String schemaString) {
 		LOGGER.info("build On condition using string builder method");
 		StringBuilder conditionBuilder = new StringBuilder();
 		try {			

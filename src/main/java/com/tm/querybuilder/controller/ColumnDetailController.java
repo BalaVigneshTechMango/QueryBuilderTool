@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.tm.querybuilder.constant.MessageConstants;
 import com.tm.querybuilder.dto.TableDetailPojo;
-import com.tm.querybuilder.enums.KeyTypes;
+import com.tm.querybuilder.enums.KeyColumn;
 import com.tm.querybuilder.dto.ColumnDetails;
 import com.tm.querybuilder.dto.ForeignKeys;
 import com.tm.querybuilder.request.SchemaPOJO;
@@ -68,10 +68,10 @@ public class ColumnDetailController {
 						tableDetailPojo.setColumn(column);
 						tablesMap.put(columnDetails.getTableName(), tableDetailPojo);
 					}
-					if (KeyTypes.PRIMARY_KEY.getOperator().equals(columnDetails.getColumnKey())) {
+					if (KeyColumn.PRI.equals(columnDetails.getColumnKey())) {
 						tableDetailPojo = tablesMap.get(columnDetails.getTableName());
 						tableDetailPojo.setPrimarykey(columnDetails.getColumnName());
-					} else if (KeyTypes.FOREGIN_KEY.getOperator().equals(columnDetails.getColumnKey())) {
+					} else if (KeyColumn.MUL.equals(columnDetails.getColumnKey())) {
 						List<ForeignKeys> foreignKeyList = new ArrayList<>();
 						ForeignKeys foreignKeys = new ForeignKeys();
 						foreignKeys.setColumnName(columnDetails.getColumnName());

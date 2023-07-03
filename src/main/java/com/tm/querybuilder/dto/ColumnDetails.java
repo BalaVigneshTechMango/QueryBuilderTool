@@ -1,5 +1,7 @@
 package com.tm.querybuilder.dto;
 
+import com.tm.querybuilder.enums.KeyColumn;
+
 public class ColumnDetails {
 	
     private String columnName;
@@ -7,27 +9,29 @@ public class ColumnDetails {
 	private String dataType;
 	private String referenceTable;
 	private String referenceColumn;
-	private String columnKey;
 	
+	private KeyColumn columnKey;
 	
+	public KeyColumn getColumnKey() {
+		return columnKey;
+	}
+	public void setColumnKey(KeyColumn columnKey) {
+		this.columnKey = columnKey;
+	}
 	public String getReferenceTable() {
 		return referenceTable;
 	}
 	public String getReferenceColumn() {
 		return referenceColumn;
 	}
-	public String getColumnKey() {
-		return columnKey;
-	}
+	
 	public void setReferenceTable(String referenceTable) {
 		this.referenceTable = referenceTable;
 	}
 	public void setReferenceColumn(String referenceColumn) {
 		this.referenceColumn = referenceColumn;
 	}
-	public void setColumnKey(String columnKey) {
-		this.columnKey = columnKey;
-	}
+
 	public String getColumnName() {
 		return columnName;
 	}
