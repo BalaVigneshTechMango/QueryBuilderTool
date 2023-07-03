@@ -24,7 +24,7 @@ public class FilterData {
 
 	@Valid
 	private List<JoinData> join;
-
+	
 	public List<JoinData> getJoin() {
 		return join;
 	}
