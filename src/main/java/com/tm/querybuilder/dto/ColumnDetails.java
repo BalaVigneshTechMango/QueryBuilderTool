@@ -2,11 +2,32 @@ package com.tm.querybuilder.dto;
 
 public class ColumnDetails {
 	
-	public String columnName;
-	public String tableName;
-	public String dataType;
+    private String columnName;
+	private String tableName;
+	private String dataType;
+	private String referenceTable;
+	private String referenceColumn;
+	private String columnKey;
 	
 	
+	public String getReferenceTable() {
+		return referenceTable;
+	}
+	public String getReferenceColumn() {
+		return referenceColumn;
+	}
+	public String getColumnKey() {
+		return columnKey;
+	}
+	public void setReferenceTable(String referenceTable) {
+		this.referenceTable = referenceTable;
+	}
+	public void setReferenceColumn(String referenceColumn) {
+		this.referenceColumn = referenceColumn;
+	}
+	public void setColumnKey(String columnKey) {
+		this.columnKey = columnKey;
+	}
 	public String getColumnName() {
 		return columnName;
 	}

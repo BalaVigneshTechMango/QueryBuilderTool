@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
+import com.tm.querybuilder.dto.ColumnDetails;
 import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.dto.JoinData;
 import com.tm.querybuilder.dto.WhereGroupListDto;
@@ -17,7 +18,7 @@ public interface QueryBuilderService {
 	 * @return 
 	 *  get the details of table and column get the details with dao layer.
 	 */
-	public Map<String, Map<String, Object>> fetchColumnDetails(String schemaName);
+	public List<ColumnDetails> fetchColumnDetails(String schemaName);
 
 	/**
 	 * @param queryString
