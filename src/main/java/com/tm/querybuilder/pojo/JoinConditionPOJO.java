@@ -11,7 +11,7 @@ public class JoinConditionPOJO {
 	@NotBlank(message = "Enter the LeftColumn")
 	private String lsColumn;
 	
-	@NotNull(message = "Enter the Right TableDetailPOJO")
+	@NotNull(message = "Enter the Right column")
 	private String rsColumn;
 
 	@NotNull(message = "Enter the Condition")
