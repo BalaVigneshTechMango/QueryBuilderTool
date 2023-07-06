@@ -1,6 +1,6 @@
-package com.tm.querybuilder.dto;
+package com.tm.querybuilder.pojo;
 
-public class ValuesPojo {
+public class ValuesPOJO {
 
 	private String from;
 	private String to;

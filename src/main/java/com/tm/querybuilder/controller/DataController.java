@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tm.querybuilder.constant.MessageConstants;
-import com.tm.querybuilder.dto.FilterData;
-import com.tm.querybuilder.request.QueryBuilderRequestPOJO;
-import com.tm.querybuilder.response.QueryBuilderResponsePOJO;
+import com.tm.querybuilder.pojo.FilterDataPOJO;
+import com.tm.querybuilder.pojo.request.QueryBuilderRequestPOJO;
+import com.tm.querybuilder.pojo.response.QueryBuilderResponsePOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
 
 @CrossOrigin
@@ -47,7 +47,7 @@ public class DataController {
 		QueryBuilderResponsePOJO queryBuilderResponsePojo = new QueryBuilderResponsePOJO();
 		Map<String, Object> responseMap = new HashMap<>();
 		try {
-			FilterData filterData = queryBuilderRequestPojo.getRequestData();
+			FilterDataPOJO filterData = queryBuilderRequestPojo.getRequestData();
 			String schemaString = queryBuilderRequestPojo.getSchemaName();
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
 				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),filterData.getWhereData(),

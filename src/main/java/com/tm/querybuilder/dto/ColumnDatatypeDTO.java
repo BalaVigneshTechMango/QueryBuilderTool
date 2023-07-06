@@ -1,6 +1,6 @@
 package com.tm.querybuilder.dto;
 
-public class ColumnDatatype {
+public class ColumnDatatypeDTO {
 
 	
 	 String dataType;

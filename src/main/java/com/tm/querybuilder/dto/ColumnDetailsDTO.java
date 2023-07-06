@@ -2,7 +2,7 @@ package com.tm.querybuilder.dto;
 
 import com.tm.querybuilder.enums.KeyColumn;
 
-public class ColumnDetails {
+public class ColumnDetailsDTO {
 	
     private String columnName;
 	private String tableName;

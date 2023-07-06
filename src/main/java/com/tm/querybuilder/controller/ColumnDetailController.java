@@ -17,12 +17,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tm.querybuilder.constant.MessageConstants;
-import com.tm.querybuilder.dto.TableDetailPojo;
+import com.tm.querybuilder.dto.ColumnDetailsDTO;
 import com.tm.querybuilder.enums.KeyColumn;
-import com.tm.querybuilder.dto.ColumnDetails;
-import com.tm.querybuilder.dto.ForeignKeys;
-import com.tm.querybuilder.request.SchemaPOJO;
-import com.tm.querybuilder.response.QueryBuilderResponsePOJO;
+import com.tm.querybuilder.pojo.ForeignKeysPOJO;
+import com.tm.querybuilder.pojo.TableDetailPOJO;
+import com.tm.querybuilder.pojo.request.SchemaRequestPOJO;
+import com.tm.querybuilder.pojo.response.QueryBuilderResponsePOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
 
 @CrossOrigin
@@ -44,20 +44,20 @@ public class ColumnDetailController {
 	 * @return QueryBuilderResponsePOJO
 	 */
 	@PostMapping("/fetchColumnDetails")
-	public QueryBuilderResponsePOJO fetchColumnDetails(@Valid @RequestBody SchemaPOJO schemaPojo) {
-		LOGGER.info("fetch TableDetailPojo Details Api:");
+	public QueryBuilderResponsePOJO fetchColumnDetails(@Valid @RequestBody SchemaRequestPOJO schemaPojo) {
+		LOGGER.info("fetch TableDetailPOJO Details Api:");
 		QueryBuilderResponsePOJO queryBuilderResponsePojo = new QueryBuilderResponsePOJO();
 		try {
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaPojo.getSchemaName()))) {
 				LOGGER.info("schema is valid and fetching the details for tables");
 
-				List<ColumnDetails> columnDetailList = queryBuilderService
+				List<ColumnDetailsDTO> columnDetailList = queryBuilderService
 						.fetchColumnDetails(schemaPojo.getSchemaName());
-				Map<String, TableDetailPojo> tablesMap = new HashMap<>();
+				Map<String, TableDetailPOJO> tablesMap = new HashMap<>();
 
-				for (ColumnDetails columnDetails : columnDetailList) {
+				for (ColumnDetailsDTO columnDetails : columnDetailList) {
 
-					TableDetailPojo tableDetailPojo = new TableDetailPojo();
+					TableDetailPOJO tableDetailPojo = new TableDetailPOJO();
 					if (tablesMap.containsKey(columnDetails.getTableName())) {
 						tableDetailPojo = tablesMap.get(columnDetails.getTableName());
 						Map<String, String> column = tableDetailPojo.getColumn();
@@ -72,8 +72,8 @@ public class ColumnDetailController {
 						tableDetailPojo = tablesMap.get(columnDetails.getTableName());
 						tableDetailPojo.setPrimarykey(columnDetails.getColumnName());
 					} else if (KeyColumn.MUL.equals(columnDetails.getColumnKey())) {
-						List<ForeignKeys> foreignKeyList = new ArrayList<>();
-						ForeignKeys foreignKeys = new ForeignKeys();
+						List<ForeignKeysPOJO> foreignKeyList = new ArrayList<>();
+						ForeignKeysPOJO foreignKeys = new ForeignKeysPOJO();
 						foreignKeys.setColumnName(columnDetails.getColumnName());
 						foreignKeys.setReferencecolumn(columnDetails.getReferenceColumn());
 						foreignKeys.setReferenceTable(columnDetails.getReferenceTable());

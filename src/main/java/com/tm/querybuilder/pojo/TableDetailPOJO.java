@@ -1,15 +1,15 @@
-package com.tm.querybuilder.dto;
+package com.tm.querybuilder.pojo;
 
 import java.util.List;
 import java.util.Map;
 
-public class TableDetailPojo {
+public class TableDetailPOJO {
 
 	Map<String, String> column;
 
 	private String primarykey;
 	
-	List<ForeignKeys> foreignKeys;
+	List<ForeignKeysPOJO> foreignKeys;
 
 	public Map<String, String> getColumn() {
 		return column;
@@ -19,7 +19,7 @@ public class TableDetailPojo {
 		return primarykey;
 	}
 
-	public List<ForeignKeys> getForeignKeys() {
+	public List<ForeignKeysPOJO> getForeignKeys() {
 		return foreignKeys;
 	}
 
@@ -31,7 +31,7 @@ public class TableDetailPojo {
 		this.primarykey = primarykey;
 	}
 
-	public void setForeignKeys(List<ForeignKeys> foreignKeys) {
+	public void setForeignKeys(List<ForeignKeysPOJO> foreignKeys) {
 		this.foreignKeys = foreignKeys;
 	}
 	

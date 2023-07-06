@@ -18,8 +18,8 @@ import org.springframework.stereotype.Service;
 import com.tm.querybuilder.constant.MessageConstants;
 import com.tm.querybuilder.constant.QueryConstants;
 import com.tm.querybuilder.dao.QueryBuilderDao;
-import com.tm.querybuilder.dto.ColumnDatatype;
-import com.tm.querybuilder.dto.ColumnDetails;
+import com.tm.querybuilder.dto.ColumnDatatypeDTO;
+import com.tm.querybuilder.dto.ColumnDetailsDTO;
 
 @Service
 public class QueryBuilderDaoImpl implements QueryBuilderDao {
@@ -106,8 +106,8 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			// condition is okay the returns
 			isValidColumn = countInt != null && countInt == columnsList.size();
 		} catch (DataAccessException exception) {
-			LOGGER.error("An error occurred while checking if the isValid TableDetailPojo");
-			throw new DataAccessResourceFailureException("An error occurred while checking if the isValid TableDetailPojo",
+			LOGGER.error("An error occurred while checking if the isValid TableDetailPOJO");
+			throw new DataAccessResourceFailureException("An error occurred while checking if the isValid TableDetailPOJO",
 					exception);
 		}
 		LOGGER.debug("is Valid column dao :{}", isValidColumn);
@@ -121,22 +121,22 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public List<ColumnDetails> fetchColumnDetails(String schemaString) {
+	public List<ColumnDetailsDTO> fetchColumnDetails(String schemaString) {
 		
 		LOGGER.info("fetch column details dao");
-		List<ColumnDetails> columnList;
+		List<ColumnDetailsDTO> columnList;
 		try {
 			// Query to get column names and data types for each table
 			String sqlString = QueryConstants.SCHEMA_DETAIL;
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 			paramsObj.addValue(MessageConstants.SCHEMA_NAME, schemaString);
 			columnList = namedParameterJdbcTemplate.query(sqlString, paramsObj,
-					new BeanPropertyRowMapper<>(ColumnDetails.class));
+					new BeanPropertyRowMapper<>(ColumnDetailsDTO.class));
 		} catch (DataAccessException exception) {
-			LOGGER.error("An error occurred while fetch TableDetailPojo Details");
-			throw new DataAccessResourceFailureException("An error occurred while fetch TableDetailPojo Details", exception);
+			LOGGER.error("An error occurred while fetch TableDetailPOJO Details");
+			throw new DataAccessResourceFailureException("An error occurred while fetch TableDetailPOJO Details", exception);
 		}
-		LOGGER.debug("TableDetailPojo and datatype dao:{}", columnList);
+		LOGGER.debug("TableDetailPOJO and datatype dao:{}", columnList);
 		return columnList;
 
 	}
@@ -173,9 +173,9 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public List<ColumnDatatype> getDataType(String schemaString, Set<String> tableList, Set<String> columnList) {
+	public List<ColumnDatatypeDTO> getDataType(String schemaString, Set<String> tableList, Set<String> columnList) {
 		LOGGER.info("get Datatype dao");
-		List<ColumnDatatype> columnDetailsList;
+		List<ColumnDatatypeDTO> columnDetailsList;
 		try {
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 			String sqlString = QueryConstants.GET_DATATYPE;
@@ -183,7 +183,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 			paramsObj.addValue(MessageConstants.TABLE_NAME, tableList);
 			paramsObj.addValue("columns", columnList);
 			columnDetailsList = namedParameterJdbcTemplate.query(sqlString, paramsObj,
-					new BeanPropertyRowMapper<>(ColumnDatatype.class));
+					new BeanPropertyRowMapper<>(ColumnDatatypeDTO.class));
 		} catch (DataAccessException exception) {
 			LOGGER.error("An error occurred while getting the Datatype");
 			throw new DataAccessResourceFailureException("An error occurred while getting the Datatype", exception);

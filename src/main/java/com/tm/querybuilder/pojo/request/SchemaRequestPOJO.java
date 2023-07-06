@@ -1,8 +1,8 @@
-package com.tm.querybuilder.request;
+package com.tm.querybuilder.pojo.request;
 
 import javax.validation.constraints.NotBlank;
 
-public class SchemaPOJO {
+public class SchemaRequestPOJO {
 
 	@NotBlank(message = "Enter the SchemaName")
 	private String schemaName;

@@ -1,4 +1,4 @@
-package com.tm.querybuilder.dto;
+package com.tm.querybuilder.pojo;
 
 import java.util.List;
 
@@ -9,10 +9,10 @@ import javax.validation.constraints.Size;
 import com.tm.querybuilder.enums.JoinTypes;
 import com.tm.querybuilder.validation.NoWhitespaceList;
 
-public class JoinData {
+public class JoinDataPOJO {
 
 	@Valid
-	private List<JoinConditionDto> joinCondition;
+	private List<JoinConditionPOJO> joinCondition;
 
 	@NotBlank(message = "Enter the Right TableName")
 	private String joinTableName;
@@ -24,7 +24,7 @@ public class JoinData {
 	@NoWhitespaceList
 	private List<String> columnNames;
 
-	public List<JoinConditionDto> getJoinCondition() {
+	public List<JoinConditionPOJO> getJoinCondition() {
 		return joinCondition;
 	}
 
@@ -44,7 +44,7 @@ public class JoinData {
 		return columnNames;
 	}
 
-	public void setJoinCondition(List<JoinConditionDto> joinCondition) {
+	public void setJoinCondition(List<JoinConditionPOJO> joinCondition) {
 		this.joinCondition = joinCondition;
 	}
 

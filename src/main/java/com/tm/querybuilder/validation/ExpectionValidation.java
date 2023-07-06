@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.tm.querybuilder.response.QueryBuilderResponsePOJO;
+import com.tm.querybuilder.pojo.response.QueryBuilderResponsePOJO;
 
 @RestControllerAdvice
 public class ExpectionValidation {
