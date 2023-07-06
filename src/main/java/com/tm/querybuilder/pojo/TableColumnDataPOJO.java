@@ -1,13 +1,13 @@
-package com.tm.querybuilder.dto;
+package com.tm.querybuilder.pojo;
 
 import java.util.Set;
 
-public class TableColumnData {
+public class TableColumnDataPOJO {
 	private Set<String> tableList;
 	private Set<Object> columnList;
 
 
-	public TableColumnData(Set<String> tableList, Set<Object> columnList) {
+	public TableColumnDataPOJO(Set<String> tableList, Set<Object> columnList) {
 		this.tableList = tableList;
 		this.columnList = columnList;
 	}

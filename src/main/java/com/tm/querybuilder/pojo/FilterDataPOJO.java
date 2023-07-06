@@ -1,4 +1,4 @@
-package com.tm.querybuilder.dto;
+package com.tm.querybuilder.pojo;
 
 import java.util.List;
 
@@ -9,10 +9,10 @@ import javax.validation.constraints.Size;
 
 import com.tm.querybuilder.validation.NoWhitespaceList;
 
-public class FilterData {
+public class FilterDataPOJO {
 
 	@Valid
-	private List<WhereGroupListDto> whereData;
+	private List<WhereGroupListPOJO> whereData;
 
 	@NotBlank(message = "Enter the tableName")
 	private String tableName;
@@ -23,21 +23,21 @@ public class FilterData {
 	private List<String> columnNames;
 
 	@Valid
-	private List<JoinData> join;
+	private List<JoinDataPOJO> join;
 	
-	public List<JoinData> getJoin() {
+	public List<JoinDataPOJO> getJoin() {
 		return join;
 	}
 
-	public void setJoin(List<JoinData> join) {
+	public void setJoin(List<JoinDataPOJO> join) {
 		this.join = join;
 	}
 
-	public List<WhereGroupListDto> getWhereData() {
+	public List<WhereGroupListPOJO> getWhereData() {
 		return whereData;
 	}
 
-	public void setWhereData(List<WhereGroupListDto> whereData) {
+	public void setWhereData(List<WhereGroupListPOJO> whereData) {
 		this.whereData = whereData;
 	}
 

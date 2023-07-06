@@ -6,8 +6,8 @@ import java.util.Set;
 
 import org.springframework.stereotype.Service;
 
-import com.tm.querybuilder.dto.ColumnDatatype;
-import com.tm.querybuilder.dto.ColumnDetails;
+import com.tm.querybuilder.dto.ColumnDatatypeDTO;
+import com.tm.querybuilder.dto.ColumnDetailsDTO;
 
 @Service
 public interface QueryBuilderDao {
@@ -57,7 +57,7 @@ public interface QueryBuilderDao {
 	 * @param columnList
 	 * @return
 	 */
-	public List<ColumnDatatype> getDataType(String schemaString, Set<String> tableList, Set<String> columnList);
+	public List<ColumnDatatypeDTO> getDataType(String schemaString, Set<String> tableList, Set<String> columnList);
 
 
 	/**
@@ -67,7 +67,7 @@ public interface QueryBuilderDao {
 	 * @param tableString
 	 * @return
 	 */
-	List<ColumnDetails> fetchColumnDetails(String schemaString);
+	List<ColumnDetailsDTO> fetchColumnDetails(String schemaString);
 
 	
 	

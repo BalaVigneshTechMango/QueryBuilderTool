@@ -1,6 +1,6 @@
-package com.tm.querybuilder.dto;
+package com.tm.querybuilder.pojo;
 
-public class ForeignKeys {
+public class ForeignKeysPOJO {
 
 	private String referenceTable;
 	private String referencecolumn;

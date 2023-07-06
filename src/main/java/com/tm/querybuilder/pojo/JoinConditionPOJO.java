@@ -1,4 +1,4 @@
-package com.tm.querybuilder.dto;
+package com.tm.querybuilder.pojo;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -6,12 +6,12 @@ import javax.validation.constraints.NotNull;
 import com.tm.querybuilder.enums.Condition;
 import com.tm.querybuilder.enums.LogicalCondition;
 
-public class JoinConditionDto {
+public class JoinConditionPOJO {
 
 	@NotBlank(message = "Enter the LeftColumn")
 	private String lsColumn;
-
-	@NotBlank(message = "Enter the Right Column")
+	
+	@NotNull(message = "Enter the Right column")
 	private String rsColumn;
 
 	@NotNull(message = "Enter the Condition")
@@ -23,10 +23,7 @@ public class JoinConditionDto {
 		return lsColumn;
 	}
 
-	public String getRsColumn() {
-		return rsColumn;
-	}
-
+	
 	public Condition getCondition() {
 		return condition;
 	}
@@ -39,9 +36,15 @@ public class JoinConditionDto {
 		this.lsColumn = lsColumn;
 	}
 
+	public String getRsColumn() {
+		return rsColumn;
+	}
+
+
 	public void setRsColumn(String rsColumn) {
 		this.rsColumn = rsColumn;
 	}
+
 
 	public void setCondition(Condition condition) {
 		this.condition = condition;

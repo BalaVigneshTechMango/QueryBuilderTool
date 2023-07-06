@@ -5,10 +5,10 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import com.tm.querybuilder.dto.ColumnDetails;
-import com.tm.querybuilder.dto.FilterData;
-import com.tm.querybuilder.dto.JoinData;
-import com.tm.querybuilder.dto.WhereGroupListDto;
+import com.tm.querybuilder.dto.ColumnDetailsDTO;
+import com.tm.querybuilder.pojo.FilterDataPOJO;
+import com.tm.querybuilder.pojo.JoinDataPOJO;
+import com.tm.querybuilder.pojo.WhereGroupListPOJO;
 
 @Service
 public interface QueryBuilderService {
@@ -18,7 +18,7 @@ public interface QueryBuilderService {
 	 * @return 
 	 *  get the details of table and column get the details with dao layer.
 	 */
-	public List<ColumnDetails> fetchColumnDetails(String schemaName);
+	public List<ColumnDetailsDTO> fetchColumnDetails(String schemaName);
 
 	/**
 	 * @param queryString
@@ -31,7 +31,7 @@ public interface QueryBuilderService {
 	 * @param filterData
 	 * @return String This method build the query based on the request.
 	 */
-	public String fetchQuery(FilterData filterData,String schemaString);
+	public String fetchQuery(FilterDataPOJO filterData,String schemaString);
 
 
 	
@@ -49,7 +49,7 @@ public interface QueryBuilderService {
 	 * @return
 	 * This method will check the schema and table and column in dao.
 	 */
-	public Boolean isValidTable(String schemaString, String tableName,List<JoinData>joinData);
+	public Boolean isValidTable(String schemaString, String tableName,List<JoinDataPOJO>joinData);
 
 
 	/**
@@ -58,7 +58,7 @@ public interface QueryBuilderService {
 	 * @param schemaString
 	 * get the column valid using columnList with its table and schema
 	 */
-	public Boolean isValidColumns(List<String> columnList,List<WhereGroupListDto>whereCondition, String tableName, String schemaString, List<JoinData> joinData);
+	public Boolean isValidColumns(List<String> columnList,List<WhereGroupListPOJO>whereCondition, String tableName, String schemaString, List<JoinDataPOJO> joinData);
 
 
 

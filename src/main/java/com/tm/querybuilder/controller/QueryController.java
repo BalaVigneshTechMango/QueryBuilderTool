@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.tm.querybuilder.constant.MessageConstants;
-import com.tm.querybuilder.dto.FilterData;
-import com.tm.querybuilder.request.QueryBuilderRequestPOJO;
-import com.tm.querybuilder.response.QueryBuilderResponsePOJO;
+import com.tm.querybuilder.pojo.FilterDataPOJO;
+import com.tm.querybuilder.pojo.request.QueryBuilderRequestPOJO;
+import com.tm.querybuilder.pojo.response.QueryBuilderResponsePOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
 
 @CrossOrigin
@@ -43,7 +43,7 @@ public class QueryController {
 		LOGGER.info("fetch Query Api");
 		QueryBuilderResponsePOJO queryBuilderResponsePojo = new QueryBuilderResponsePOJO();
 		try {
-			FilterData filterData = queryBuilderRequestPojo.getRequestData();
+			FilterDataPOJO filterData = queryBuilderRequestPojo.getRequestData();
 			String schemaString = queryBuilderRequestPojo.getSchemaName();
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
 				LOGGER.info("schema is valid, validating table and column details");

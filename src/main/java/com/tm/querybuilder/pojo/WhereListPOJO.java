@@ -1,4 +1,4 @@
-package com.tm.querybuilder.dto;
+package com.tm.querybuilder.pojo;
 
 import javax.validation.constraints.NotBlank;
 
@@ -6,7 +6,7 @@ import com.tm.querybuilder.enums.Condition;
 import com.tm.querybuilder.enums.LogicalCondition;
 import com.tm.querybuilder.validation.ObjectNoWhiteSpace;
 
-public class WhereListDto {
+public class WhereListPOJO {
 
 	@NotBlank(message = "Enter column")
 	private String column;
@@ -16,6 +16,7 @@ public class WhereListDto {
 
 	@ObjectNoWhiteSpace
 	private Object value;
+	
 	
 	private LogicalCondition logicalCondition;
 

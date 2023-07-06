@@ -1,4 +1,4 @@
-package com.tm.querybuilder.dto;
+package com.tm.querybuilder.pojo;
 
 import java.util.List;
 
@@ -6,10 +6,10 @@ import javax.validation.Valid;
 
 import com.tm.querybuilder.enums.LogicalCondition;
 
-public class WhereGroupListDto {
+public class WhereGroupListPOJO {
 
     @Valid
-	private List<WhereListDto> whereList;
+	private List<WhereListPOJO> whereList;
 	private LogicalCondition logicalCondition;
 
 	public LogicalCondition getLogicalCondition() {
@@ -20,11 +20,11 @@ public class WhereGroupListDto {
 		this.logicalCondition = logicalCondition;
 	}
 
-	public List<WhereListDto> getWhereList() {
+	public List<WhereListPOJO> getWhereList() {
 		return whereList;
 	}
 
-	public void setWhereList(List<WhereListDto> whereConditon) {
+	public void setWhereList(List<WhereListPOJO> whereConditon) {
 		this.whereList = whereConditon;
 	}
 
