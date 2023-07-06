@@ -10,8 +10,8 @@ public class JoinConditionDto {
 
 	@NotBlank(message = "Enter the LeftColumn")
 	private String lsColumn;
-
-	@NotBlank(message = "Enter the Right Column")
+	
+	@NotNull(message = "Enter the Right TableDetailPojo")
 	private String rsColumn;
 
 	@NotNull(message = "Enter the Condition")
@@ -23,10 +23,7 @@ public class JoinConditionDto {
 		return lsColumn;
 	}
 
-	public String getRsColumn() {
-		return rsColumn;
-	}
-
+	
 	public Condition getCondition() {
 		return condition;
 	}
@@ -39,9 +36,15 @@ public class JoinConditionDto {
 		this.lsColumn = lsColumn;
 	}
 
+	public String getRsColumn() {
+		return rsColumn;
+	}
+
+
 	public void setRsColumn(String rsColumn) {
 		this.rsColumn = rsColumn;
 	}
+
 
 	public void setCondition(Condition condition) {
 		this.condition = condition;

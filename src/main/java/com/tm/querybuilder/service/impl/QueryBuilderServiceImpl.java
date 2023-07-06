@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,14 +17,17 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tm.querybuilder.dao.QueryBuilderDao;
 import com.tm.querybuilder.dto.ColumnDatatype;
 import com.tm.querybuilder.dto.ColumnDetails;
 import com.tm.querybuilder.dto.FilterData;
 import com.tm.querybuilder.dto.JoinConditionDto;
 import com.tm.querybuilder.dto.JoinData;
+import com.tm.querybuilder.dto.ValuesPojo;
 import com.tm.querybuilder.dto.WhereGroupListDto;
 import com.tm.querybuilder.dto.WhereListDto;
+import com.tm.querybuilder.enums.Condition;
 import com.tm.querybuilder.service.QueryBuilderService;
 
 @Service
@@ -67,7 +70,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			responseList = queryBuilderDao.fetchResultData(queryString);
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while fetch Data in service layer.", exception);
-			throw new DataAccessResourceFailureException("An error occurred while fetch Data .");
+			throw new DataAccessResourceFailureException("An error occurred while fetch Data");
 		}
 		return responseList;
 	}
@@ -131,7 +134,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		Boolean isValidTable = false;
 		try {
 			Set<String> tablesList = new HashSet<>();
-			if (joinData != null && !joinData.isEmpty()) {
+			if (!CollectionUtils.isEmpty(joinData)) {
 				for (JoinData joinTable : joinData) {
 					tablesList.add(joinTable.getJoinTableName());
 				}
@@ -163,17 +166,16 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			Set<String> tablesList = new HashSet<>();
 			Set<String> columnsList = new HashSet<>();
 			
-			if (joinData != null && !joinData.isEmpty()) {
+			if (!CollectionUtils.isEmpty(joinData)) {
 				for (JoinData joinTable : joinData) {
 					tablesList.add(joinTable.getJoinTableName());
-					
 					for (JoinConditionDto joinConditionDto : joinTable.getJoinCondition()) {
 						columnsList.add(joinConditionDto.getLsColumn());
 						columnList.add(joinConditionDto.getRsColumn());
 					}
 				}
 			}
-			if (whereConditionList != null && !whereConditionList.isEmpty()) {
+			if (!CollectionUtils.isEmpty(whereConditionList)) {
 				for (WhereGroupListDto whereGroupListDto : whereConditionList) {
 					for (WhereListDto whereListDto : whereGroupListDto.getWhereList()) {
 						columnsList.add(whereListDto.getColumn());
@@ -207,7 +209,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 					columnsList.add(whereListDto.getColumn());
 				}
 			}
-			if (filterData.getJoin() != null && !filterData.getJoin().isEmpty()) {
+			if (!CollectionUtils.isEmpty(filterData.getJoin())) {
 				for (JoinData joinTable : filterData.getJoin()) {
 					tablesList.add(joinTable.getJoinTableName());
 				}
@@ -273,30 +275,41 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		LOGGER.info("building where condition method");
 		StringBuilder whereBuilder = new StringBuilder();
 		try {
-			Set<String> operatorString = new HashSet<>(Arrays.asList("varchar", "char", "enum", "text"));
+			Set<String> operatorString = new HashSet<>(Arrays.asList("varchar", "char", "enum", "text","date","time","timestamp","year"));
 			for (WhereGroupListDto whereGroupListDto : whereClauseList) {
-				StringBuilder whereGroupBuilder = new StringBuilder();
+				whereBuilder.append("(");
 				for (WhereListDto whereListDto : whereGroupListDto.getWhereList()) {
-					whereGroupBuilder.append(whereListDto.getColumn())
+					whereBuilder.append(whereListDto.getColumn()).append(" ")
 							.append(whereListDto.getCondition().getOperator());
+					if (operatorString.contains(columnDataTypeMap.get(whereListDto.getColumn()))
+							&& Condition.BETWEEN.equals(whereListDto.getCondition())) {
+						ObjectMapper mapper = new ObjectMapper();
+						ValuesPojo value = mapper.readValue(mapper.writeValueAsString(whereListDto.getValue()), ValuesPojo.class);
+						whereBuilder.append(" '").append(value.getFrom()).append("' ").append("AND ")
+						.append("'").append(value.getTo()).append("'");
+					}
+					else if (operatorString.contains(columnDataTypeMap.get(whereListDto.getColumn())) 
+							 && Condition.IN.equals(whereListDto.getCondition())) {
+                         List<String>list= (List<String>)whereListDto.getValue();
+						String value = list.stream().collect(Collectors.joining("','", "'", "'"));
+						whereBuilder.append(" (")
+						.append(value).append(")");
+					}
 					// check whether the column data type is a part of operater list to add single
 					// quotes in prefix and suffix
-					if (operatorString.contains(columnDataTypeMap.get(whereListDto.getColumn()))) {
-						whereGroupBuilder.append("'").append(whereListDto.getValue()).append("'");
-					} else {
-						whereGroupBuilder.append(whereListDto.getValue());
+					else if (operatorString.contains(columnDataTypeMap.get(whereListDto.getColumn()))) {
+						whereBuilder.append("'").append(whereListDto.getValue()).append("'");
+					}
+					else {
+						whereBuilder.append(whereListDto.getValue());
 					}
 					// Append condition to the where group list if the condition has value
 					// Condition will be null if it is the last item of the list.
 					if (whereListDto.getLogicalCondition() != null) {	
-						whereGroupBuilder.append(" ").append(whereListDto.getLogicalCondition()).append(" ");
+						whereBuilder.append(" ").append(whereListDto.getLogicalCondition()).append(" ");
 					}
 				}
-				// Start and close with paranthesis if inner condition list has value
-				// Append the where group string to the where list
-				if (!whereGroupBuilder.toString().isEmpty()) {
-					whereBuilder.append("(").append(whereGroupBuilder.toString()).append(")");
-				}
+				whereBuilder.append(")");
 				// Append condition to the where list if the condition has value
 				// Condition will be null if it is the last item of the list
 				if (whereGroupListDto.getLogicalCondition() != null) {
@@ -312,6 +325,4 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return whereBuilder.toString();
 	}
 	
-	
-
 }

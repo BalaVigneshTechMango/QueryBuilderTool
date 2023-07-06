@@ -17,6 +17,7 @@ public class WhereListDto {
 	@ObjectNoWhiteSpace
 	private Object value;
 	
+	
 	private LogicalCondition logicalCondition;
 
 	public String getColumn() {

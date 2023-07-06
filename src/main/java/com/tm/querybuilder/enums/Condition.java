@@ -2,7 +2,8 @@ package com.tm.querybuilder.enums;
 
 public enum Condition {
 
-	EQUAL("="), NOT_EQUAL("<>"), LT("<"), GT(">"), GTE(">="), LTE("<="), CONTAINS("CONTAINS"), LIKE("LIKE");
+	EQUAL("="), NOT_EQUAL("<>"), LT("<"), GT(">"), GTE(">="), LTE("<="),CONTAINS("LIKE"),
+	BETWEEN("BETWEEN"),IN("IN");
     
 	private final String operator;
 
