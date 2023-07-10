@@ -61,7 +61,7 @@ public interface QueryBuilderService {
 	public Boolean isValidColumns(List<String> columnList,List<WhereGroupListPOJO>whereCondition, String tableName, String schemaString, List<JoinDataPOJO> joinData);
 
 
-
+    
 	
 
 }

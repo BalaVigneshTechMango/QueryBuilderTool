@@ -20,6 +20,7 @@ import com.tm.querybuilder.constant.QueryConstants;
 import com.tm.querybuilder.dao.QueryBuilderDao;
 import com.tm.querybuilder.dto.ColumnDatatypeDTO;
 import com.tm.querybuilder.dto.ColumnDetailsDTO;
+import com.tm.querybuilder.dto.TableRecordCount;
 
 @Service
 public class QueryBuilderDaoImpl implements QueryBuilderDao {
@@ -190,7 +191,29 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		}
 		LOGGER.debug("get DataType dao: {}", columnDetailsList);
 		return columnDetailsList;
-
 	}
+	
+	 @Override
+	 public List<TableRecordCount> getRecordCountsForAllTables(String schemaString) {
+		 List<String>tableName=new ArrayList<>();
+		 tableName.add("mall_details");
+		 tableName.add("store_details");
+		 tableName.add("product_details");
+	        String query = "SELECT CONCAT('ANALYZE TABLE ', table_schema, '.', table_name, ';') as analyzes,table_name,\n"
+	        		+ "TABLE_ROWS\n"
+	        		+ "FROM information_schema.tables\n"
+	        		+ "WHERE table_schema = :schemaName\n"
+	        		+ "  AND table_name IN (:tableName)";
+	        MapSqlParameterSource params = new MapSqlParameterSource();
+	        params.addValue("schemaName", schemaString);
+	        params.addValue("tableName", tableName);
+
+	        return namedParameterJdbcTemplate.query(query, params, (rs, rowNum) -> {
+	            String tableNames = rs.getString("TABLE_NAME");
+	            int recordCount = rs.getInt("TABLE_ROWS");
+	            return new TableRecordCount(tableNames, recordCount);
+	        });
+	    }
+
 
 }

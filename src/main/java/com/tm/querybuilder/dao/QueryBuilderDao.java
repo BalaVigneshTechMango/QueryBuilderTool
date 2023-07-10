@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.tm.querybuilder.dto.ColumnDatatypeDTO;
 import com.tm.querybuilder.dto.ColumnDetailsDTO;
+import com.tm.querybuilder.dto.TableRecordCount;
 
 @Service
 public interface QueryBuilderDao {
@@ -68,6 +69,8 @@ public interface QueryBuilderDao {
 	 * @return
 	 */
 	List<ColumnDetailsDTO> fetchColumnDetails(String schemaString);
+
+	List<TableRecordCount> getRecordCountsForAllTables(String schemaString);
 
 	
 	
