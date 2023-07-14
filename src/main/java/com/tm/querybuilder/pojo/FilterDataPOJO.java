@@ -24,7 +24,27 @@ public class FilterDataPOJO {
 
 	@Valid
 	private List<JoinDataPOJO> join;
-	
+
+	private int limit;
+
+	private int pageNo;
+
+	public int getLimit() {
+		return limit;
+	}
+
+	public void setLimit(int limit) {
+		this.limit = limit;
+	}
+
+	public int getPageNo() {
+		return pageNo;
+	}
+
+	public void setPageNo(int pageNo) {
+		this.pageNo = pageNo;
+	}
+
 	public List<JoinDataPOJO> getJoin() {
 		return join;
 	}
