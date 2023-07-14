@@ -26,6 +26,7 @@ import com.tm.querybuilder.enums.Condition;
 import com.tm.querybuilder.pojo.FilterDataPOJO;
 import com.tm.querybuilder.pojo.JoinConditionPOJO;
 import com.tm.querybuilder.pojo.JoinDataPOJO;
+import com.tm.querybuilder.pojo.OrderByPOJO;
 import com.tm.querybuilder.pojo.ValuesPOJO;
 import com.tm.querybuilder.pojo.WhereGroupListPOJO;
 import com.tm.querybuilder.pojo.WhereListPOJO;
@@ -95,6 +96,9 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			if (!CollectionUtils.isEmpty(filterData.getWhereData())) {
 				querBuilder.append(QueryConstants.WHERE)
 						.append(whereCondition(filterData.getWhereData(), getDataType(filterData, schemaString)));
+			}
+			if (filterData.getOrderBy() != null && !filterData.getOrderBy().toString().isEmpty()) {
+				querBuilder.append(getColumnOrderBy(filterData.getOrderBy()));
 			}
 			querBuilder.append(QueryConstants.LIMIT).append(filterData.getLimit()).append(QueryConstants.OFFSET)
 					.append(filterData.getLimit() * (filterData.getPageNo() - 1));
@@ -325,5 +329,18 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return whereBuilder.toString();
 	}
 
+	private String getColumnOrderBy(List<OrderByPOJO> orderByPOJO) {
+		StringBuilder columnBuilder = new StringBuilder();
+		StringBuilder orderBy = new StringBuilder();
+		orderBy.append(QueryConstants.ORDERBY);
+		for (OrderByPOJO columnList : orderByPOJO) {
+			if (!columnBuilder.isEmpty()) {
+				columnBuilder.append(",");
+			}
+			columnBuilder.append(columnList.getOrderColumnName()).append(" ").append(columnList.getOrderType());
+		}
+		orderBy.append(columnBuilder.toString());
+		return orderBy.toString();
+	}
 
 }

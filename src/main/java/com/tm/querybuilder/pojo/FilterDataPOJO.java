@@ -21,6 +21,8 @@ public class FilterDataPOJO {
 	@Size(min = 1, message = "Minimum One column should be selected")
 	@NoWhitespaceList
 	private List<String> columnNames;
+	
+	private List<OrderByPOJO>orderBy;
 
 	@Valid
 	private List<JoinDataPOJO> join;
@@ -28,6 +30,15 @@ public class FilterDataPOJO {
 	private int limit;
 
 	private int pageNo;
+
+	
+	public List<OrderByPOJO> getOrderBy() {
+		return orderBy;
+	}
+
+	public void setOrderBy(List<OrderByPOJO> orderBy) {
+		this.orderBy = orderBy;
+	}
 
 	public int getLimit() {
 		return limit;
