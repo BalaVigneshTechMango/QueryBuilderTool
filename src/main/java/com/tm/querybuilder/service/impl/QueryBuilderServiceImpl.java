@@ -97,11 +97,14 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				querBuilder.append(QueryConstants.WHERE)
 						.append(whereCondition(filterData.getWhereData(), getDataType(filterData, schemaString)));
 			}
+
+			if (filterData.getLimit() > 0) {
+				querBuilder.append(getLimit(filterData));
+			}
 			if (filterData.getOrderBy() != null && !filterData.getOrderBy().toString().isEmpty()) {
 				querBuilder.append(getColumnOrderBy(filterData.getOrderBy()));
 			}
-			querBuilder.append(QueryConstants.LIMIT).append(filterData.getLimit()).append(QueryConstants.OFFSET)
-					.append(filterData.getLimit() * (filterData.getPageNo() - 1));
+
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while fetch Query.");
 			throw new DataAccessResourceFailureException("An error occurred while fetch Query.", exception);
@@ -329,6 +332,16 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return whereBuilder.toString();
 	}
 
+	private String getLimit(FilterDataPOJO filterData) {
+		StringBuilder querBuilder = new StringBuilder();
+		if (filterData.getPageNo() > 0) {
+			querBuilder.append(QueryConstants.LIMIT).append(filterData.getLimit()).append(QueryConstants.OFFSET)
+					.append(filterData.getLimit() * (filterData.getPageNo() - 1));
+		} else {
+			querBuilder.append(QueryConstants.LIMIT).append(filterData.getLimit());
+		}
+		return querBuilder.toString();
+  }
 	private String getColumnOrderBy(List<OrderByPOJO> orderByPOJO) {
 		StringBuilder columnBuilder = new StringBuilder();
 		StringBuilder orderBy = new StringBuilder();
