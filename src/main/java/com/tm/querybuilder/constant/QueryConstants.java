@@ -21,6 +21,7 @@ public class QueryConstants {
 	public static final String WHERE=" WHERE ";
 	public static final String LIMIT=" LIMIT ";
 	public static final String OFFSET=" OFFSET ";
+	public static final String ORDERBY=" ORDER BY ";
 	
 	
 }
