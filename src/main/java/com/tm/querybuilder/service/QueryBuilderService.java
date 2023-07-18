@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import com.tm.querybuilder.dto.ColumnDetailsDTO;
 import com.tm.querybuilder.pojo.FilterDataPOJO;
 import com.tm.querybuilder.pojo.JoinDataPOJO;
-import com.tm.querybuilder.pojo.WhereGroupListPOJO;
+import com.tm.querybuilder.pojo.ConditionGroupPOJO;
 
 @Service
 public interface QueryBuilderService {
@@ -58,7 +58,7 @@ public interface QueryBuilderService {
 	 * @param schemaString
 	 * get the column valid using columnList with its table and schema
 	 */
-	public Boolean isValidColumns(List<String> columnList,List<WhereGroupListPOJO>whereCondition, String tableName, String schemaString, List<JoinDataPOJO> joinData);
+	public Boolean isValidColumns(List<String> columnList,List<ConditionGroupPOJO>whereCondition, String tableName, String schemaString, List<JoinDataPOJO> joinData);
 
 
 
