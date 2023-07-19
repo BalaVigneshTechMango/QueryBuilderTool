@@ -14,11 +14,11 @@ import com.tm.querybuilder.pojo.ConditionGroupPOJO;
 public interface QueryBuilderService {
 
 	/**
-	 * @param schemaName
+	 * @param schemaString
 	 * @return 
-	 *  get the details of table and column get the details with dao layer.
+	 * Get the details of table and column get the details with dao layer.
 	 */
-	public List<ColumnDetailsDTO> fetchColumnDetails(String schemaName);
+	public List<ColumnDetailsDTO> fetchColumnDetails(String schemaString);
 
 	/**
 	 * @param queryString
@@ -49,7 +49,7 @@ public interface QueryBuilderService {
 	 * @return
 	 * This method will check the schema and table and column in dao.
 	 */
-	public Boolean isValidTable(String schemaString, String tableName,List<JoinDataPOJO>joinData);
+	public Boolean isValidTable(String schemaString, String tableString ,List<JoinDataPOJO>joinDataList);
 
 
 	/**
@@ -58,7 +58,7 @@ public interface QueryBuilderService {
 	 * @param schemaString
 	 * get the column valid using columnList with its table and schema
 	 */
-	public Boolean isValidColumns(List<String> columnList,List<ConditionGroupPOJO>whereCondition, String tableName, String schemaString, List<JoinDataPOJO> joinData);
+	public Boolean isValidColumns(List<String> columnList,List<ConditionGroupPOJO>conditionGroupList, String tableString, String schemaString, List<JoinDataPOJO> joinDataList);
 
 
 

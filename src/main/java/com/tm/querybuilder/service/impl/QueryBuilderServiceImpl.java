@@ -48,15 +48,15 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public List<ColumnDetailsDTO> fetchColumnDetails(String schemaString) {
 		LOGGER.info("fetch table, column, and its datatype service method");
-		List<ColumnDetailsDTO> columnDetails;
+		List<ColumnDetailsDTO> columnDetailsList;
 		try {
-			columnDetails = queryBuilderDao.fetchColumnDetails(schemaString);
+			columnDetailsList = queryBuilderDao.fetchColumnDetails(schemaString);
 		} catch (DataAccessException exception) {
 			LOGGER.error("An error occurred while fetch ColumnDetailsDTO", exception);
 			throw new DataAccessResourceFailureException("An error occurred while fetch ColumnDetailsDTO.");
 		}
-		LOGGER.debug("Result of table, column, and its datatype {}", columnDetails);
-		return columnDetails;
+		LOGGER.debug("Result of table, column, and its datatype {}", columnDetailsList);
+		return columnDetailsList;
 	}
 
 	/**
@@ -93,9 +93,9 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			if (!CollectionUtils.isEmpty(filterData.getJoin())) {
 				querBuilder.append(getOnCondition(filterData.getJoin(), schemaString));
 			}
-			if (!CollectionUtils.isEmpty(filterData.getWhereData())) {
+			if (!CollectionUtils.isEmpty(filterData.getConditionData())) {
 				querBuilder.append(QueryConstants.WHERE)
-						.append(fetchCondition(filterData.getWhereData(), getDataType(filterData, schemaString)));
+						.append(fetchCondition(filterData.getConditionData(), getDataType(filterData, schemaString)));
 			}
 			if (filterData.getOrderBy() != null && !filterData.getOrderBy().toString().isEmpty()) {
 				querBuilder.append(getColumnOrderBy(filterData.getOrderBy()));
@@ -117,11 +117,11 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * 
 	 */
 	@Override
-	public Boolean isSchemaExist(String schemaNameString) {
+	public Boolean isSchemaExist(String schemaString) {
 		LOGGER.info("Schema Exist service Method");
 		boolean isSchemaExist = false;
 		try {
-			isSchemaExist = queryBuilderDao.isSchemaExist(schemaNameString);
+			isSchemaExist = queryBuilderDao.isSchemaExist(schemaString);
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while checking is Schema Exist in service.");
 			throw new DataAccessResourceFailureException("An error occurred while checking is Schema Exist.",
@@ -136,22 +136,21 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @return This method will check the schema and table and column in dao.
 	 */
 	@Override
-	public Boolean isValidTable(String schemaString, String tableName, List<JoinDataPOJO> joinData) {
+	public Boolean isValidTable(String schemaString, String tableString, List<JoinDataPOJO> joinDataList) {
 		LOGGER.info("isValid table service");
 		Boolean isValidTable = false;
 		try {
 			Set<String> tablesList = new HashSet<>();
-			if (!CollectionUtils.isEmpty(joinData)) {
-				for (JoinDataPOJO joinTable : joinData) {
+			if (!CollectionUtils.isEmpty(joinDataList)) {
+				for (JoinDataPOJO joinTable : joinDataList) {
 					tablesList.add(joinTable.getJoinTableName());
 				}
 			}
-			tablesList.add(tableName);
+			tablesList.add(tableString);
 			isValidTable = queryBuilderDao.isValidTable(schemaString, tablesList);
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while checking is valid Table.");
 			throw new DataAccessResourceFailureException("An error occurred while checking is valid Table.", exception);
-
 		}
 		return isValidTable;
 	}
@@ -164,15 +163,15 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @param schemaString
 	 */
 	@Override
-	public Boolean isValidColumns(List<String> columnList, List<ConditionGroupPOJO> whereConditionList,
-			String tableName, String schemaString, List<JoinDataPOJO> joinData) {
+	public Boolean isValidColumns(List<String> columnList, List<ConditionGroupPOJO> conditionGroupList,
+			String tableName, String schemaString, List<JoinDataPOJO> joinDataList) {
 		LOGGER.info("Is Valid TableDetailPOJO service method");
 		boolean isValidColumn = false;
 		try {
 			Set<String> tablesList = new HashSet<>();
 			Set<String> columnsList = new HashSet<>();
-			if (!CollectionUtils.isEmpty(joinData)) {
-				for (JoinDataPOJO joinTable : joinData) {
+			if (!CollectionUtils.isEmpty(joinDataList)) {
+				for (JoinDataPOJO joinTable : joinDataList) {
 					tablesList.add(joinTable.getJoinTableName());
 					for (JoinConditionPOJO joinConditionDto : joinTable.getJoinCondition()) {
 						columnsList.add(joinConditionDto.getLsColumn());
@@ -180,8 +179,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 					}
 				}
 			}
-			if (!CollectionUtils.isEmpty(whereConditionList)) {
-				for (ConditionGroupPOJO whereGroupListDto : whereConditionList) {
+			if (!CollectionUtils.isEmpty(conditionGroupList)) {
+				for (ConditionGroupPOJO whereGroupListDto : conditionGroupList) {
 					for (ConditionPOJO whereListDto : whereGroupListDto.getConditionList()) {
 						columnsList.add(whereListDto.getColumn());
 					}
@@ -208,11 +207,10 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		try {
 			Set<String> tablesList = new HashSet<>();
 			Set<String> columnsList = new HashSet<>();
-			List<ConditionGroupPOJO> whereClauseList = filterData.getWhereData();
-			for (ConditionGroupPOJO whereGroupListDto : whereClauseList) {
-				List<ConditionPOJO> whereList = whereGroupListDto.getConditionList();
-				for (ConditionPOJO whereListDto : whereList) {
-					columnsList.add(whereListDto.getColumn());
+			for (ConditionGroupPOJO conditionGroupList : filterData.getConditionData()) {
+				List<ConditionPOJO> conditionList = conditionGroupList.getConditionList();
+				for (ConditionPOJO condition : conditionList) {
+					columnsList.add(condition.getColumn());
 				}
 			}
 			if (!CollectionUtils.isEmpty(filterData.getJoin())) {
@@ -231,7 +229,6 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		}
 		LOGGER.debug("get datatype service:{}", schemaMap);
 		return schemaMap;
-
 	}
 
 	/**
@@ -268,26 +265,40 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 
 	private String getLimit(FilterDataPOJO filterData) {
 		StringBuilder querBuilder = new StringBuilder();
-		if (filterData.getPageNo() > 0) {
-			querBuilder.append(QueryConstants.LIMIT).append(filterData.getLimit()).append(QueryConstants.OFFSET)
-					.append(filterData.getLimit() * (filterData.getPageNo() - 1));
-		} else {
-			querBuilder.append(QueryConstants.LIMIT).append(filterData.getLimit());
+		try {
+			if (filterData.getPageNo() > 0) {
+				querBuilder.append(QueryConstants.LIMIT).append(filterData.getLimit()).append(QueryConstants.OFFSET)
+						.append(filterData.getLimit() * (filterData.getPageNo() - 1));
+			} else {
+				querBuilder.append(QueryConstants.LIMIT).append(filterData.getLimit());
+			}
+		} catch (Exception exception) {
+			LOGGER.error(" ** An error occurred while get limit and offset service impl  **");
+			throw new DataAccessResourceFailureException(
+					" ** An error occurred while get limit and offset service impl  **", exception);
 		}
+		LOGGER.debug("get limit and offset : {}", querBuilder);
 		return querBuilder.toString();
 	}
 
 	private String getColumnOrderBy(List<OrderByPOJO> orderByPOJO) {
 		StringBuilder columnBuilder = new StringBuilder();
 		StringBuilder orderBy = new StringBuilder();
-		orderBy.append(QueryConstants.ORDERBY);
-		for (OrderByPOJO columnList : orderByPOJO) {
-			if (!columnBuilder.isEmpty()) {
-				columnBuilder.append(",");
+		try {
+			orderBy.append(QueryConstants.ORDERBY);
+			for (OrderByPOJO columnList : orderByPOJO) {
+				if (!columnBuilder.isEmpty()) {
+					columnBuilder.append(",");
+				}
+				columnBuilder.append(columnList.getOrderColumnName()).append(" ").append(columnList.getOrderType());
 			}
-			columnBuilder.append(columnList.getOrderColumnName()).append(" ").append(columnList.getOrderType());
+			orderBy.append(columnBuilder.toString());
+		} catch (Exception exception) {
+			LOGGER.error(" ** An error occurred while get column order by service impl **");
+			throw new DataAccessResourceFailureException(
+					" ** An error occurred while get column order by service impl **", exception);
 		}
-		orderBy.append(columnBuilder.toString());
+		LOGGER.debug("get column order by  : {}", orderBy);
 		return orderBy.toString();
 	}
 

@@ -4,13 +4,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +22,6 @@ import com.tm.querybuilder.pojo.request.SchemaRequestPOJO;
 import com.tm.querybuilder.pojo.response.QueryBuilderResponsePOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
 
-@CrossOrigin
 @RestController
 @RequestMapping(value = "/columndetails")
 public class ColumnDetailController {
@@ -56,7 +52,6 @@ public class ColumnDetailController {
 				Map<String, TableDetailPOJO> tablesMap = new HashMap<>();
 
 				for (ColumnDetailsDTO columnDetails : columnDetailList) {
-
 					TableDetailPOJO tableDetailPojo = new TableDetailPOJO();
 					if (tablesMap.containsKey(columnDetails.getTableName())) {
 						tableDetailPojo = tablesMap.get(columnDetails.getTableName());

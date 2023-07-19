@@ -3,13 +3,10 @@ package com.tm.querybuilder.controller;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.validation.Valid;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,7 +18,6 @@ import com.tm.querybuilder.pojo.request.QueryBuilderRequestPOJO;
 import com.tm.querybuilder.pojo.response.QueryBuilderResponsePOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
 
-@CrossOrigin
 @RestController
 @RequestMapping(value = "/data")
 public class DataController {
@@ -50,7 +46,7 @@ public class DataController {
 			FilterDataPOJO filterData = queryBuilderRequestPojo.getRequestData();
 			String schemaString = queryBuilderRequestPojo.getSchemaName();
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
-				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),filterData.getWhereData(),
+				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),filterData.getConditionData(),
 						filterData.getTableName(), schemaString,filterData.getJoin())
 						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName(),filterData.getJoin()))) {
 					List<Map<String, Object>> responseList = queryBuilderService

@@ -12,7 +12,7 @@ import com.tm.querybuilder.validation.NoWhitespaceList;
 public class FilterDataPOJO {
 
 	@Valid
-	private List<WhereGroupListPOJO> whereData;
+	private List<ConditionGroupPOJO> conditionData;
 
 	@NotBlank(message = "Enter the tableName")
 	private String tableName;
@@ -64,12 +64,12 @@ public class FilterDataPOJO {
 		this.join = join;
 	}
 
-	public List<WhereGroupListPOJO> getWhereData() {
-		return whereData;
+	public List<ConditionGroupPOJO> getConditionData() {
+		return conditionData;
 	}
 
-	public void setWhereData(List<WhereGroupListPOJO> whereData) {
-		this.whereData = whereData;
+	public void setConditionData(List<ConditionGroupPOJO> whereData) {
+		this.conditionData = whereData;
 	}
 
 	public String getTableName() {
