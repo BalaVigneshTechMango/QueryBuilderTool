@@ -6,7 +6,7 @@ import com.tm.querybuilder.enums.Condition;
 import com.tm.querybuilder.enums.LogicalCondition;
 import com.tm.querybuilder.validation.ObjectNoWhiteSpace;
 
-public class WhereListPOJO {
+public class ConditionPOJO {
 
 	@NotBlank(message = "Enter column")
 	private String column;

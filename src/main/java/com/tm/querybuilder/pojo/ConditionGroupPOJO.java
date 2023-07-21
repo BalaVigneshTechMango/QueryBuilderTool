@@ -6,10 +6,10 @@ import javax.validation.Valid;
 
 import com.tm.querybuilder.enums.LogicalCondition;
 
-public class WhereGroupListPOJO {
+public class ConditionGroupPOJO {
 
     @Valid
-	private List<WhereListPOJO> whereList;
+	private List<ConditionPOJO> conditionList;
 	private LogicalCondition logicalCondition;
 
 	public LogicalCondition getLogicalCondition() {
@@ -20,12 +20,12 @@ public class WhereGroupListPOJO {
 		this.logicalCondition = logicalCondition;
 	}
 
-	public List<WhereListPOJO> getWhereList() {
-		return whereList;
+	public List<ConditionPOJO> getConditionList() {
+		return conditionList;
 	}
 
-	public void setWhereList(List<WhereListPOJO> whereConditon) {
-		this.whereList = whereConditon;
+	public void setConditionList(List<ConditionPOJO> whereConditon) {
+		this.conditionList = whereConditon;
 	}
 
 }
