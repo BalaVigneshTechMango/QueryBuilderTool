@@ -6,6 +6,8 @@ import java.util.Set;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.util.CollectionUtils;
+
 import com.tm.querybuilder.condition.ConditionBuilder;
 import com.tm.querybuilder.constant.QueryConstants;
 import com.tm.querybuilder.pojo.ConditionGroupPOJO;
@@ -23,7 +25,7 @@ public class Clauses {
 		ConditionBuilder condition = new ConditionBuilder();
 		StringBuilder querBuilder = new StringBuilder();
 		querBuilder.append(QueryConstants.WHERE)
-				.append(condition.fetchCondition(filterData.getConditionData(), datatype));
+				.append(condition.fetchCondition(filterData.getWhereData().getConditionData(), datatype));
 		return querBuilder.toString();
 	}
 
@@ -64,7 +66,9 @@ public class Clauses {
 		StringBuilder groupByBuilder = new StringBuilder();
 		try {
 			Set<String> columnList = new HashSet<>();
-			columnList.addAll(groupBy.getColumnList());
+			if (!CollectionUtils.isEmpty(groupBy.getColumnList())) {
+				columnList.addAll(groupBy.getColumnList());	
+			}
 			columnList.addAll(columnsList);
 			groupByBuilder.append(QueryConstants.GROUPBY).append(String.join(",", columnList));
 		} catch (Exception exception) {

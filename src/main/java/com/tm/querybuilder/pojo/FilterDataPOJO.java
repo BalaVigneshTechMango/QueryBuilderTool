@@ -11,8 +11,6 @@ import com.tm.querybuilder.validation.NoWhitespaceList;
 
 public class FilterDataPOJO {
 
-	@Valid
-	private List<ConditionGroupPOJO> conditionData;
 
 	@NotBlank(message = "Enter the tableName")
 	private String tableName;
@@ -23,15 +21,36 @@ public class FilterDataPOJO {
 	private List<String> columnNames;
 	
 	private List<OrderByPOJO>orderBy;
-
+	
+	private GroupByPOJO groupBy;
+	
+	private WhereConditionPOJO whereData;
+	
 	@Valid
 	private List<JoinDataPOJO> join;
 
 	private int limit;
 
 	private int pageNo;
-
 	
+
+	public WhereConditionPOJO getWhereData() {
+		return whereData;
+	}
+
+	public void setWhereData(WhereConditionPOJO wheredata) {
+		this.whereData = wheredata;
+	}
+
+
+	public GroupByPOJO getGroupBy() {
+		return groupBy;
+	}
+
+	public void setGroupBy(GroupByPOJO groupBy) {
+		this.groupBy = groupBy;
+	}
+
 	public List<OrderByPOJO> getOrderBy() {
 		return orderBy;
 	}
@@ -64,13 +83,7 @@ public class FilterDataPOJO {
 		this.join = join;
 	}
 
-	public List<ConditionGroupPOJO> getConditionData() {
-		return conditionData;
-	}
-
-	public void setConditionData(List<ConditionGroupPOJO> whereData) {
-		this.conditionData = whereData;
-	}
+	
 
 	public String getTableName() {
 		return tableName;

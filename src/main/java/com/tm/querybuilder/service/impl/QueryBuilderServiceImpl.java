@@ -89,35 +89,44 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @param schemaString
 	 */
 	@Override
-	public Boolean isValidColumns(List<String> columnList, List<ConditionGroupPOJO> conditionGroupList,
-			String tableName, String schemaString, List<JoinDataPOJO> joinDataList) {
+	public Boolean isValidColumns(FilterDataPOJO filterData, String schemaString) {
 		LOGGER.info("Is Valid TableDetailPOJO service method");
 		boolean isValidColumn = false;
 		try {
 			Set<String> tablesList = new HashSet<>();
 			Set<String> columnsList = new HashSet<>();
-			if (!CollectionUtils.isEmpty(joinDataList)) {
-				for (JoinDataPOJO joinTable : joinDataList) {
+			if (!CollectionUtils.isEmpty(filterData.getJoin())) {
+				for (JoinDataPOJO joinTable : filterData.getJoin()) {
 					tablesList.add(joinTable.getJoinTableName());
 					for (JoinConditionPOJO joinConditionDto : joinTable.getJoinCondition()) {
 						columnsList.add(joinConditionDto.getLsColumn());
-						columnList.add(joinConditionDto.getRsColumn());
+						columnsList.add(joinConditionDto.getRsColumn());
 					}
 				}
 			}
-			if (!CollectionUtils.isEmpty(conditionGroupList)) {
-				for (ConditionGroupPOJO whereGroupListDto : conditionGroupList) {
-					for (ConditionPOJO whereListDto : whereGroupListDto.getConditionList()) {
-						columnsList.add(whereListDto.getColumn());
+			if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
+				for (ConditionGroupPOJO conditionGroupList : filterData.getWhereData().getConditionData()) {
+					for (ConditionPOJO conditionList : conditionGroupList.getConditionList()) {
+						columnsList.add(conditionList.getColumn());
 					}
 				}
 			}
-			columnsList.addAll(columnList);
-			tablesList.add(tableName);
+			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
+				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getColumnList())) {
+					columnsList.addAll(filterData.getGroupBy().getColumnList());
+				}
+				for (ConditionGroupPOJO conditionGroupList : filterData.getGroupBy().getConditionData()) {
+					for (ConditionPOJO conditionList : conditionGroupList.getConditionList()) {
+						columnsList.add(conditionList.getColumn());
+					}
+				}
+			}
+			columnsList.addAll(filterData.getColumnNames());
+			tablesList.add(filterData.getTableName());
 			isValidColumn = queryBuilderDao.isValidColumns(columnsList, tablesList, schemaString);
-		} catch (Exception exception) {
-			LOGGER.error("An error occurred Checking is valid TableDetailPOJO.");
-			throw new DataAccessResourceFailureException("An error occurred Checking is valid TableDetailPOJO.",
+		} catch (Exception exception) {	
+			LOGGER.error("An error occurred Checking is valid Column details.");
+			throw new DataAccessResourceFailureException("An error occurred Checking is valid Column Details",
 					exception);
 		}
 		return isValidColumn;
@@ -169,24 +178,14 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	@Override
 	public String fetchQuery(FilterDataPOJO filterData, String schemaString) {
 		KeyTypes keyTypes = new KeyTypes();
-		Clauses clauses = new Clauses();
 		LOGGER.info("fetch query service");
 		StringBuilder querBuilder = new StringBuilder();
 		try {
 			querBuilder.append(QueryConstants.SELECT).append(String.join(",", filterData.getColumnNames()));
 			querBuilder.append(QueryConstants.FROM).append(schemaString).append(".").append(filterData.getTableName());
-			if (!CollectionUtils.isEmpty(filterData.getJoin())) {
-				querBuilder.append(clauses.getOnCondition(filterData.getJoin(), schemaString));
-			}
-			if (!CollectionUtils.isEmpty(filterData.getConditionData())) {
-				querBuilder.append(clauses.whereCondition(filterData, getDataType(filterData, schemaString)));
-			}
-			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
-				querBuilder.append(clauses.groupBy(filterData.getGroupBy(), filterData.getColumnNames()));
-				if (EmptyNotNull.isValidInput(filterData.getGroupBy().getConditionData())) {
-					querBuilder.append(clauses.having(filterData.getGroupBy().getConditionData(),
-							getDataType(filterData, schemaString)));
-				}
+			String ifQueryPresent = ifQueryBuilder(filterData, schemaString);
+			if (EmptyNotNull.isValidInput(ifQueryPresent)) {
+				querBuilder.append(ifQueryPresent);
 			}
 			if (EmptyNotNull.isValidInput(filterData.getOrderBy())) {
 				querBuilder.append(keyTypes.getColumnOrderBy(filterData.getOrderBy()));
@@ -200,32 +199,60 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		return querBuilder.toString();
 	}
 
+	private String ifQueryBuilder(FilterDataPOJO filterData, String schemaString) {
+		StringBuilder querBuilder = new StringBuilder();
+		Clauses clauses = new Clauses();
+		try {
+			if (!CollectionUtils.isEmpty(filterData.getJoin())) {
+				querBuilder.append(clauses.getOnCondition(filterData.getJoin(), schemaString));
+			}
+			if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
+				querBuilder.append(clauses.whereCondition(filterData, getDataType(filterData, schemaString)));
+			}
+			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
+				querBuilder.append(clauses.groupBy(filterData.getGroupBy(), filterData.getColumnNames()));
+				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getConditionData())) {
+					querBuilder.append(clauses.having(filterData.getGroupBy().getConditionData(),
+							getDataType(filterData, schemaString)));
+				}
+			}
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while ifQuery Builder.");
+			throw new DataAccessResourceFailureException("An error occurred while ifQuery Builder.", exception);
+		}
+		LOGGER.debug("Build Query for the request data service:{}", querBuilder);
+		return querBuilder.toString();
+
+	}
+
 	/**
 	 * @param filterData
 	 * @return get the datatype of column in the whereClause
 	 */
-
 	private Map<String, Object> getDataType(FilterDataPOJO filterData, String schemaString) {
 		LOGGER.info("Get data type service");
 		Map<String, Object> schemaMap = new LinkedHashMap<>();
 		try {
 			Set<String> tablesList = new HashSet<>();
 			Set<String> columnsList = new HashSet<>();
-			for (ConditionGroupPOJO conditionGroupList : filterData.getConditionData()) {
-				for (ConditionPOJO conditions : conditionGroupList.getConditionList()) {
-					columnsList.add(conditions.getColumn());
+
+			if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
+				for (ConditionGroupPOJO conditionGroupList : filterData.getWhereData().getConditionData()) {
+					for (ConditionPOJO conditions : conditionGroupList.getConditionList()) {
+						columnsList.add(conditions.getColumn());
+					}
+				}
+			}
+			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
+				for (ConditionGroupPOJO conditionGroupList : filterData.getGroupBy().getConditionData()) {
+					for (ConditionPOJO conditions : conditionGroupList.getConditionList()) {
+						columnsList.add(conditions.getColumn());
+					}
 				}
 			}
 			if (!CollectionUtils.isEmpty(filterData.getJoin())) {
 				for (JoinDataPOJO joinTable : filterData.getJoin()) {
 					tablesList.add(joinTable.getJoinTableName());
-				}
-			}
-			if (!CollectionUtils.isEmpty(filterData.getOrderBy())) {
-				for (ConditionGroupPOJO conditionGroupList : filterData.getGroupBy().getConditionData()) {
-					for (ConditionPOJO conditions : conditionGroupList.getConditionList()) {
-						columnsList.add(conditions.getColumn());
-					}
 				}
 			}
 			tablesList.add(filterData.getTableName());

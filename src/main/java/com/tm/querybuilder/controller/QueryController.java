@@ -42,8 +42,7 @@ public class QueryController {
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
 				LOGGER.info("schema is valid, validating table and column details");
 				if (Boolean.TRUE.equals(queryBuilderService.isValidTable(schemaString, filterData.getTableName(),filterData.getJoin())
-						&& queryBuilderService.isValidColumns(filterData.getColumnNames(),filterData.getConditionData(),
-						filterData.getTableName(), schemaString,filterData.getJoin())
+						&& queryBuilderService.isValidColumns(filterData, schemaString)
 					)) {
 					LOGGER.info(MessageConstants.VALID_TABLECOLUMN);
 					Map<String, String> responseMap = new HashMap<>();
