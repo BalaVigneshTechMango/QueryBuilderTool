@@ -11,7 +11,6 @@ public class ConditionPOJO {
 	@NotBlank(message = "Enter column")
 	private String column;
 
-   // @EnumValue(enumClass = ConditionBuilder.class)
 	private Condition condition;
 
 	@ObjectNoWhiteSpace
