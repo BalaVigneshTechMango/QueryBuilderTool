@@ -1,5 +1,6 @@
 package com.tm.querybuilder.constant;
 
+
 public class QueryConstants {
 
 	private QueryConstants() {
@@ -22,6 +23,8 @@ public class QueryConstants {
 	public static final String LIMIT=" LIMIT ";
 	public static final String OFFSET=" OFFSET ";
 	public static final String ORDERBY=" ORDER BY ";
+	public static final String GROUPBY=" GROUP BY ";
+	public static final String HAVING=" HAVING ";
 	
 	
 }

@@ -46,9 +46,8 @@ public class DataController {
 			FilterDataPOJO filterData = queryBuilderRequestPojo.getRequestData();
 			String schemaString = queryBuilderRequestPojo.getSchemaName();
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
-				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData.getColumnNames(),filterData.getConditionData(),
-						filterData.getTableName(), schemaString,filterData.getJoin())
-						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName(),filterData.getJoin()))) {
+				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData, schemaString) && queryBuilderService
+								.isValidTable(schemaString, filterData.getTableName(), filterData.getJoin()))) {
 					List<Map<String, Object>> responseList = queryBuilderService
 							.fetchResultData(queryBuilderService.fetchQuery(filterData, schemaString));
 					if (responseList.isEmpty()) {
