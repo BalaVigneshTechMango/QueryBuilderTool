@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,7 +18,9 @@ import com.tm.querybuilder.pojo.FilterDataPOJO;
 import com.tm.querybuilder.pojo.request.QueryBuilderRequestPOJO;
 import com.tm.querybuilder.pojo.response.QueryBuilderResponsePOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
+import com.tm.querybuilder.validation.EmptyNotNull;
 
+@CrossOrigin
 @RestController
 @RequestMapping(value = "/data")
 public class DataController {
@@ -42,20 +45,31 @@ public class DataController {
 		LOGGER.info("fetch Result Data Api");
 		QueryBuilderResponsePOJO queryBuilderResponsePojo = new QueryBuilderResponsePOJO();
 		Map<String, Object> responseMap = new HashMap<>();
+		boolean isValidCondition = true;
 		try {
 			FilterDataPOJO filterData = queryBuilderRequestPojo.getRequestData();
 			String schemaString = queryBuilderRequestPojo.getSchemaName();
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
-				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData, schemaString) && queryBuilderService
-								.isValidTable(schemaString, filterData.getTableName(), filterData.getJoin()))) {
-					List<Map<String, Object>> responseList = queryBuilderService
-							.fetchResultData(queryBuilderService.fetchQuery(filterData, schemaString));
-					if (responseList.isEmpty()) {
-						LOGGER.error("Result No data Found for the Request Data:");
-						queryBuilderResponsePojo.response(MessageConstants.NO_DATA, false);
+				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData, schemaString)
+						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName(),
+								filterData.getJoinData()))) {
+					if (EmptyNotNull.isValidInput(filterData.getJoinData())
+							&& Boolean.FALSE.equals(filterData.getJoinData().getIsPrimaryKey())) {
+						isValidCondition = queryBuilderService.joinConditionValidator(filterData, schemaString);
+					}
+					if (Boolean.FALSE.equals(isValidCondition)) {
+						queryBuilderResponsePojo.response("Both the join Columns are primary key", null, false);
 					} else {
-						responseMap.put("filterResponse", responseList);
-						queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
+						Map<String, String> queryMap = queryBuilderService.fetchQuery(filterData, schemaString);
+						List<Map<String, Object>> responseList = queryBuilderService
+								.fetchResultData(queryMap.get("selectQuery"), queryMap.get("countQuery"));
+						if (responseList.isEmpty()) {
+							LOGGER.error("Result No data Found for the Request Data:");
+							queryBuilderResponsePojo.response(MessageConstants.NO_DATA, false);
+						} else {
+							responseMap.put("filterResponse", responseList);
+							queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
+						}
 					}
 				} else {
 					LOGGER.error(MessageConstants.NOT_VALID_TABLECOLUMN);

@@ -10,6 +10,7 @@ import org.springframework.dao.DataAccessResourceFailureException;
 import com.tm.querybuilder.constant.QueryConstants;
 import com.tm.querybuilder.pojo.FilterDataPOJO;
 import com.tm.querybuilder.pojo.OrderByPOJO;
+import com.tm.querybuilder.validation.EmptyNotNull;
 
 public class KeyTypes {
 
@@ -21,6 +22,13 @@ public class KeyTypes {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(KeyTypes.class);
 
+	/**
+	 * Build the limit request with limit will build using if not having limit and
+	 * offset in request by use application properties values
+	 * 
+	 * @param filterData
+	 * @return
+	 */
 	public String getLimit(FilterDataPOJO filterData) {
 		StringBuilder querBuilder = new StringBuilder();
 		try {
@@ -45,13 +53,19 @@ public class KeyTypes {
 		return querBuilder.toString();
 	}
 
+	/**
+	 * Build order by query
+	 * 
+	 * @param orderByPOJO
+	 * @return
+	 */
 	public String getColumnOrderBy(List<OrderByPOJO> orderByPOJO) {
 		StringBuilder columnBuilder = new StringBuilder();
 		StringBuilder orderBy = new StringBuilder();
 		try {
 			orderBy.append(QueryConstants.ORDERBY);
 			for (OrderByPOJO columnList : orderByPOJO) {
-				if (!columnBuilder.isEmpty()) {
+				if (EmptyNotNull.isValidInput(columnBuilder)) {
 					columnBuilder.append(",");
 				}
 				columnBuilder.append(columnList.getOrderColumnName()).append(" ").append(columnList.getOrderType());

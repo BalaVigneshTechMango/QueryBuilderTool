@@ -22,10 +22,12 @@ public class ConditionBuilder {
 	private static final Logger LOGGER = LoggerFactory.getLogger(ConditionBuilder.class);
 
 	/**
-	 * The method build the where condition by iterating the whereGroup data and
-	 * where list data
+	 * Build the condition by using condition list and datatype of columns for where
+	 * clause conditon and having clause.
 	 * 
-	 * @param filterData
+	 * @param filterDataif (conditionList.getLogicalCondition() != null) {
+						conditionBuilder.append(" ").append(conditionList.getLogicalCondition()).append(" ");
+					}
 	 * @param datatypeMap
 	 * @return
 	 */
@@ -34,20 +36,25 @@ public class ConditionBuilder {
 		StringBuilder conditionBuilder = new StringBuilder();
 		try {
 			Set<String> operatorString = new HashSet<>(
-					Arrays.asList("varchar", "char", "enum", "text", "date", "time", "timestamp", "year"));
+					Arrays.asList("varchar", "char", "enum", "text", "date", "timestamp", "time", "year"));
+			Set<String> inDatatype = new HashSet<>(
+					Arrays.asList("varchar", "char", "enum", "text", "date", "time", "timestamp", "year", "int",
+							"float", "double", "long", "bigint", "tinyint", "smallint", "decimal", "mediumint"));
+			Set<String> betweenInDatatype = new HashSet<>(Arrays.asList("date", "time", "timestamp", "year", "int",
+					"float", "double", "long", "bigint", "tinyint", "smallint", "decimal", "mediumint"));
 			for (ConditionGroupPOJO conditionGroup : conditionGroupList) {
 				conditionBuilder.append("(");
 				for (ConditionPOJO conditionList : conditionGroup.getConditionList()) {
 					conditionBuilder.append(conditionList.getColumn()).append(" ")
 							.append(conditionList.getCondition().getOperator());
-					if (operatorString.contains(columnDataTypeMap.get(conditionList.getColumn()))
+					if (betweenInDatatype.contains(columnDataTypeMap.get(conditionList.getColumn()))
 							&& Condition.BETWEEN.equals(conditionList.getCondition())) {
 						ObjectMapper mapper = new ObjectMapper();
 						ValuesPOJO value = mapper.readValue(mapper.writeValueAsString(conditionList.getValue()),
 								ValuesPOJO.class);
 						conditionBuilder.append(" '").append(value.getFrom()).append("' ").append("AND ").append("'")
 								.append(value.getTo()).append("'");
-					} else if (operatorString.contains(columnDataTypeMap.get(conditionList.getColumn()))
+					} else if (inDatatype.contains(columnDataTypeMap.get(conditionList.getColumn()))
 							&& Condition.IN.equals(conditionList.getCondition())) {
 						List<String> list = (List<String>) conditionList.getValue();
 						String value = list.stream().collect(Collectors.joining("','", "'", "'"));

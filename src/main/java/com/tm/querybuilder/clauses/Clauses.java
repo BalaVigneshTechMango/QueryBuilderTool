@@ -21,11 +21,24 @@ public class Clauses {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Clauses.class);
 
+	/**
+	 * Build the where Clause and get the condition by fetch condition method
+	 * 
+	 * @param filterData
+	 * @param datatype
+	 * @return
+	 */
 	public String whereCondition(FilterDataPOJO filterData, Map<String, Object> datatype) {
 		ConditionBuilder condition = new ConditionBuilder();
 		StringBuilder querBuilder = new StringBuilder();
-		querBuilder.append(QueryConstants.WHERE)
-				.append(condition.fetchCondition(filterData.getWhereData().getConditionData(), datatype));
+		try {
+			querBuilder.append(QueryConstants.WHERE)
+					.append(condition.fetchCondition(filterData.getWhereData().getConditionData(), datatype));
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while Where condition.");
+			throw new DataAccessResourceFailureException("An error occurred while  query.", exception);
+		}
+		LOGGER.debug("where Conditions : {}", condition);
 		return querBuilder.toString();
 	}
 
@@ -61,13 +74,21 @@ public class Clauses {
 		return conditionBuilder.toString();
 	}
 
+	/**
+	 * Build the Group by by using list of columns in and group by column list
+	 * 
+	 * 
+	 * @param groupBy
+	 * @param columnsList
+	 * @return
+	 */
 	public String groupBy(GroupByPOJO groupBy, List<String> columnsList) {
 		LOGGER.info("**Group by service**");
 		StringBuilder groupByBuilder = new StringBuilder();
 		try {
 			Set<String> columnList = new HashSet<>();
 			if (!CollectionUtils.isEmpty(groupBy.getColumnList())) {
-				columnList.addAll(groupBy.getColumnList());	
+				columnList.addAll(groupBy.getColumnList());
 			}
 			columnList.addAll(columnsList);
 			groupByBuilder.append(QueryConstants.GROUPBY).append(String.join(",", columnList));
@@ -78,6 +99,13 @@ public class Clauses {
 		return groupByBuilder.toString();
 	}
 
+	/**
+	 * Build the having clause
+	 * 
+	 * @param conditionGroup
+	 * @param datatype
+	 * @return
+	 */
 	public String having(List<ConditionGroupPOJO> conditionGroup, Map<String, Object> datatype) {
 		ConditionBuilder condition = new ConditionBuilder();
 		StringBuilder havingBuilder = new StringBuilder();

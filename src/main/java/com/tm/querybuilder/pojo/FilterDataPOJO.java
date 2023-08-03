@@ -1,38 +1,44 @@
 package com.tm.querybuilder.pojo;
 
 import java.util.List;
-
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.Size;
-
-import com.tm.querybuilder.validation.NoWhitespaceList;
 
 public class FilterDataPOJO {
-
 
 	@NotBlank(message = "Enter the tableName")
 	private String tableName;
 
-	@NotEmpty(message = "String list cannot be empty")
-	@Size(min = 1, message = "Minimum One column should be selected")
-	@NoWhitespaceList
+//	@NotEmpty(message = "String list cannot be empty")
+//	@Size(min = 1, message = "Minimum One column should be selected")
+//	@NoWhitespaceList
 	private List<String> columnNames;
-	
-	private List<OrderByPOJO>orderBy;
-	
-	private GroupByPOJO groupBy;
-	
-	private WhereConditionPOJO whereData;
-	
+
 	@Valid
-	private List<JoinDataPOJO> join;
+	private List<OrderByPOJO> orderBy;
+
+	@Valid
+	private GroupByPOJO groupBy;
+
+	@Valid
+	private WhereConditionPOJO whereData;
+
+	@Valid
+	private JoinsPOJO joinData;
+
+	private List<AggregateFunctionPOJO> aggregateFunction;
 
 	private int limit;
 
 	private int pageNo;
-	
+
+	public List<AggregateFunctionPOJO> getAggregateFunction() {
+		return aggregateFunction;
+	}
+
+	public void setAggregateFunction(List<AggregateFunctionPOJO> aggregateFunction) {
+		this.aggregateFunction = aggregateFunction;
+	}
 
 	public WhereConditionPOJO getWhereData() {
 		return whereData;
@@ -41,7 +47,6 @@ public class FilterDataPOJO {
 	public void setWhereData(WhereConditionPOJO wheredata) {
 		this.whereData = wheredata;
 	}
-
 
 	public GroupByPOJO getGroupBy() {
 		return groupBy;
@@ -75,15 +80,13 @@ public class FilterDataPOJO {
 		this.pageNo = pageNo;
 	}
 
-	public List<JoinDataPOJO> getJoin() {
-		return join;
+	public JoinsPOJO getJoinData() {
+		return joinData;
 	}
 
-	public void setJoin(List<JoinDataPOJO> join) {
-		this.join = join;
+	public void setJoinData(JoinsPOJO joinData) {
+		this.joinData = joinData;
 	}
-
-	
 
 	public String getTableName() {
 		return tableName;
