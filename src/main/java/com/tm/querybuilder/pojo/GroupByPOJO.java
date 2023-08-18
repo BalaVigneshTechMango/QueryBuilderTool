@@ -2,9 +2,18 @@ package com.tm.querybuilder.pojo;
 
 import java.util.List;
 
-public class GroupByPOJO {
+import javax.validation.Valid;
+import javax.validation.constraints.Size;
 
+import com.tm.querybuilder.validation.NoWhitespaceList;
+
+public class GroupByPOJO {
+    
+	@Size(min = 1, message = "Minimum One column should be in Group by column list")
+	@NoWhitespaceList
 	private List<String>columnList;
+	
+	@Valid
 	private List<ConditionGroupPOJO>conditionData;
 	
 	public List<String> getColumnList() {

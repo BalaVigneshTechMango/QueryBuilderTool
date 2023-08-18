@@ -1,10 +1,12 @@
 package com.tm.querybuilder.controller;
+
 import java.util.HashMap;
 import java.util.Map;
 import javax.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,7 +16,9 @@ import com.tm.querybuilder.pojo.FilterDataPOJO;
 import com.tm.querybuilder.pojo.request.QueryBuilderRequestPOJO;
 import com.tm.querybuilder.pojo.response.QueryBuilderResponsePOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
+import com.tm.querybuilder.validation.EmptyNotNull;
 
+@CrossOrigin
 @RestController
 @RequestMapping(value = "/query")
 public class QueryController {
@@ -36,18 +40,27 @@ public class QueryController {
 	public QueryBuilderResponsePOJO fetchQuery(@Valid @RequestBody QueryBuilderRequestPOJO queryBuilderRequestPojo) {
 		LOGGER.info("fetch Query Api");
 		QueryBuilderResponsePOJO queryBuilderResponsePojo = new QueryBuilderResponsePOJO();
+		boolean isValidCondition = true;
 		try {
 			FilterDataPOJO filterData = queryBuilderRequestPojo.getRequestData();
 			String schemaString = queryBuilderRequestPojo.getSchemaName();
 			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
 				LOGGER.info("schema is valid, validating table and column details");
-				if (Boolean.TRUE.equals(queryBuilderService.isValidTable(schemaString, filterData.getTableName(),filterData.getJoin())
-						&& queryBuilderService.isValidColumns(filterData, schemaString)
-					)) {
-					LOGGER.info(MessageConstants.VALID_TABLECOLUMN);
-					Map<String, String> responseMap = new HashMap<>();
-					responseMap.put("query", queryBuilderService.fetchQuery(filterData, schemaString));
-					queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
+				if (Boolean.TRUE.equals(queryBuilderService.isValidTable(schemaString, filterData.getTableName(),
+						filterData.getJoinData()) && queryBuilderService.isValidColumns(filterData, schemaString))) {
+					if (EmptyNotNull.isValidInput(filterData.getJoinData())
+							&& Boolean.FALSE.equals(filterData.getJoinData().getIsPrimaryKey())) {
+						isValidCondition = queryBuilderService.joinConditionValidator(filterData, schemaString);
+					}
+					if (Boolean.FALSE.equals(isValidCondition)) {
+						queryBuilderResponsePojo.response("Both the join Columns are primary key", null, false);
+					} else {
+						LOGGER.info(MessageConstants.VALID_TABLECOLUMN);
+						Map<String, String> responseMap = new HashMap<>();
+						responseMap.put("query",
+								queryBuilderService.fetchQuery(filterData, schemaString).get("selectQuery"));
+						queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
+					}
 				} else {
 					LOGGER.error(MessageConstants.NOT_VALID_TABLECOLUMN);
 					queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_TABLECOLUMN, false);

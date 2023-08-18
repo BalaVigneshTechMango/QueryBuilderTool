@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.tm.querybuilder.dto.ColumnDatatypeDTO;
 import com.tm.querybuilder.dto.ColumnDetailsDTO;
+import com.tm.querybuilder.dto.CountRowDTO;
+import com.tm.querybuilder.dto.FetchTableDetailsDTO;
 
 @Service
 public interface QueryBuilderDao {
@@ -68,6 +70,17 @@ public interface QueryBuilderDao {
 	 * @return
 	 */
 	List<ColumnDetailsDTO> fetchColumnDetails(String schemaString);
+
+	/**
+	 * Fetch the table details
+	 * 
+	 * @param tableList
+	 * @param schemaString
+	 * @return
+	 */
+	public List<FetchTableDetailsDTO> fetchTableDetails(Set<String> tableList, String schemaString);
+
+	List<CountRowDTO> countQuery(String countQueryString);
 
 	
 	

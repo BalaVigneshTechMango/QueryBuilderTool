@@ -1,8 +1,12 @@
 package com.tm.querybuilder.pojo;
 
+import javax.validation.constraints.NotBlank;
+
 public class OrderByPOJO {
 
+	@NotBlank(message = "Enter the Order Column Name")
 	private String orderColumnName;
+	@NotBlank(message = "Enter the Order Type")
 	private String orderType;
 
 	public String getOrderColumnName() {

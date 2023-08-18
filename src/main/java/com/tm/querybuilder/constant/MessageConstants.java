@@ -1,6 +1,7 @@
 package com.tm.querybuilder.constant;
 
 
+
 public class MessageConstants {
 
 	private MessageConstants() {
@@ -21,5 +22,6 @@ public class MessageConstants {
 	public static final String NOT_VALID_TABLECOLUMN = "Not a valid Table or Column";
 	public static final String SCHEMA_IS_VALID = "Schema is valid :";
 	public static final String VALID_TABLECOLUMN = "Table and column are  valid one.";
+	
 
 }

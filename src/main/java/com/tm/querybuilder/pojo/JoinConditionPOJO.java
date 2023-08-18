@@ -14,7 +14,7 @@ public class JoinConditionPOJO {
 	@NotNull(message = "Enter the Right column")
 	private String rsColumn;
 
-	@NotNull(message = "Enter the Condition")
+	@NotNull(message = "Enter the ConditionBuilder")
 	private Condition condition;
 
 	private LogicalCondition logicalCondition;
