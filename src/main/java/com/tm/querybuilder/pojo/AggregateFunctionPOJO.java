@@ -1,11 +1,14 @@
 package com.tm.querybuilder.pojo;
 
+import javax.validation.constraints.NotBlank;
+
 import com.tm.querybuilder.enums.AggregateTypes;
 
 public class AggregateFunctionPOJO {
 
 	private AggregateTypes aggregateTypes;
 
+	@NotBlank(message = "Enter the column name for aggregate function")
 	private String columnName;
 
 	public AggregateTypes getAggregateTypes() {

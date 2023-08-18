@@ -2,6 +2,6 @@ package com.tm.querybuilder.enums;
 
 public enum AggregateTypes {
 
-	COUNT, SUM, AVG
+	COUNT, SUM, AVG,MIN,MAX
 
 }

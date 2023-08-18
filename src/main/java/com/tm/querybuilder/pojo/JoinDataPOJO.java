@@ -24,6 +24,7 @@ public class JoinDataPOJO {
 	@NoWhitespaceList
 	private List<String> columnNames;
 
+	@Valid
 	public List<JoinConditionPOJO> getJoinCondition() {
 		return joinCondition;
 	}

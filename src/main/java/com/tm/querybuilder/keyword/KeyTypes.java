@@ -4,21 +4,17 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.stereotype.Component;
 
 import com.tm.querybuilder.constant.QueryConstants;
 import com.tm.querybuilder.pojo.FilterDataPOJO;
 import com.tm.querybuilder.pojo.OrderByPOJO;
 import com.tm.querybuilder.validation.EmptyNotNull;
 
+
+@Component
 public class KeyTypes {
-
-	@Value("${query.limit}")
-	private int limit;
-
-	@Value("${query.limit}")
-	private int offset;
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(KeyTypes.class);
 
@@ -29,7 +25,7 @@ public class KeyTypes {
 	 * @param filterData
 	 * @return
 	 */
-	public String getLimit(FilterDataPOJO filterData) {
+	public String getLimit(FilterDataPOJO filterData, int limit, int offset) {
 		StringBuilder querBuilder = new StringBuilder();
 		try {
 			if (filterData.getLimit() > 0) {

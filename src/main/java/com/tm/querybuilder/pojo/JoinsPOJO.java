@@ -2,10 +2,13 @@ package com.tm.querybuilder.pojo;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 public class JoinsPOJO {
 
 	private Boolean isPrimaryKey;
 	
+	@Valid
 	private List<JoinDataPOJO> join;
 
 	public List<JoinDataPOJO> getJoin() {

@@ -26,6 +26,7 @@ public class FilterDataPOJO {
 	@Valid
 	private JoinsPOJO joinData;
 
+	@Valid
 	private List<AggregateFunctionPOJO> aggregateFunction;
 
 	private int limit;

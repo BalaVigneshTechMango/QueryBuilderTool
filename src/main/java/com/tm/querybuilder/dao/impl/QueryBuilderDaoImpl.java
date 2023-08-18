@@ -4,18 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+
+import javax.sql.DataSource;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.stereotype.Service;
 
+import com.tm.querybuilder.connection.DynamicDataSource;
 import com.tm.querybuilder.constant.MessageConstants;
 import com.tm.querybuilder.constant.QueryConstants;
 import com.tm.querybuilder.dao.QueryBuilderDao;
@@ -23,14 +28,26 @@ import com.tm.querybuilder.dto.ColumnDatatypeDTO;
 import com.tm.querybuilder.dto.ColumnDetailsDTO;
 import com.tm.querybuilder.dto.CountRowDTO;
 import com.tm.querybuilder.dto.FetchTableDetailsDTO;
+import com.tm.querybuilder.pojo.DatabaseConnectionDTO;
+import com.tm.querybuilder.pojo.request.DbConnectionRequestPOJO;
 
+/**
+ * @author TTS-467-balavignesh
+ *
+ */
 @Service
 public class QueryBuilderDaoImpl implements QueryBuilderDao {
 
-	@Autowired
-	private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
 	private static final Logger LOGGER = LoggerFactory.getLogger(QueryBuilderDaoImpl.class);
+
+	@Value("${spring.datasource.url}")
+	private String jdbcUrl;
+
+	@Value("${spring.datasource.username}")
+	private String user;
+
+	@Value("${spring.datasource.password}")
+	private String password;
 
 	/**
 	 * This method will check the schema name and table exist in dao.
@@ -39,11 +56,12 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public Boolean isSchemaExist(String schemaString) {
+	public Boolean isSchemaExist(String schemaString, DatabaseConnectionDTO databaseConnectionDTO) {
 		LOGGER.info("Is Schema Exist Dao layer.");
 		boolean isSchemaExist = false;
 		try {
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
 			// Build a query and store in string.
 			String existsSqlString = QueryConstants.IS_SCHEMA_EXIST;
 			paramsObj.addValue(MessageConstants.SCHEMA_NAME, schemaString);
@@ -64,11 +82,13 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public Boolean isValidTable(String schemaString, Set<String> tableList) {
+	public Boolean isValidTable(String schemaString, Set<String> tableList,
+			DatabaseConnectionDTO databaseConnectionDTO) {
 		LOGGER.info("isValid Table Dao");
 		boolean isValidTable = false;
 		try {
 			MapSqlParameterSource parametersObj = new MapSqlParameterSource();
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
 			// Build a query and store in string.
 			String queryString = QueryConstants.IS_VALID_TABLE;
 			parametersObj.addValue(MessageConstants.TABLE_NAME, tableList);
@@ -93,18 +113,19 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public Boolean isValidColumns(Set<String> columnsList, Set<String> tableList, String schemaString) {
-
+	public Boolean isValidColumns(Set<String> columnsList, Set<String> tableList, String schemaString,
+			DatabaseConnectionDTO databaseConnectionDTO) {
 		LOGGER.info("Is Valid Columns Dao");
 		boolean isValidColumn = false;
 		try {
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
 			MapSqlParameterSource parametersObj = new MapSqlParameterSource();
 			String queryString = QueryConstants.IS_VALID_COLUMN;
 			parametersObj.addValue("columns", columnsList);
 			parametersObj.addValue(MessageConstants.TABLE_NAME, tableList);
 			parametersObj.addValue(MessageConstants.SCHEMA_NAME, schemaString);
 			Integer countInt = namedParameterJdbcTemplate.queryForObject(queryString, parametersObj, Integer.class);
-			// if the count not equal to null and colunt the column size and if the both
+			// If the count not equal to null and colunt the column size and if the both
 			// condition is okay the returns
 			isValidColumn = countInt != null && countInt == columnsList.size();
 		} catch (DataAccessException exception) {
@@ -123,10 +144,11 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public List<ColumnDetailsDTO> fetchColumnDetails(String schemaString) {
+	public List<ColumnDetailsDTO> fetchColumnDetails(String schemaString, DatabaseConnectionDTO databaseConnectionDTO) {
 		LOGGER.info("fetch column details dao");
 		List<ColumnDetailsDTO> columnList;
 		try {
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
 			// Query to get column names and data types for each table
 			String sqlString = QueryConstants.SCHEMA_DETAIL;
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
@@ -150,10 +172,11 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public List<Map<String, Object>> fetchResultData(String queryString) {
+	public List<Map<String, Object>> fetchResultData(String queryString, DatabaseConnectionDTO databaseConnectionDTO) {
 		LOGGER.info("fetch Result Data Dao");
 		List<Map<String, Object>> responseList = new ArrayList<>();
 		try {
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
 			MapSqlParameterSource params = new MapSqlParameterSource();
 			responseList = namedParameterJdbcTemplate.queryForList(queryString, params);
 		} catch (DataAccessException exception) {
@@ -165,9 +188,10 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	}
 
 	@Override
-	public List<CountRowDTO> countQuery(String countQueryString) {
+	public List<CountRowDTO> countQuery(String countQueryString, DatabaseConnectionDTO databaseConnectionDTO) {
 		List<CountRowDTO> count;
 		try {
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
 			SqlParameterSource sqlParameterSource = new MapSqlParameterSource();
 			count = namedParameterJdbcTemplate.query(countQueryString, sqlParameterSource,
 					BeanPropertyRowMapper.newInstance(CountRowDTO.class));
@@ -179,7 +203,7 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	}
 
 	/**
-	 * get the data type of the column in where clause
+	 * Get the data type of the column in where clause
 	 * 
 	 * @param schemaString
 	 * @param tableList
@@ -187,10 +211,12 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	 * @return
 	 */
 	@Override
-	public List<ColumnDatatypeDTO> getDataType(String schemaString, Set<String> tableList, Set<String> columnList) {
+	public List<ColumnDatatypeDTO> getDataType(String schemaString, Set<String> tableList, Set<String> columnList,
+			DatabaseConnectionDTO databaseConnectionDTO) {
 		LOGGER.info("get Datatype dao");
 		List<ColumnDatatypeDTO> columnDetailsList;
 		try {
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 			String sqlString = QueryConstants.GET_DATATYPE;
 			paramsObj.addValue(MessageConstants.SCHEMA_NAME, schemaString);
@@ -207,9 +233,11 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 	}
 
 	@Override
-	public List<FetchTableDetailsDTO> fetchTableDetails(Set<String> tableList, String schemaString) {
+	public List<FetchTableDetailsDTO> fetchTableDetails(Set<String> tableList, String schemaString,
+			DatabaseConnectionDTO databaseConnectionDTO) {
 		List<FetchTableDetailsDTO> fetchTableDetails;
 		try {
+			NamedParameterJdbcTemplate namedParameterJdbcTemplate = getConnection(databaseConnectionDTO);
 			MapSqlParameterSource paramsObj = new MapSqlParameterSource();
 			String sqlString = QueryConstants.FETCH_TABLE_DETAILS;
 			paramsObj.addValue(MessageConstants.SCHEMA_NAME, schemaString);
@@ -224,4 +252,107 @@ public class QueryBuilderDaoImpl implements QueryBuilderDao {
 		return fetchTableDetails;
 	}
 
+	/**
+	 * This method is used to register the database details in query builder db and
+	 * return the connectionId (UUID)
+	 */
+	@Override
+	public String getDatabaseConnection(DbConnectionRequestPOJO dbConnectionRequestPojo) {
+		String response = null;
+		try {
+			DataSource dynamicDataSource = new DynamicDataSource(jdbcUrl, user, password);
+			NamedParameterJdbcTemplate parameterJdbcTemplate = new NamedParameterJdbcTemplate(dynamicDataSource);
+			String sql = "INSERT INTO db_connection(connection_id,connection_host,connection_db,connection_port,connection_driver,connection_user,connection_password) VALUES(:id,:host,:database,:port,:driver,:user,:password)";
+			UUID uuid = UUID.randomUUID();
+			MapSqlParameterSource params = new MapSqlParameterSource().addValue("id", uuid.toString())
+					.addValue("host", dbConnectionRequestPojo.getConnectionHost())
+					.addValue("database", dbConnectionRequestPojo.getDatabaseName())
+					.addValue("port", dbConnectionRequestPojo.getConnectionPort())
+					.addValue("driver", dbConnectionRequestPojo.getConnectionDriver())
+					.addValue("user", dbConnectionRequestPojo.getDatabaseUser())
+					.addValue("password", dbConnectionRequestPojo.getDatabasePassword());
+			int valid = parameterJdbcTemplate.update(sql, params);
+			if (valid > 0) {
+				response = uuid.toString();
+			}
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while get Database connection in dao layer");
+			throw new DataAccessResourceFailureException(
+					"An error occurred while getting database connection in dao layer", exception);
+		}
+		LOGGER.debug("get connection dao: {},", response);
+		return response;
+	}
+
+	/**
+	 * This method is used to fetch the database connection details using
+	 * connectionid(UUID)
+	 */
+	@Override
+	public DatabaseConnectionDTO fetchdatabaseConnection(String connectionId) {
+		DatabaseConnectionDTO databaseConnectionDTO = null;
+		try {
+			DataSource dynamicDataSource = new DynamicDataSource(jdbcUrl, user, password);
+			NamedParameterJdbcTemplate parameterJdbcTemplate = new NamedParameterJdbcTemplate(dynamicDataSource);
+			String sql = "select * from db_connection where connection_id=:connectionId";
+			MapSqlParameterSource mapSqlParameterSource = new MapSqlParameterSource();
+			mapSqlParameterSource.addValue("connectionId", connectionId);
+			databaseConnectionDTO = parameterJdbcTemplate.queryForObject(sql, mapSqlParameterSource,
+					BeanPropertyRowMapper.newInstance(DatabaseConnectionDTO.class));
+		} catch (EmptyResultDataAccessException e) {
+			LOGGER.error("Fetch database connection is not valid");
+			throw new EmptyResultDataAccessException("fetch database connection is not valid", 0);
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while fetch Database connection in dao layer");
+			throw new DataAccessResourceFailureException(
+					"An error occurred while fetch database connection in dao layer", exception);
+		}
+		return databaseConnectionDTO;
+	}
+
+	/**
+	 * This method is used to get the connection source using from
+	 * databaseconnectiondto
+	 * 
+	 * @param databaseConnectionDTO
+	 * @return
+	 */
+	private NamedParameterJdbcTemplate getConnection(DatabaseConnectionDTO databaseConnectionDTO) {
+		NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+		try {
+			String jdbcUrls = "jdbc:" + databaseConnectionDTO.getConnectionDriver() + "://"
+					+ databaseConnectionDTO.getConnectionHost() + ":" + databaseConnectionDTO.getConnectionPort() + "/"
+					+ databaseConnectionDTO.getConnectionDb();
+			DataSource dynamicDataSource = new DynamicDataSource(jdbcUrls, databaseConnectionDTO.getConnectionUser(),
+					databaseConnectionDTO.getConnectionPassword());
+			namedParameterJdbcTemplate = new NamedParameterJdbcTemplate(dynamicDataSource);
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while getting connection in dao");
+			throw new DataAccessResourceFailureException("An error occurred while getting connection in dao layer",
+					exception);
+		}
+		return namedParameterJdbcTemplate;
+
+	}
+
+	/**
+	 * This method is used to get thet database connection for local connection
+	 * maintains query builder database
+	 */
+	@Override
+	public DataSource getlocalConnection(DbConnectionRequestPOJO dbConnectionRequestPojo) {
+		DataSource dynamicDataSource;
+		try {
+			String urlJdbc = QueryConstants.JDBC + ":" + dbConnectionRequestPojo.getConnectionDriver() + "://"
+					+ dbConnectionRequestPojo.getConnectionHost() + ":" + dbConnectionRequestPojo.getConnectionPort()
+					+ "/" + dbConnectionRequestPojo.getDatabaseName();
+			dynamicDataSource = new DynamicDataSource(urlJdbc, dbConnectionRequestPojo.getDatabaseUser(),
+					dbConnectionRequestPojo.getDatabasePassword());
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while get local database connection in dao layer");
+			throw new DataAccessResourceFailureException(
+					"An error occurred while get local database connection in dao layer", exception);
+		}
+		return dynamicDataSource;
+	}
 }

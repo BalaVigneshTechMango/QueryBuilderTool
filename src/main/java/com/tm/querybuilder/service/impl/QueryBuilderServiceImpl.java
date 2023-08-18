@@ -1,5 +1,6 @@
 package com.tm.querybuilder.service.impl;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,9 +9,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.stereotype.Service;
@@ -30,15 +34,24 @@ import com.tm.querybuilder.pojo.ForeignKeysPOJO;
 import com.tm.querybuilder.pojo.JoinConditionPOJO;
 import com.tm.querybuilder.pojo.JoinDataPOJO;
 import com.tm.querybuilder.pojo.JoinsPOJO;
+import com.tm.querybuilder.pojo.OrderByPOJO;
+import com.tm.querybuilder.pojo.request.DbConnectionRequestPOJO;
 import com.tm.querybuilder.pojo.AggregateFunctionPOJO;
 import com.tm.querybuilder.pojo.ConditionGroupPOJO;
 import com.tm.querybuilder.pojo.ConditionPOJO;
+import com.tm.querybuilder.pojo.DatabaseConnectionDTO;
 import com.tm.querybuilder.pojo.FetchTableDetailsPOJO;
 import com.tm.querybuilder.service.QueryBuilderService;
 import com.tm.querybuilder.validation.EmptyNotNull;
 
 @Service
 public class QueryBuilderServiceImpl implements QueryBuilderService {
+
+	@Value("${querybuilder.limit}")
+	private int limit;
+
+	@Value("${querybuilder.offset}")
+	private int offset;
 
 	@Autowired
 	private QueryBuilderDao queryBuilderDao;
@@ -51,16 +64,19 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * 
 	 */
 	@Override
-	public Boolean isSchemaExist(String schemaString) {
+	public Boolean isSchemaExist(String connectionId) {
 		LOGGER.info("Schema Exist service Method");
 		boolean isSchemaExist = false;
 		try {
-			isSchemaExist = queryBuilderDao.isSchemaExist(schemaString);
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			isSchemaExist = queryBuilderDao.isSchemaExist(databaseConnectionDTO.getConnectionDb(),
+					databaseConnectionDTO);
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while checking is Schema Exist in service.");
-			throw new DataAccessResourceFailureException("An error occurred while checking is Schema Exist.",
+			throw new DataAccessResourceFailureException("An error occurred while checking is Schema Exist in service.",
 					exception);
 		}
+		LOGGER.debug("Is Schema Exist in dao layer with boolean value {}", isSchemaExist);
 		return isSchemaExist;
 	}
 
@@ -70,11 +86,10 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @return This method will check the schema and table and column in dao.
 	 */
 	@Override
-	public Boolean isValidTable(String schemaString, String tableString, JoinsPOJO joinsPOJO) {
+	public Boolean isValidTable(String tableString, JoinsPOJO joinsPOJO, String connectionId) {
 		LOGGER.info("isValid table service");
 		Boolean isValidTable = false;
 		try {
-
 			Set<String> tablesList = new HashSet<>();
 			if (EmptyNotNull.isValidInput(joinsPOJO)) {
 				for (JoinDataPOJO joinTable : joinsPOJO.getJoin()) {
@@ -82,11 +97,15 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				}
 			}
 			tablesList.add(tableString);
-			isValidTable = queryBuilderDao.isValidTable(schemaString, tablesList);
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			isValidTable = queryBuilderDao.isValidTable(databaseConnectionDTO.getConnectionDb(), tablesList,
+					databaseConnectionDTO);
 		} catch (Exception exception) {
-			LOGGER.error("An error occurred while checking is valid Table.");
-			throw new DataAccessResourceFailureException("An error occurred while checking is valid Table.", exception);
+			LOGGER.error("An error occurred while checking is valid Table in service.");
+			throw new DataAccessResourceFailureException("An error occurred while checking is valid Table in service.",
+					exception);
 		}
+		LOGGER.debug("Is valid table dao with boolean value {}", isValidTable);
 		return isValidTable;
 	}
 
@@ -96,16 +115,19 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 *         layer.
 	 */
 	@Override
-	public List<ColumnDetailsDTO> fetchColumnDetails(String schemaString) {
+	public List<ColumnDetailsDTO> fetchColumnDetails(String connectionId) {
 		LOGGER.info("fetch table, column, and its datatype service method");
 		List<ColumnDetailsDTO> columnDetailsList;
 		try {
-			columnDetailsList = queryBuilderDao.fetchColumnDetails(schemaString);
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			columnDetailsList = queryBuilderDao.fetchColumnDetails(databaseConnectionDTO.getConnectionDb(),
+					databaseConnectionDTO);
 		} catch (DataAccessException exception) {
-			LOGGER.error("An error occurred while fetch ColumnDetailsDTO", exception);
-			throw new DataAccessResourceFailureException("An error occurred while fetch ColumnDetailsDTO.");
+			LOGGER.error("An error occurred while fetch ColumnDetailsDTO in service layer", exception);
+			throw new DataAccessResourceFailureException(
+					"An error occurred while fetch ColumnDetailsDTO in service layer.");
 		}
-		LOGGER.debug("Result of table, column, and its datatype {}", columnDetailsList);
+		LOGGER.debug("fetch column details in service layer return columnDetailsDTO {}", columnDetailsList);
 		return columnDetailsList;
 	}
 
@@ -114,15 +136,17 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @return List<Map<String, Object>> By getting string as query in parameter
 	 *         based on the query in will execute.
 	 */
-	private List<CountRowDTO> fetchCountQuery(String countqueryString) {
+	private List<CountRowDTO> fetchCountQuery(String connectionId, String countqueryString) {
 		LOGGER.info("fetch Result Data service");
 		List<CountRowDTO> countQuery;
 		try {
-			countQuery = queryBuilderDao.countQuery(countqueryString);
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			countQuery = queryBuilderDao.countQuery(countqueryString, databaseConnectionDTO);
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while fetch Data in service layer.", exception);
 			throw new DataAccessResourceFailureException("An error occurred while fetch Data");
 		}
+		LOGGER.debug("fetch count of query in service layer return in CountTowDTO list {}", countQuery);
 		return countQuery;
 	}
 
@@ -132,20 +156,23 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 *         based on the query in will execute.
 	 */
 	@Override
-	public List<Map<String, Object>> fetchResultData(String selectQueryString, String countQueryString) {
+	public List<Map<String, Object>> fetchResultData(String selectQueryString, String countQueryString,
+			String connectionId) {
 		LOGGER.info("fetch Result Data service");
 		List<Map<String, Object>> responseList = new ArrayList<>();
 		Map<String, Object> countMap = new HashMap<>();
 		try {
-			responseList = queryBuilderDao.fetchResultData(selectQueryString);
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			responseList = queryBuilderDao.fetchResultData(selectQueryString, databaseConnectionDTO);
 			if (!CollectionUtils.isEmpty(responseList)) {
-				countMap.put("rowCount", fetchCountQuery(countQueryString).get(0).getCount());
+				countMap.put("rowCount", fetchCountQuery(connectionId, countQueryString).get(0).getCount());
 				responseList.add(countMap);
 			}
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while fetch Data in service layer.", exception);
 			throw new DataAccessResourceFailureException("An error occurred while fetch Data");
 		}
+		LOGGER.debug("fetch Result Data in service layer return list of map {}", responseList);
 		return responseList;
 	}
 
@@ -156,7 +183,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 *         send data to dao layer. select query with and without where caluse
 	 */
 	@Override
-	public Map<String, String> fetchQuery(FilterDataPOJO filterData, String schemaString) {
+	public Map<String, String> fetchQuery(String connectionId, FilterDataPOJO filterData) {
 		Map<String, String> queryMap = new HashMap<>();
 		KeyTypes keyTypes = new KeyTypes();
 		LOGGER.info("fetch query service");
@@ -169,7 +196,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 					&& !CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
 				selectBuilder.append(String.join(",", filterData.getColumnNames()));
 				for (AggregateFunctionPOJO aggregateFunctionPOJO : filterData.getAggregateFunction()) {
-					selectBuilder.append(aggregateFunctionPOJO.getAggregateTypes()).append("(")
+					selectBuilder.append(" ").append(aggregateFunctionPOJO.getAggregateTypes()).append("(")
 							.append(aggregateFunctionPOJO.getColumnName()).append(")");
 				}
 			} else if (!CollectionUtils.isEmpty(filterData.getColumnNames())) {
@@ -183,15 +210,17 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				LOGGER.error("** Both the column list and aggregate function are empty **");
 				throw new DataAccessResourceFailureException("Both the column List and aggregate function are empty");
 			}
-			querBuilder.append(QueryConstants.FROM).append(schemaString).append(".").append(filterData.getTableName());
-			String ifQueryPresent = ifQueryBuilder(filterData, schemaString);
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			querBuilder.append(QueryConstants.FROM).append(databaseConnectionDTO.getConnectionDb()).append(".")
+					.append(filterData.getTableName());
+			String ifQueryPresent = ifQueryBuilder(filterData, databaseConnectionDTO.getConnectionDb(), connectionId);
 			if (EmptyNotNull.isValidInput(ifQueryPresent)) {
 				querBuilder.append(ifQueryPresent);
 			}
 			if (EmptyNotNull.isValidInput(filterData.getOrderBy())) {
 				querBuilder.append(keyTypes.getColumnOrderBy(filterData.getOrderBy()));
 			}
-            //querBuilder.append(keyTypes.getLimit(filterData));
+			querBuilder.append(keyTypes.getLimit(filterData, limit, offset));
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while fetch Query.");
 			throw new DataAccessResourceFailureException("An error occurred while fetch Query.", exception);
@@ -202,11 +231,10 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 		queryMap.put("countQuery", countBuilder.append(querBuilder).toString());
 
 		LOGGER.debug("Build Query for the request data service:{}", querBuilder);
-
 		return queryMap;
 	}
 
-	private String ifQueryBuilder(FilterDataPOJO filterData, String schemaString) {
+	private String ifQueryBuilder(FilterDataPOJO filterData, String schemaString, String connectionId) {
 		StringBuilder querBuilder = new StringBuilder();
 		Clauses clauses = new Clauses();
 		try {
@@ -214,7 +242,8 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				querBuilder.append(clauses.getOnCondition(filterData.getJoinData().getJoin(), schemaString));
 			}
 			if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
-				querBuilder.append(clauses.whereCondition(filterData, getDataType(filterData, schemaString)));
+				querBuilder.append(
+						clauses.whereCondition(filterData, getDataType(filterData, schemaString, connectionId)));
 			}
 			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
 				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getColumnList())) {
@@ -222,43 +251,36 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				}
 				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getConditionData())) {
 					querBuilder.append(clauses.having(filterData.getGroupBy().getConditionData(),
-							getDataType(filterData, schemaString)));
+							getDataType(filterData, schemaString, connectionId)));
 				}
 			}
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred while ifQuery Builder.");
 			throw new DataAccessResourceFailureException("An error occurred while ifQuery Builder.", exception);
 		}
-		LOGGER.debug("Build Query for the request data service:{}", querBuilder);
+		LOGGER.debug("build the query ifQueryBuilder in service layer return stringbuilder:{}", querBuilder);
 		return querBuilder.toString();
-
 	}
 
 	/**
 	 * @param filterData
 	 * @return Get the datatype of column in the whereClause
 	 */
-	private Map<String, Object> getDataType(FilterDataPOJO filterData, String schemaString) {
+	private Map<String, Object> getDataType(FilterDataPOJO filterData, String schemaString, String connectionId) {
 		LOGGER.info("Get data type service");
 		Map<String, Object> schemaMap = new LinkedHashMap<>();
 		try {
 			Set<String> tablesList = new HashSet<>();
 			Set<String> columnsList = new HashSet<>();
-			if (!CollectionUtils.isEmpty(filterData.getWhereData().getConditionData())) {
-				for (ConditionGroupPOJO conditionGroupList : filterData.getWhereData().getConditionData()) {
-					for (ConditionPOJO conditions : conditionGroupList.getConditionList()) {
-						columnsList.add(conditions.getColumn());
-					}
+			if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
+				if (!CollectionUtils.isEmpty(filterData.getWhereData().getConditionData())) {
+					columnsList = fetchConditionColumn(filterData.getWhereData().getConditionData());
 				}
 			}
 			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
 				columnsList.addAll(filterData.getColumnNames());
 				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getConditionData())) {
-					for (ConditionGroupPOJO condition : filterData.getGroupBy().getConditionData()) {
-						for (ConditionPOJO conditions : condition.getConditionList()) {
-							columnsList.add(conditions.getColumn());
-						}
-					}
+					columnsList = fetchConditionColumn(filterData.getGroupBy().getConditionData());
 				}
 			}
 			if (EmptyNotNull.isValidInput(filterData.getJoinData())) {
@@ -267,16 +289,17 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				}
 			}
 			tablesList.add(filterData.getTableName());
-			List<ColumnDatatypeDTO> columnDetails = queryBuilderDao.getDataType(schemaString, tablesList, columnsList);
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			List<ColumnDatatypeDTO> columnDetails = queryBuilderDao.getDataType(schemaString, tablesList, columnsList,
+					databaseConnectionDTO);
 			for (ColumnDatatypeDTO columnDetail : columnDetails) {
 				schemaMap.put(columnDetail.getTableColumn(), columnDetail.getDataType());
 			}
 		} catch (Exception exception) {
-			exception.printStackTrace();
 			LOGGER.error("An error occurred while Getting Data Type.");
 			throw new DataAccessResourceFailureException("An error occurred while Getting Data Type.", exception);
 		}
-		LOGGER.debug("get datatype service:{}", schemaMap);
+		LOGGER.debug("get datatype in service:{}", schemaMap);
 		return schemaMap;
 	}
 
@@ -288,7 +311,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	 * @param schemaString
 	 */
 	@Override
-	public Boolean isValidColumns(FilterDataPOJO filterData, String schemaString) {
+	public Boolean isValidColumns(FilterDataPOJO filterData, String connectionId) {
 		LOGGER.info("Is Valid TableDetailPOJO service method");
 		boolean isValidColumn = false;
 		try {
@@ -304,42 +327,43 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				}
 			}
 			if (EmptyNotNull.isValidInput(filterData.getWhereData())) {
-				for (ConditionGroupPOJO conditionGroupList : filterData.getWhereData().getConditionData()) {
-					for (ConditionPOJO conditionList : conditionGroupList.getConditionList()) {
-						columnsList.add(conditionList.getColumn());
-					}
-				}
+				columnsList = fetchConditionColumn(filterData.getWhereData().getConditionData());
 			}
 			if (EmptyNotNull.isValidInput(filterData.getGroupBy())) {
 				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getColumnList())) {
 					columnsList.addAll(filterData.getGroupBy().getColumnList());
 				}
 				if (!CollectionUtils.isEmpty(filterData.getGroupBy().getConditionData())) {
-					for (ConditionGroupPOJO conditionGroupList : filterData.getGroupBy().getConditionData()) {
-						for (ConditionPOJO conditionList : conditionGroupList.getConditionList()) {
-							columnsList.add(conditionList.getColumn());
-						}
-					}
+					columnsList.addAll(fetchConditionColumn(filterData.getGroupBy().getConditionData()));
+				}
+			}
+			if (!CollectionUtils.isEmpty(filterData.getOrderBy())) {
+				for (OrderByPOJO orderByPOJO : filterData.getOrderBy()) {
+					columnsList.add(orderByPOJO.getOrderColumnName());
 				}
 			}
 			if (!CollectionUtils.isEmpty(filterData.getColumnNames())) {
 				columnsList.addAll(filterData.getColumnNames());
-			} else {
+			}
+			if (!CollectionUtils.isEmpty(filterData.getAggregateFunction())) {
 				for (AggregateFunctionPOJO aggregateFunction : filterData.getAggregateFunction()) {
 					columnsList.add(aggregateFunction.getColumnName());
 				}
 			}
 			tablesList.add(filterData.getTableName());
-			isValidColumn = queryBuilderDao.isValidColumns(columnsList, tablesList, schemaString);
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			isValidColumn = queryBuilderDao.isValidColumns(columnsList, tablesList,
+					databaseConnectionDTO.getConnectionDb(), databaseConnectionDTO);
 		} catch (Exception exception) {
 			LOGGER.error("An error occurred Checking is valid Column details.");
 			throw new DataAccessResourceFailureException("An error occurred Checking is valid Column Details",
 					exception);
 		}
+		LOGGER.debug("is valid column in service layer:{}", isValidColumn);
 		return isValidColumn;
 	}
 
-	private Map<String, FetchTableDetailsPOJO> fetchTableDetails(FilterDataPOJO filterDataPOJO, String schemaString) {
+	private Map<String, FetchTableDetailsPOJO> fetchTableDetails(FilterDataPOJO filterDataPOJO, String connectionId) {
 		Map<String, FetchTableDetailsPOJO> tablesMap = new HashMap<>();
 		try {
 			Set<String> tablesList = new HashSet<>();
@@ -349,7 +373,9 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 				}
 			}
 			tablesList.add(filterDataPOJO.getTableName());
-			List<FetchTableDetailsDTO> fetchTableDetails = queryBuilderDao.fetchTableDetails(tablesList, schemaString);
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			List<FetchTableDetailsDTO> fetchTableDetails = queryBuilderDao.fetchTableDetails(tablesList,
+					databaseConnectionDTO.getConnectionDb(), databaseConnectionDTO);
 			for (FetchTableDetailsDTO fetchTableDetailsDTO : fetchTableDetails) {
 				FetchTableDetailsPOJO fetchTableDetailsPOJO = new FetchTableDetailsPOJO();
 				if (!tablesMap.containsKey(fetchTableDetailsDTO.getTableName())) {
@@ -379,10 +405,10 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 	}
 
 	@Override
-	public Boolean joinConditionValidator(FilterDataPOJO filterData, String schemaString) {
+	public Boolean joinConditionValidator(FilterDataPOJO filterData, String connectionId) {
 		boolean isValidCondition = false;
 		try {
-			Map<String, FetchTableDetailsPOJO> tableDetails = fetchTableDetails(filterData, schemaString);
+			Map<String, FetchTableDetailsPOJO> tableDetails = fetchTableDetails(filterData, connectionId);
 			isValidCondition = conditionValidator(filterData, tableDetails);
 		} catch (Exception exception) {
 			LOGGER.error("** An error occurred while validating the join condition in service **");
@@ -395,7 +421,7 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 
 	private Boolean conditionValidator(FilterDataPOJO filterData, Map<String, FetchTableDetailsPOJO> tableDetails) {
 		LOGGER.info("build On condition using string builder method");
-		boolean isValid = false;
+		boolean isValid = true;
 		try {
 			for (JoinDataPOJO joinData : filterData.getJoinData().getJoin()) {
 				for (JoinConditionPOJO joinConditionDto : joinData.getJoinCondition()) {
@@ -410,16 +436,12 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 						isPrimary = leftTableString.getPrimarykey().equals(joinConditionDto.getLsColumn())
 								|| rightTableString.getPrimarykey().equals(joinConditionDto.getRsColumn());
 						if (!CollectionUtils.isEmpty(leftTableString.getForeignKeys())) {
-							for (ForeignKeysPOJO foreignKey : leftTableString.getForeignKeys()) {
-								isForeign = foreignKey.getReferenceTable().equals(joinData.getJoinTableName())
-										&& foreignKey.getReferencecolumn().equals(joinConditionDto.getLsColumn());
-							}
+							isForeign = getKeyIteration(leftTableString.getForeignKeys(), joinData.getJoinTableName(),
+									joinConditionDto.getLsColumn());
 						}
 						if (!CollectionUtils.isEmpty(rightTableString.getForeignKeys())) {
-							for (ForeignKeysPOJO foreignKeysPOJO : rightTableString.getForeignKeys()) {
-								isForeign = foreignKeysPOJO.getReferenceTable().equals(filterData.getTableName())
-										&& foreignKeysPOJO.getReferencecolumn().equals(joinConditionDto.getRsColumn());
-							}
+							isForeign = getKeyIteration(rightTableString.getForeignKeys(), filterData.getTableName(),
+									joinConditionDto.getRsColumn());
 						}
 						isValid = Boolean.TRUE.equals(isPrimary) && Boolean.TRUE.equals(isForeign);
 					}
@@ -430,7 +452,74 @@ public class QueryBuilderServiceImpl implements QueryBuilderService {
 			throw new DataAccessResourceFailureException("An error occurred while getting Join condition query.",
 					exception);
 		}
-		LOGGER.debug("On conditon : {}", isValid);
+		LOGGER.debug("conditionValidator in service layer: {}", isValid);
+		return isValid;
+	}
+
+	private Set<String> fetchConditionColumn(List<ConditionGroupPOJO> conditionGroupPOJO) {
+		Set<String> columnsListSet = new HashSet<>();
+		try {
+			for (ConditionGroupPOJO conditionGroupList : conditionGroupPOJO) {
+				for (ConditionPOJO conditions : conditionGroupList.getConditionList()) {
+					columnsListSet.add(conditions.getColumn());
+				}
+			}
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while getting fetch condition column");
+			throw new DataAccessResourceFailureException("An error occurred while getting Join condition query.",
+					exception);
+		}
+		LOGGER.debug("fetch Condition columns service : {}", columnsListSet);
+		return columnsListSet;
+	}
+
+	private Boolean getKeyIteration(List<ForeignKeysPOJO> foreignKeyPojo, String tableName, String columnLsRs) {
+		boolean isForeign = false;
+		try {
+			for (ForeignKeysPOJO foreignKeysPOJO : foreignKeyPojo) {
+				isForeign = foreignKeysPOJO.getReferenceTable().equals(tableName)
+						&& foreignKeysPOJO.getReferencecolumn().equals(columnLsRs);
+			}
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while getting key Iteration in service");
+			throw new DataAccessResourceFailureException("An error occurred while getting key Iteration in service.",
+					exception);
+		}
+		LOGGER.debug("fetch get Key Iteration : {}", isForeign);
+		return isForeign;
+	}
+
+	@Override
+	public String getDatabaseConnection(DbConnectionRequestPOJO dbConnectionRequestPojo) {
+		String response = null;
+		try {
+			DataSource dynamicDataSource = queryBuilderDao.getlocalConnection(dbConnectionRequestPojo);
+			// verify the connection already exist
+			// FIXME test
+			if (EmptyNotNull.isValidInput(dynamicDataSource.getConnection())) {
+				response = queryBuilderDao.getDatabaseConnection(dbConnectionRequestPojo);
+			}
+		} catch (SQLException exception) {
+			LOGGER.error("An error occurred while get database connection in service");
+			throw new DataAccessResourceFailureException(
+					"An error occurred while getting database connection in service.", exception);
+		}
+		return response;
+	}
+
+	@Override
+	public boolean isValidConnection(String connectionId) {
+		boolean isValid = false;
+		try {
+			DatabaseConnectionDTO databaseConnectionDTO = queryBuilderDao.fetchdatabaseConnection(connectionId);
+			if (EmptyNotNull.isValidInput(databaseConnectionDTO)) {
+				isValid = true;
+			}
+		} catch (Exception exception) {
+			LOGGER.error("An error occurred while checking is valid connection in service");
+			throw new DataAccessResourceFailureException(
+					"An error occurred while checking is valid connection in service", exception);
+		}
 		return isValid;
 	}
 }
