@@ -26,5 +26,6 @@ public class QueryConstants {
 	public static final String GROUPBY = " GROUP BY ";
 	public static final String HAVING = " HAVING ";
 	public static final String SELECT_COUNT = "SELECT count(*) as count";
+	public static final String JDBC = "jdbc";
 
 }

@@ -48,36 +48,44 @@ public class DataController {
 		boolean isValidCondition = true;
 		try {
 			FilterDataPOJO filterData = queryBuilderRequestPojo.getRequestData();
-			String schemaString = queryBuilderRequestPojo.getSchemaName();
-			if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(schemaString))) {
-				if (Boolean.TRUE.equals(queryBuilderService.isValidColumns(filterData, schemaString)
-						&& queryBuilderService.isValidTable(schemaString, filterData.getTableName(),
-								filterData.getJoinData()))) {
-					if (EmptyNotNull.isValidInput(filterData.getJoinData())
-							&& Boolean.FALSE.equals(filterData.getJoinData().getIsPrimaryKey())) {
-						isValidCondition = queryBuilderService.joinConditionValidator(filterData, schemaString);
-					}
-					if (Boolean.FALSE.equals(isValidCondition)) {
-						queryBuilderResponsePojo.response("Both the join Columns are primary key", null, false);
-					} else {
-						Map<String, String> queryMap = queryBuilderService.fetchQuery(filterData, schemaString);
-						List<Map<String, Object>> responseList = queryBuilderService
-								.fetchResultData(queryMap.get("selectQuery"), queryMap.get("countQuery"));
-						if (responseList.isEmpty()) {
-							LOGGER.error("Result No data Found for the Request Data:");
-							queryBuilderResponsePojo.response(MessageConstants.NO_DATA, false);
-						} else {
-							responseMap.put("filterResponse", responseList);
-							queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
+			if (Boolean.TRUE.equals(queryBuilderService.isValidConnection(queryBuilderRequestPojo.getConnectionId()))) {
+				if (Boolean.TRUE.equals(queryBuilderService.isSchemaExist(queryBuilderRequestPojo.getConnectionId()))) {
+					if (Boolean.TRUE.equals(
+							queryBuilderService.isValidColumns(filterData, queryBuilderRequestPojo.getConnectionId())
+									&& queryBuilderService.isValidTable(filterData.getTableName(),
+											filterData.getJoinData(), queryBuilderRequestPojo.getConnectionId()))) {
+						if (EmptyNotNull.isValidInput(filterData.getJoinData())
+								&& Boolean.FALSE.equals(filterData.getJoinData().getIsPrimaryKey())) {
+							isValidCondition = queryBuilderService.joinConditionValidator(filterData,
+									queryBuilderRequestPojo.getConnectionId());
 						}
+						if (Boolean.FALSE.equals(isValidCondition)) {
+							queryBuilderResponsePojo.response("Both the join Columns are primary key", null, false);
+						} else {
+							Map<String, String> queryMap = queryBuilderService
+									.fetchQuery(queryBuilderRequestPojo.getConnectionId(), filterData);
+							List<Map<String, Object>> responseList = queryBuilderService.fetchResultData(
+									queryMap.get("selectQuery"), queryMap.get("countQuery"),
+									queryBuilderRequestPojo.getConnectionId());
+							if (responseList.isEmpty()) {
+								LOGGER.error("Result No data Found for the Request Data:");
+								queryBuilderResponsePojo.response(MessageConstants.NO_DATA, false);
+							} else {
+								responseMap.put("filterResponse", responseList);
+								queryBuilderResponsePojo.response("Data for the Request", responseMap, true);
+							}
+						}
+					} else {
+						LOGGER.error(MessageConstants.NOT_VALID_TABLECOLUMN);
+						queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_TABLECOLUMN, false);
 					}
 				} else {
-					LOGGER.error(MessageConstants.NOT_VALID_TABLECOLUMN);
-					queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_TABLECOLUMN, false);
+					LOGGER.error(MessageConstants.NOT_VALID_SCHEMA);
+					queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_SCHEMA, false);
 				}
 			} else {
-				LOGGER.error(MessageConstants.NOT_VALID_SCHEMA);
-				queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_SCHEMA, false);
+				LOGGER.error(MessageConstants.NOT_VALID_CONNECTION);
+				queryBuilderResponsePojo.response(MessageConstants.NOT_VALID_CONNECTION, false);
 			}
 		} catch (Exception exception) {
 			LOGGER.error(exception.getMessage());

@@ -4,24 +4,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.sql.DataSource;
+
 import org.springframework.stereotype.Service;
 
 import com.tm.querybuilder.dto.ColumnDatatypeDTO;
 import com.tm.querybuilder.dto.ColumnDetailsDTO;
 import com.tm.querybuilder.dto.CountRowDTO;
 import com.tm.querybuilder.dto.FetchTableDetailsDTO;
+import com.tm.querybuilder.pojo.DatabaseConnectionDTO;
+import com.tm.querybuilder.pojo.request.DbConnectionRequestPOJO;
 
 @Service
 public interface QueryBuilderDao {
 
-	
 	/**
 	 * This Api for dynamic join query for multiple tables
 	 * 
 	 * @param queryString
 	 * @return List<Map<String, Object>>
 	 */
-	public List<Map<String, Object>> fetchResultData(String queryString);
+	public List<Map<String, Object>> fetchResultData(String queryString, DatabaseConnectionDTO databaseConnectionDTO);
 
 	/**
 	 * this method is to check the schema exist in the db.
@@ -29,7 +32,7 @@ public interface QueryBuilderDao {
 	 * @param schemaString
 	 * @return boolean
 	 */
-	public Boolean isSchemaExist(String schemaString);
+	public Boolean isSchemaExist(String schemaString, DatabaseConnectionDTO databaseConnectionDTO);
 
 	/**
 	 * In this method it validate the table in the schema
@@ -38,7 +41,8 @@ public interface QueryBuilderDao {
 	 * @param tableString
 	 * @return
 	 */
-	public Boolean isValidTable(String schemaString, Set<String> tableList);
+	public Boolean isValidTable(String schemaString, Set<String> tableList,
+			DatabaseConnectionDTO databaseConnectionDTO);
 
 	/**
 	 * In this method validate the column by using schema and table name using
@@ -49,7 +53,8 @@ public interface QueryBuilderDao {
 	 * @param schemaString
 	 * @return
 	 */
-	public Boolean isValidColumns(Set<String> columnsList, Set<String> tableList, String schemaString);
+	public Boolean isValidColumns(Set<String> columnsList, Set<String> tableList, String schemaString,
+			DatabaseConnectionDTO databaseConnectionDTO);
 
 	/**
 	 * get the data type of the column in where clause
@@ -59,8 +64,8 @@ public interface QueryBuilderDao {
 	 * @param columnList
 	 * @return
 	 */
-	public List<ColumnDatatypeDTO> getDataType(String schemaString, Set<String> tableList, Set<String> columnList);
-
+	public List<ColumnDatatypeDTO> getDataType(String schemaString, Set<String> tableList, Set<String> columnList,
+			DatabaseConnectionDTO databaseConnectionDTO);
 
 	/**
 	 * This method will return the column And TableName of the database
@@ -69,7 +74,7 @@ public interface QueryBuilderDao {
 	 * @param tableString
 	 * @return
 	 */
-	List<ColumnDetailsDTO> fetchColumnDetails(String schemaString);
+	List<ColumnDetailsDTO> fetchColumnDetails(String schemaString, DatabaseConnectionDTO databaseConnectionDTO);
 
 	/**
 	 * Fetch the table details
@@ -78,11 +83,15 @@ public interface QueryBuilderDao {
 	 * @param schemaString
 	 * @return
 	 */
-	public List<FetchTableDetailsDTO> fetchTableDetails(Set<String> tableList, String schemaString);
+	public List<FetchTableDetailsDTO> fetchTableDetails(Set<String> tableList, String schemaString,
+			DatabaseConnectionDTO databaseConnectionDTO);
 
-	List<CountRowDTO> countQuery(String countQueryString);
+	public List<CountRowDTO> countQuery(String countQueryString, DatabaseConnectionDTO databaseConnectionDTO);
 
-	
-	
+	public String getDatabaseConnection(DbConnectionRequestPOJO dbConnectionRequestPojo);
+
+	DatabaseConnectionDTO fetchdatabaseConnection(String connectionId);
+
+	public DataSource getlocalConnection(DbConnectionRequestPOJO dbConnectionRequestPojo);
 
 }
